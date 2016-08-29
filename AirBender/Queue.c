@@ -63,6 +63,8 @@ Return Value:
         WdfIoQueueDispatchParallel
         );
 
+    queueConfig.PowerManaged = WdfFalse;
+
     queueConfig.EvtIoDeviceControl = AirBenderEvtIoDeviceControl;
     queueConfig.EvtIoStop = AirBenderEvtIoStop;
 

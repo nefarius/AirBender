@@ -51,6 +51,8 @@ Return Value:
 
     PAGED_CODE();
 
+    WdfFdoInitSetFilter(DeviceInit);
+
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);

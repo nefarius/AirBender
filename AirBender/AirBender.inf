@@ -1,90 +1,187 @@
-;
-; AirBender.inf
-;
-
 [Version]
-Signature="$WINDOWS NT$"
-Class=Sample ; TODO: edit Class
-ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
-Provider=%ManufacturerName%
-CatalogFile=AirBender.cat
-DriverVer= ; TODO: set DriverVer in stampinf property pages
+Signature="$Windows NT$"
+Class=Bluetooth
+ClassGUID={e0cbf06c-cd8b-4647-bb8a-263b43f0f974}
+Provider=%Provider%
+DriverVer=29/08/2016,1.0.0.1
+CatalogFile=airbender.cat
 
 [DestinationDirs]
-DefaultDestDir = 12
+DefaultDestDir = 12 ; DIRID_DRIVERS
 
-; ================= Class section =====================
+[ControlFlags]
+; We don't want our device to be installable via the non-PnP hardware dialogs
+ExcludeFromSelect = *
 
-[ClassInstall32]
-Addreg=SampleClassReg
-
-[SampleClassReg]
-HKR,,,0,%ClassName%
-HKR,,Icon,,-5
-
-[SourceDisksNames]
-1 = %DiskName%,,,""
-
-[SourceDisksFiles]
-AirBender.sys  = 1,,
-
-;*****************************************
-; Install Section
-;*****************************************
-
+; Manufacturer Section
+; ---------------------------------------------------------
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$
+%NSS%=NefariusSoftwareSolutions,NT$ARCH$
 
-[Standard.NT$ARCH$]
-%AirBender.DeviceDesc%=AirBender_Device, Root\AirBender ; TODO: edit hw-id
+; Devices Section
+; ---------------------------------------------------------
+[NefariusSoftwareSolutions.NT$ARCH$]
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_03F0&PID_231D
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_044E&PID_3010
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_045E&PID_3500
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0461&PID_4D75
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_046D&PID_C709
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_047D&PID_105E
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E011
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E027
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E042
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E04D
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E04E
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_04CA&PID_3006
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_050D&PID_016A
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_050D&PID_065A
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_05AC&PID_8216
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_05AC&PID_821A
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_05AC&PID_821D
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_05AC&PID_821F
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_05AC&PID_8286
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_07D1&PID_F101
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0930&PID_0214
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0930&PID_0215
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A12&PID_0001
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_200A
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2021
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2100
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2101
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2146
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2148
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2150
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2153
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2154
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_217D
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2190
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_2198
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_21B4
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_21E1
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_21E3
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0A5C&PID_21E8
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_1715
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_1783
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_1785
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_1788
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_179C
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_17B5
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_17CB
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_B700
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0BDA&PID_0724
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0BDA&PID_8723
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0CF3&PID_3002
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0CF3&PID_3004
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0CF3&PID_3005
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0DB0&PID_3801
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0DF6&PID_2200
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0E5E&PID_6622
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_1131&PID_1001
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_1131&PID_1004
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_1286&PID_2044
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_13D3&PID_3304
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_13D3&PID_3315
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_413C&PID_8126
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_413C&PID_8197
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_8086&PID_0189
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_8087&PID_07DA
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_8087&PID_07DC
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0B05&PID_17CB
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_0489&PID_E092
+%AirBenderDeviceName% = AirBender_Inst, USB\VID_04CA&PID_300B
 
-[AirBender_Device.NT]
-CopyFiles=Drivers_Dir
+; Install Section
+; ---------------------------------------------------------
+[AirBender_Inst.NT]
+Include = BTH.INF
+Needs = BthUsb.NT
+CopyFiles = AirBender_Inst_CopyFiles.NT
 
-[Drivers_Dir]
+[AirBender_Inst.NT.HW]
+Include = BTH.INF
+Needs = BthUsb.NT.HW
+AddReg = AirBender_Inst_HWAddReg.NT
+
+[AirBender_Inst_HWAddReg.NT]
+HKR,,"LowerFilters",0x00010000,"AirBender"
+
+[AirBender_Inst_CopyFiles.NT]
 AirBender.sys
 
-;-------------- Service installation
-[AirBender_Device.NT.Services]
-AddService = AirBender,%SPSVCINST_ASSOCSERVICE%, AirBender_Service_Inst
+[AirBender_Inst.NT.Services]
+Include = BTH.INF
+Needs = BthUsb.NT.Services
+AddService = AirBender, , AirBender_Service_Inst
 
-; -------------- AirBender driver install sections
 [AirBender_Service_Inst]
-DisplayName    = %AirBender.SVCDESC%
-ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
-StartType      = 3               ; SERVICE_DEMAND_START
-ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+DisplayName    = %AirBender.SvcDesc%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %12%\AirBender.sys
 
+; Source Media Section
+; ---------------------------------------------------------
+[SourceDisksNames]
+1 = %DiskName%
+
+[SourceDisksFiles]
+AirBender.sys = 1
+
 ;
-;--- AirBender_Device Coinstaller installation ------
+;--- AirBender_Inst WDF Coinstaller installation ------
 ;
 
 [DestinationDirs]
-AirBender_Device_CoInstaller_CopyFiles = 11
+AirBender_Inst_CoInstaller_CopyFiles = 11
 
-[AirBender_Device.NT.CoInstallers]
-AddReg=AirBender_Device_CoInstaller_AddReg
-CopyFiles=AirBender_Device_CoInstaller_CopyFiles
+[AirBender_Inst.NT.CoInstallers]
+AddReg=AirBender_Inst_CoInstaller_AddReg
+CopyFiles=AirBender_Inst_CoInstaller_CopyFiles
 
-[AirBender_Device_CoInstaller_AddReg]
+[AirBender_Inst_CoInstaller_AddReg]
 HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
 
-[AirBender_Device_CoInstaller_CopyFiles]
+[AirBender_Inst_CoInstaller_CopyFiles]
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [SourceDisksFiles]
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
 
-[AirBender_Device.NT.Wdf]
-KmdfService =  AirBender, AirBender_wdfsect
+[AirBender_Inst.NT.Wdf]
+KmdfService = AirBender, AirBender_wdfsect
 [AirBender_wdfsect]
 KmdfLibraryVersion = $KMDFVERSION$
 
+
+; Strings Section
+; ---------------------------------------------------------
 [Strings]
+; Provider names
+Provider = "Nefarius Software Solutions"
+
+; Mfg names
+NSS = "Nefarius Software Solutions"
+
+; Service names
+AirBender.SvcDesc = "AirBender Service"
+
+; Media names
+DiskName = "AirBender Driver Disk"
+
+; HID device IDs
+AirBenderDeviceName = "AirBender Bluetooth Host Adapter"
+
+; Standard defs
+SPSVCINST_TAGTOFRONT  = 0x00000001
 SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
-ClassName="Samples" ; TODO: edit ClassName
-DiskName = "AirBender Installation Disk"
-AirBender.DeviceDesc = "AirBender Device"
-AirBender.SVCDESC = "AirBender Service"
+SERVICE_KERNEL_DRIVER = 1
+SERVICE_BOOT_START    = 0
+SERVICE_SYSTEM_START  = 1
+SERVICE_AUTO_START    = 2
+SERVICE_ERROR_NORMAL  = 1
+SERVICE_ERROR_IGNORE  = 0
+REG_EXPAND_SZ         = 0x00020000
+REG_DWORD             = 0x00010001
+REG_SZ                = 0x00000000
+
