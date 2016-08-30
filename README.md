@@ -1,6 +1,8 @@
 # AirBender
 HIDUSB filter driver for Sony DualShock controllers
 
+_Work in progress_
+
 ## Sources
  * https://nadavrub.wordpress.com/2015/07/17/simulate-hid-device-with-windows-desktop/
  * https://github.com/felis/USB_Host_Shield_2.0/wiki/PS3-Information#Bluetooth
