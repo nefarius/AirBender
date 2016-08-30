@@ -1,5 +1,5 @@
 # AirBender
-HIDUSB filter driver for Sony DualShock controllers
+HIDBTH filter driver for Sony DualShock controllers
 
 _Work in progress_
 
