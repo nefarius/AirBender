@@ -68,11 +68,6 @@ Return Value:
         deviceContext = DeviceGetContext(device);
 
         //
-        // Initialize the context.
-        //
-        deviceContext->PrivateDeviceData = 0;
-
-        //
         // Create a device interface so that applications can find and talk
         // to us.
         //
@@ -121,6 +116,11 @@ Return Value:
     PDEVICE_CONTEXT pDeviceContext;
     WDF_USB_DEVICE_CREATE_CONFIG createParams;
     WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
+    WDFUSBPIPE                          pipe;
+    WDF_USB_PIPE_INFORMATION            pipeInfo;
+    UCHAR                               index;
+    UCHAR                               numberConfiguredPipes;
+    WDFUSBINTERFACE                     usbInterface;
 
     UNREFERENCED_PARAMETER(ResourceList);
     UNREFERENCED_PARAMETER(ResourceListTranslated);
@@ -174,6 +174,81 @@ Return Value:
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
                     "WdfUsbTargetDeviceSelectConfig failed 0x%x", status);
+        return status;
+    }
+
+    usbInterface =
+        WdfUsbTargetDeviceGetInterface(pDeviceContext->UsbDevice, 0);
+
+    if (NULL == usbInterface) {
+        status = STATUS_UNSUCCESSFUL;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "WdfUsbTargetDeviceGetInterface 0 failed %!STATUS! \n",
+            status);
+        return status;
+    }
+
+    configParams.Types.SingleInterface.ConfiguredUsbInterface =
+        usbInterface;
+
+    configParams.Types.SingleInterface.NumberConfiguredPipes =
+        WdfUsbInterfaceGetNumConfiguredPipes(usbInterface);
+
+    pDeviceContext->UsbInterface =
+        configParams.Types.SingleInterface.ConfiguredUsbInterface;
+
+    numberConfiguredPipes = configParams.Types.SingleInterface.NumberConfiguredPipes;
+
+    //
+    // Get pipe handles
+    //
+    for (index = 0; index < numberConfiguredPipes; index++) {
+
+        WDF_USB_PIPE_INFORMATION_INIT(&pipeInfo);
+
+        pipe = WdfUsbInterfaceGetConfiguredPipe(
+            pDeviceContext->UsbInterface,
+            index, //PipeIndex,
+            &pipeInfo
+        );
+        //
+        // Tell the framework that it's okay to read less than
+        // MaximumPacketSize
+        //
+        WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(pipe);
+
+        if (WdfUsbPipeTypeInterrupt == pipeInfo.PipeType) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "Interrupt Pipe is 0x%p\n", pipe);
+            pDeviceContext->InterruptPipe = pipe;
+        }
+
+        if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+            WdfUsbTargetPipeIsInEndpoint(pipe)) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "BulkInput Pipe is 0x%p\n", pipe);
+            pDeviceContext->BulkReadPipe = pipe;
+        }
+
+        if (WdfUsbPipeTypeBulk == pipeInfo.PipeType &&
+            WdfUsbTargetPipeIsOutEndpoint(pipe)) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE,
+                "BulkOutput Pipe is 0x%p\n", pipe);
+            pDeviceContext->BulkWritePipe = pipe;
+        }
+
+    }
+
+    //
+    // If we didn't find all the 3 pipes, fail the start.
+    //
+    if (!(pDeviceContext->BulkWritePipe
+        && pDeviceContext->BulkReadPipe && pDeviceContext->InterruptPipe)) {
+        status = STATUS_INVALID_DEVICE_STATE;
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "Device is not configured properly %!STATUS!\n",
+            status);
+
         return status;
     }
 
