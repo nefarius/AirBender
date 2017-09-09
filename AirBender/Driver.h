@@ -22,6 +22,7 @@ Environment:
 
 #include "device.h"
 #include "queue.h"
+#include "Interrupt.h"
 #include "trace.h"
 
 EXTERN_C_START

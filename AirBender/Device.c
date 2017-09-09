@@ -49,6 +49,7 @@ Return Value:
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = AirBenderEvtDevicePrepareHardware;
+    pnpPowerCallbacks.EvtDeviceD0Entry = AirBenderEvtDeviceD0Entry;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
@@ -250,6 +251,55 @@ Return Value:
             status);
 
         return status;
+    }
+
+    AirBenderConfigContReaderForInterruptEndPoint(pDeviceContext);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+    return status;
+}
+
+_Use_decl_annotations_
+NTSTATUS
+AirBenderEvtDeviceD0Entry(
+    WDFDEVICE  Device,
+    WDF_POWER_DEVICE_STATE  PreviousState
+)
+{
+    PDEVICE_CONTEXT         pDeviceContext;
+    NTSTATUS                status;
+    BOOLEAN                 isTargetStarted;
+
+    pDeviceContext = DeviceGetContext(Device);
+    isTargetStarted = FALSE;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    UNREFERENCED_PARAMETER(PreviousState);
+
+    //
+    // Since continuous reader is configured for this interrupt-pipe, we must explicitly start
+    // the I/O target to get the framework to post read requests.
+    //
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start interrupt pipe %!STATUS!\n", status);
+        goto End;
+    }
+
+    isTargetStarted = TRUE;
+
+End:
+
+    if (!NT_SUCCESS(status)) {
+        //
+        // Failure in D0Entry will lead to device being removed. So let us stop the continuous
+        // reader in preparation for the ensuing remove.
+        //
+        if (isTargetStarted) {
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);
+        }
     }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");

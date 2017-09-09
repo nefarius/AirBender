@@ -1,0 +1,9 @@
+#pragma once
+
+NTSTATUS
+AirBenderConfigContReaderForInterruptEndPoint(
+    _In_ PDEVICE_CONTEXT DeviceContext
+);
+
+EVT_WDF_USB_READER_COMPLETION_ROUTINE AirBenderEvtUsbInterruptPipeReadComplete;
+EVT_WDF_USB_READERS_FAILED AirBenderEvtUsbInterruptReadersFailed;
