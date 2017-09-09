@@ -143,6 +143,8 @@ Return Value:
     //
     if (pDeviceContext->UsbDevice == NULL) {
 
+        WDF_USB_DEVICE_CREATE_CONFIG_INIT(&createParams, 0x602);
+
         status = WdfUsbTargetDeviceCreateWithParameters(Device,
                                                     &createParams,
                                                     WDF_NO_OBJECT_ATTRIBUTES,
