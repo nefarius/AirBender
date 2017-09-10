@@ -274,6 +274,18 @@ AirBenderEvtDeviceD0Entry(
         goto End;
     }
 
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk read pipe %!STATUS!\n", status);
+        goto End;
+    }
+
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe));
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk write pipe %!STATUS!\n", status);
+        goto End;
+    }
+
     isTargetStarted = TRUE;
 
 End:
@@ -285,6 +297,8 @@ End:
         //
         if (isTargetStarted) {
             WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe), WdfIoTargetCancelSentIo);
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe), WdfIoTargetCancelSentIo);
+            WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe), WdfIoTargetCancelSentIo);
         }
     }
 
