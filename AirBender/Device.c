@@ -50,6 +50,7 @@ Return Value:
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = AirBenderEvtDevicePrepareHardware;
     pnpPowerCallbacks.EvtDeviceD0Entry = AirBenderEvtDeviceD0Entry;
+    pnpPowerCallbacks.EvtDeviceD0Exit = AirBenderEvtDeviceD0Exit;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
@@ -305,5 +306,18 @@ End:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
     return status;
+}
+
+_Use_decl_annotations_
+NTSTATUS
+AirBenderEvtDeviceD0Exit(
+    WDFDEVICE  Device,
+    WDF_POWER_DEVICE_STATE  TargetState
+)
+{
+    UNREFERENCED_PARAMETER(Device);
+    UNREFERENCED_PARAMETER(TargetState);
+
+    return STATUS_SUCCESS;
 }
 

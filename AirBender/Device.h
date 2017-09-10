@@ -55,5 +55,6 @@ AirBenderCreateDevice(
 //
 EVT_WDF_DEVICE_PREPARE_HARDWARE AirBenderEvtDevicePrepareHardware;
 EVT_WDF_DEVICE_D0_ENTRY AirBenderEvtDeviceD0Entry;
+EVT_WDF_DEVICE_D0_EXIT AirBenderEvtDeviceD0Exit;
 
 EXTERN_C_END
