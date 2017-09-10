@@ -272,7 +272,7 @@ AirBenderEvtDeviceD0Entry(
     // Since continuous reader is configured for this interrupt-pipe, we must explicitly start
     // the I/O target to get the framework to post read requests.
     //
-    status = STATUS_SUCCESS; // WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
+    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start interrupt pipe %!STATUS!\n", status);
         goto End;
