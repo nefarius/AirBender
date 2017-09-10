@@ -121,7 +121,6 @@ Return Value:
     WDF_USB_PIPE_INFORMATION            pipeInfo;
     UCHAR                               index;
     UCHAR                               numberConfiguredPipes;
-    WDFUSBINTERFACE                     usbInterface;
 
     UNREFERENCED_PARAMETER(ResourceList);
     UNREFERENCED_PARAMETER(ResourceListTranslated);
@@ -178,27 +177,18 @@ Return Value:
         return status;
     }
 
-    usbInterface =
+    pDeviceContext->UsbInterface =
         WdfUsbTargetDeviceGetInterface(pDeviceContext->UsbDevice, 0);
 
-    if (NULL == usbInterface) {
+    if (NULL == pDeviceContext->UsbInterface) {
         status = STATUS_UNSUCCESSFUL;
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
             "WdfUsbTargetDeviceGetInterface 0 failed %!STATUS! \n",
             status);
         return status;
     }
-
-    configParams.Types.SingleInterface.ConfiguredUsbInterface =
-        usbInterface;
-
-    configParams.Types.SingleInterface.NumberConfiguredPipes =
-        WdfUsbInterfaceGetNumConfiguredPipes(usbInterface);
-
-    pDeviceContext->UsbInterface =
-        configParams.Types.SingleInterface.ConfiguredUsbInterface;
-
-    numberConfiguredPipes = configParams.Types.SingleInterface.NumberConfiguredPipes;
+        
+    numberConfiguredPipes = WdfUsbInterfaceGetNumConfiguredPipes(pDeviceContext->UsbInterface);
 
     //
     // Get pipe handles
@@ -282,7 +272,7 @@ AirBenderEvtDeviceD0Entry(
     // Since continuous reader is configured for this interrupt-pipe, we must explicitly start
     // the I/O target to get the framework to post read requests.
     //
-    status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
+    status = STATUS_SUCCESS; // WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start interrupt pipe %!STATUS!\n", status);
         goto End;
