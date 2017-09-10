@@ -355,12 +355,12 @@ InitPowerManagement(
         return status;
     }
 
-    KdPrint((__DRIVER_NAME  "Device self powered: %d",
-        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_SELF_POWERED ? 1 : 0));
-    KdPrint((__DRIVER_NAME  "Device remote wake capable: %d",
-        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE ? 1 : 0));
-    KdPrint((__DRIVER_NAME  "Device high speed: %d",
-        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED ? 1 : 0));
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Device self powered: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_SELF_POWERED ? 1 : 0);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Device remote wake capable: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE ? 1 : 0);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "Device high speed: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED ? 1 : 0);
 
     if (usbInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE)
     {

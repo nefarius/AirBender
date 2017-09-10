@@ -134,12 +134,12 @@ Return Value:
         DEFAULT_CONTROL_TRANSFER_TIMEOUT
     );
 
-    WDF_USB_CONTROL_SETUP_PACKET_INIT_VENDOR(&controlSetupPacket,
+    WDF_USB_CONTROL_SETUP_PACKET_INIT_CLASS(&controlSetupPacket,
         BmRequestHostToDevice,
         BmRequestToDevice,
-        0x00, // Request
-        0, // Value
-        0); // Index
+        0x00,
+        0,
+        0);
 
     UCHAR buffer[3];
 
