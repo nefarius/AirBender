@@ -37,12 +37,14 @@
   <ItemGroup>
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="HCI.c" />
     <ClCompile Include="Interrupt.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />

@@ -315,6 +315,8 @@ End:
         }
     }
 
+    HCI_Command_Reset(pDeviceContext);
+
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
     return status;
