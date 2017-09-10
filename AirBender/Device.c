@@ -46,6 +46,7 @@ Return Value:
     PDEVICE_CONTEXT deviceContext;
     WDFDEVICE device;
     NTSTATUS status;
+    WDF_DEVICE_PNP_CAPABILITIES pnpCapabilities;
 
     WDF_PNPPOWER_EVENT_CALLBACKS_INIT(&pnpPowerCallbacks);
     pnpPowerCallbacks.EvtDevicePrepareHardware = AirBenderEvtDevicePrepareHardware;
@@ -68,6 +69,11 @@ Return Value:
         // run under framework verifier mode.
         //
         deviceContext = DeviceGetContext(device);
+
+        WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
+        pnpCapabilities.Removable = WdfTrue;
+        pnpCapabilities.SurpriseRemovalOK = WdfTrue;
+        WdfDeviceSetPnpCapabilities(device, &pnpCapabilities);
 
         //
         // Create a device interface so that applications can find and talk
@@ -240,6 +246,10 @@ Return Value:
         return status;
     }
 
+    status = InitPowerManagement(Device, pDeviceContext);
+    if (!NT_SUCCESS(status))
+        return status;
+
     AirBenderConfigContReaderForInterruptEndPoint(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
@@ -319,5 +329,68 @@ AirBenderEvtDeviceD0Exit(
     UNREFERENCED_PARAMETER(TargetState);
 
     return STATUS_SUCCESS;
+}
+
+NTSTATUS
+InitPowerManagement(
+    IN WDFDEVICE  Device,
+    IN PDEVICE_CONTEXT Context)
+{
+    NTSTATUS status = STATUS_SUCCESS;
+    WDF_USB_DEVICE_INFORMATION usbInfo;
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    WDF_USB_DEVICE_INFORMATION_INIT(&usbInfo);
+    status = WdfUsbTargetDeviceRetrieveInformation(
+        Context->UsbDevice,
+        &usbInfo);
+    if (!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            "WdfUsbTargetDeviceRetrieveInformation failed with status 0x%08x\n",
+            status);
+        return status;
+    }
+
+    KdPrint((__DRIVER_NAME  "Device self powered: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_SELF_POWERED ? 1 : 0));
+    KdPrint((__DRIVER_NAME  "Device remote wake capable: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE ? 1 : 0));
+    KdPrint((__DRIVER_NAME  "Device high speed: %d",
+        usbInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED ? 1 : 0));
+
+    if (usbInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE)
+    {
+        WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS idleSettings;
+        WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS wakeSettings;
+
+        WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings,
+            IdleUsbSelectiveSuspend);
+        idleSettings.IdleTimeout = 10000;
+        status = WdfDeviceAssignS0IdleSettings(Device, &idleSettings);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+                "WdfDeviceAssignS0IdleSettings failed with status 0x%08x\n",
+                status);
+            return status;
+        }
+
+        WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS_INIT(&wakeSettings);
+        wakeSettings.DxState = PowerDeviceD2;
+        status = WdfDeviceAssignSxWakeSettings(Device, &wakeSettings);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+                "WdfDeviceAssignSxWakeSettings failed with status 0x%08x\n",
+                status);
+            return status;
+        }
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+    return status;
 }
 
