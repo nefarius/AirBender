@@ -54,6 +54,8 @@ Return Value:
     pnpPowerCallbacks.EvtDeviceD0Exit = AirBenderEvtDeviceD0Exit;
     WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
+    WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoBuffered);
+
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
@@ -81,7 +83,7 @@ Return Value:
         //
         status = WdfDeviceCreateDeviceInterface(
             device,
-            &GUID_DEVINTERFACE_AirBender,
+            &GUID_DEVINTERFACE_AIRBENDER,
             NULL // ReferenceString
         );
 

@@ -19,7 +19,7 @@ Environment:
 // Device Interface GUID
 // a775e97e-a41b-4bfc-868e-25be84643b62
 //
-DEFINE_GUID(GUID_DEVINTERFACE_AirBender,
+DEFINE_GUID(GUID_DEVINTERFACE_AIRBENDER,
     0xa775e97e,0xa41b,0x4bfc,0x86,0x8e,0x25,0xbe,0x84,0x64,0x3b,0x62);
 
 //
