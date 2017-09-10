@@ -22,6 +22,7 @@ Environment:
 
 #include "device.h"
 #include "queue.h"
+#include "Bluetooth.h"
 #include "Interrupt.h"
 #include "HCI.h"
 #include "trace.h"

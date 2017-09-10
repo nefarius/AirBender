@@ -87,7 +87,7 @@ NT status value
     WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
         AirBenderEvtUsbInterruptPipeReadComplete,
         DeviceContext,    // Context
-        sizeof(UCHAR));   // TransferLength
+        INTERRUPT_IN_BUFFER_LENGTH);   // TransferLength
 
     contReaderConfig.EvtUsbTargetPipeReadersFailed = AirBenderEvtUsbInterruptReadersFailed;
 

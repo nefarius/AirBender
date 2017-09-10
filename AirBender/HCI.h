@@ -114,3 +114,138 @@ HCI_Command(
 NTSTATUS
 HCI_Command_Reset(
     PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Accept_Connection_Request(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr,
+    BYTE role);
+
+NTSTATUS
+HCI_Command_Reject_Connection_Request(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr,
+    BYTE reason);
+
+NTSTATUS
+HCI_Command_Remote_Name_Request(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_Write_Scan_Enable(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Read_Local_Version_Info(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Read_BD_Addr(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Read_Buffer_Size(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Link_Key_Request_Reply(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_Link_Key_Request_Negative_Reply(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_PIN_Code_Request_Negative_Reply(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_Set_Connection_Encryption(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle);
+
+NTSTATUS
+HCI_Command_User_Confirmation_Request_Reply(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_IO_Capability_Request_Reply(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_Set_Event_Mask(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Local_Name(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Extended_Inquiry_Response(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Class_of_Device(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Inquiry_Scan_Type(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Inquiry_Scan_Activity(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Page_Scan_Type(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Page_Scan_Activity(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Page_Timeout(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Authentication_Enable(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Simple_Pairing_Mode(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Simple_Pairing_Debug_Mode(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Inquiry_Mode(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Write_Inquiry_Transmit_Power_Level(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS HCI_Command_Inquiry(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS HCI_Command_Inquiry_Cancel(
+    PDEVICE_CONTEXT Context);
+
+NTSTATUS
+HCI_Command_Delete_Stored_Link_Key(
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr);
+
+NTSTATUS
+HCI_Command_Disconnect(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle);
