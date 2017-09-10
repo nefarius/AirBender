@@ -115,6 +115,57 @@ Return Value:
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
 
+    NTSTATUS status;
+    PDEVICE_CONTEXT pDeviceContext;
+    WDF_USB_CONTROL_SETUP_PACKET    controlSetupPacket;
+    WDF_REQUEST_SEND_OPTIONS        sendOptions;
+    WDF_MEMORY_DESCRIPTOR memDesc;
+    ULONG    bytesTransferred;
+
+    pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
+
+    WDF_REQUEST_SEND_OPTIONS_INIT(
+        &sendOptions,
+        WDF_REQUEST_SEND_OPTION_TIMEOUT
+    );
+
+    WDF_REQUEST_SEND_OPTIONS_SET_TIMEOUT(
+        &sendOptions,
+        DEFAULT_CONTROL_TRANSFER_TIMEOUT
+    );
+
+    WDF_USB_CONTROL_SETUP_PACKET_INIT_VENDOR(&controlSetupPacket,
+        BmRequestHostToDevice,
+        BmRequestToDevice,
+        0x00, // Request
+        0, // Value
+        0); // Index
+
+    UCHAR buffer[3];
+
+    buffer[0] = 0x03;
+    buffer[1] = 0x0C;
+    buffer[2] = 0x00;
+
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(&memDesc,
+        buffer,
+        3);
+
+    status = WdfUsbTargetDeviceSendControlTransferSynchronously(
+        pDeviceContext->UsbDevice,
+        WDF_NO_HANDLE,
+        &sendOptions,
+        &controlSetupPacket,
+        &memDesc,
+        &bytesTransferred);
+
+    if (!NT_SUCCESS(status)) {
+
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER,
+            "WdfUsbTargetDeviceSendControlTransferSynchronously: Failed - 0x%x (%d)\n", status, bytesTransferred);
+
+    }
+
     return;
 }
 
