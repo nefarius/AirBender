@@ -140,9 +140,7 @@ HCI_Command_Link_Key_Request_Reply(
     buffer[7] = BdAddr.Address[4];
     buffer[8] = BdAddr.Address[5];
 
-    // TODO: fix
-    /*Buffer.BlockCopy(GlobalConfiguration.Instance.BdLink, 0, buffer, 9,
-        GlobalConfiguration.Instance.BdLink.Length);*/
+    memcpy_s(&buffer[9], 25, BD_LINK, BD_LINK_LENGTH);
 
     return HCI_Command(Context, HCI_Link_Key_Request_Reply, buffer, 25);
 }
