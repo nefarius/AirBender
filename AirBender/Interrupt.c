@@ -73,11 +73,11 @@ Return Value:
 NT status value
 --*/
 {
-    PUCHAR          switchState = NULL;
     WDFDEVICE       device;
     PDEVICE_CONTEXT pDeviceContext = Context;
 
     UNREFERENCED_PARAMETER(Pipe);
+    UNREFERENCED_PARAMETER(Buffer);
 
     device = WdfObjectContextGetObject(pDeviceContext);
 
@@ -97,12 +97,10 @@ NT status value
 
 
     //assert(NumBytesTransferred == sizeof(UCHAR));
-
-    switchState = WdfMemoryGetBuffer(Buffer, NULL);
-
+        
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-        "OsrFxEvtUsbInterruptPipeReadComplete SwitchState %x\n",
-        *switchState);
+        "NumBytesTransferred %x\n",
+        (ULONG)NumBytesTransferred);
 
    // pDeviceContext->CurrentSwitchState = *switchState;
 
