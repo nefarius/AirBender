@@ -1,5 +1,5 @@
 # AirBender
-BTHUSB filter driver for Sony DualShock controllers
+Windows Bluetooth Host Driver for Sony DualShock Controllers
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/shields_io.svg?style=social&label=Follow&maxAge=2592000)](https://twitter.com/CNefarius)
 
