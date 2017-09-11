@@ -14,6 +14,8 @@ Environment:
 
 --*/
 
+#include "Bluetooth.h"
+
 EXTERN_C_START
 
 //
@@ -31,6 +33,14 @@ typedef struct _DEVICE_CONTEXT
     WDFUSBPIPE BulkReadPipe;
 
     WDFUSBPIPE BulkWritePipe;
+
+    BOOLEAN DisableSSP;
+
+    BOOLEAN Started;
+
+    BD_ADDR BluetoothHostAddress;
+
+    BOOLEAN Initialized;
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 

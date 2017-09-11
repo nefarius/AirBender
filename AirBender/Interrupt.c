@@ -3,7 +3,7 @@
 #include "interrupt.tmh"
 
 
-NTSTATUS 
+NTSTATUS
 SendControlRequest(
     _In_ PDEVICE_CONTEXT Context,
     _In_ BYTE Type,
@@ -135,10 +135,14 @@ Return Value:
 NT status value
 --*/
 {
+    NTSTATUS        status;
     WDFDEVICE       device;
     PDEVICE_CONTEXT pDeviceContext = Context;
     PUCHAR          buffer;
     HCI_EVENT       event;
+    HCI_COMMAND     command;
+    BD_ADDR         clientAddr = { 0 };
+    BTH_HANDLE      clientHandle;
 
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(Buffer);
@@ -153,27 +157,403 @@ NT status value
 
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
-            "OsrFxEvtUsbInterruptPipeReadComplete Zero length read "
+            "!FUNC! Zero length read "
             "occured on the Interrupt Pipe's Continuous Reader\n"
         );
         return;
     }
 
-
-    //assert(NumBytesTransferred == sizeof(UCHAR));
-        
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-        "NumBytesTransferred %x\n",
-        (ULONG)NumBytesTransferred);
-
     buffer = WdfMemoryGetBuffer(Buffer, NULL);
     event = (HCI_EVENT)buffer[0];
+    command = HCI_Null;
 
     switch (event)
     {
     case HCI_Command_Complete_EV:
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
+
+        command = (HCI_COMMAND)(USHORT)(buffer[3] | buffer[4] << 8);
         break;
+    case HCI_Command_Status_EV:
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Status_EV");
+
+        command = (HCI_COMMAND)(USHORT)(buffer[4] | buffer[5] << 8);
+
+        if (buffer[2] != 0)
+        {
+            switch (command)
+            {
+            case HCI_Write_Simple_Pairing_Mode:
+            case HCI_Write_Authentication_Enable:
+            case HCI_Set_Event_Mask:
+
+                pDeviceContext->DisableSSP = TRUE;
+                //GlobalConfiguration.Instance.DisableSSP = true;
+                //Log.Warn(
+                //    "-- Simple Pairing not supported on this device. [SSP Disabled]");
+                status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+                break;
+            default:
+                break;
+            }
+        }
+        break;
+    case HCI_Number_Of_Completed_Packets_EV:
+        break;
+    default:
+        break;
+    }
+
+    switch (event)
+    {
+#pragma region HCI_Command_Complete_EV
+
+    case HCI_Command_Complete_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
+
+        if (command == HCI_Reset && HCI_SUCCESS(buffer) && !pDeviceContext->Started)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Reset SUCCESS");
+
+            pDeviceContext->Started = TRUE;
+
+            status = HCI_Command_Read_BD_Addr(pDeviceContext);
+        }
+
+        if (command == HCI_Read_BD_ADDR && HCI_SUCCESS(buffer))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_BD_ADDR SUCCESS");
+
+            pDeviceContext->BluetoothHostAddress.Address[0] = buffer[11];
+            pDeviceContext->BluetoothHostAddress.Address[1] = buffer[10];
+            pDeviceContext->BluetoothHostAddress.Address[2] = buffer[9];
+            pDeviceContext->BluetoothHostAddress.Address[3] = buffer[8];
+            pDeviceContext->BluetoothHostAddress.Address[4] = buffer[7];
+            pDeviceContext->BluetoothHostAddress.Address[5] = buffer[6];
+
+            status = HCI_Command_Read_Buffer_Size(pDeviceContext);
+        }
+
+        if (command == HCI_Read_Buffer_Size && HCI_SUCCESS(buffer))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Buffer_Size SUCCESS");
+
+            status = HCI_Command_Read_Local_Version_Info(pDeviceContext);
+        }
+
+        if (command == HCI_Read_Local_Version_Info && HCI_SUCCESS(buffer))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Local_Version_Info SUCCESS");
+
+            BYTE hciMajor = buffer[6];
+            BYTE lmpMajor = buffer[9];
+
+            /* analyzes Host Controller Interface (HCI) major version
+            * see https://www.bluetooth.org/en-us/specification/assigned-numbers/host-controller-interface
+            * */
+            switch (hciMajor)
+            {
+            case 0:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 1.0b");
+                break;
+            case 1:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 1.1");
+                break;
+            case 2:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 1.2");
+                break;
+            case 3:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 2.0 + EDR");
+                break;
+            case 4:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 2.1 + EDR");
+                break;
+            case 5:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 3.0 + HS");
+                break;
+            case 6:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.0");
+                break;
+            case 7:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.1");
+                break;
+            case 8:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth Core Specification 4.2");
+                break;
+            default:
+                break;
+            }
+
+            /* analyzes Link Manager Protocol (LMP) major version
+            * see https://www.bluetooth.org/en-us/specification/assigned-numbers/link-manager
+            * */
+            switch (lmpMajor)
+            {
+            case 0:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 1.0b");
+                break;
+            case 1:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 1.1");
+                break;
+            case 2:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 1.2");
+                break;
+            case 3:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 2.0 + EDR");
+                break;
+            case 4:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 2.1 + EDR");
+                break;
+            case 5:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 3.0 + HS");
+                break;
+            case 6:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.0");
+                break;
+            case 7:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.1");
+                break;
+            case 8:
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth Core Specification 4.2");
+                break;
+            default:
+                break;
+            }
+
+            // Bluetooth v2.0 + EDR
+            if (hciMajor >= 3 && lmpMajor >= 3)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                    "Bluetooth host supports communication with DualShock 3 controllers");
+            }
+
+            // Bluetooth v2.1 + EDR
+            if (hciMajor >= 4 && lmpMajor >= 4)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                    "Bluetooth host supports communication with DualShock 4 controllers");
+            }
+
+            // dongle effectively too old/unsupported 
+            if (hciMajor < 3 || lmpMajor < 3)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                    "Unsupported Bluetooth Specification, aborting communication");
+                status = HCI_Command_Reset(pDeviceContext);
+                break;
+            }
+
+            if (pDeviceContext->DisableSSP)
+            {
+                status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+            }
+            else
+            {
+                status = HCI_Command_Write_Simple_Pairing_Mode(pDeviceContext);
+            }
+        }
+
+        if (command == HCI_Write_Simple_Pairing_Mode)
+        {
+            if (HCI_SUCCESS(buffer))
+            {
+                status = HCI_Command_Write_Simple_Pairing_Debug_Mode(pDeviceContext);
+            }
+            else
+            {
+                pDeviceContext->DisableSSP = TRUE;
+
+                //Log.Warn("-- Simple Pairing not supported on this device. [SSP Disabled]");
+
+                status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+            }
+        }
+
+        if (command == HCI_Write_Simple_Pairing_Debug_Mode)
+        {
+            status = HCI_Command_Write_Authentication_Enable(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Authentication_Enable)
+        {
+            if (HCI_SUCCESS(buffer))
+            {
+                status = HCI_Command_Set_Event_Mask(pDeviceContext);
+            }
+            else
+            {
+                pDeviceContext->DisableSSP = TRUE;
+
+                //Log.Warn("-- Simple Pairing not supported on this device. [SSP Disabled]");
+
+                status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+            }
+        }
+
+        if (command == HCI_Set_Event_Mask)
+        {
+            if (HCI_SUCCESS(buffer))
+            {
+                status = HCI_Command_Write_Page_Timeout(pDeviceContext);
+            }
+            else
+            {
+                pDeviceContext->DisableSSP = TRUE;
+
+                //Log.Warn("-- Simple Pairing not supported on this device. [SSP Disabled]");
+
+                status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+            }
+        }
+
+        if (command == HCI_Write_Page_Timeout && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Page_Scan_Activity(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Page_Scan_Activity && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Page_Scan_Type(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Page_Scan_Type && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Inquiry_Scan_Activity(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Inquiry_Scan_Activity && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Inquiry_Scan_Type(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Inquiry_Scan_Type && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Inquiry_Mode(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Inquiry_Mode && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Class_of_Device(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Class_of_Device && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Extended_Inquiry_Response(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Extended_Inquiry_Response && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Local_Name(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Local_Name && HCI_SUCCESS(buffer))
+        {
+            status = HCI_Command_Write_Scan_Enable(pDeviceContext);
+        }
+
+        if (command == HCI_Write_Scan_Enable && HCI_SUCCESS(buffer))
+        {
+            pDeviceContext->Initialized = TRUE;
+        }
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_Connection_Request_EV
+
+    case HCI_Connection_Request_EV:
+
+        memcpy_s(&clientAddr, sizeof(BD_ADDR), &buffer[2], sizeof(BD_ADDR));
+
+        status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
+        status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_Connection_Complete_EV
+
+    case HCI_Connection_Complete_EV:
+
+        if (buffer[2] == 0x00)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Connection_Complete_EV SUCCESS");
+
+            clientHandle.Lsb = buffer[3];
+            clientHandle.Msb = buffer[4];
+
+            status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
+        }
+
+        break;
+
+#pragma endregion 
+
+#pragma region HCI_Disconnection_Complete_EV
+
+    case HCI_Disconnection_Complete_EV:
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_Number_Of_Completed_Packets_EV
+
+    case HCI_Number_Of_Completed_Packets_EV:
+
+        break;
+
+#pragma endregion 
+
+#pragma region HCI_Remote_Name_Request_Complete_EV
+
+    case HCI_Remote_Name_Request_Complete_EV:
+
+        break;
+
+#pragma endregion 
+
+#pragma region HCI_Link_Key_Request_EV
+
+    case HCI_Link_Key_Request_EV:
+
+        break;
+
+#pragma endregion 
+
+#pragma region HCI_PIN_Code_Request_EV
+
+    case HCI_PIN_Code_Request_EV:
+
+        break;
+
+#pragma endregion 
+
+#pragma region HCI_IO_Capability_Request_EV
+
+    case HCI_IO_Capability_Request_EV:
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_User_Confirmation_Request_EV
+
+    case HCI_User_Confirmation_Request_EV:
+
+        break;
+
+#pragma endregion
+
+#pragma region HCI_Link_Key_Notification_EV
+
+    case HCI_Link_Key_Notification_EV:
+
+        break;
+
+#pragma endregion
     default:
         break;
     }
