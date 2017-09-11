@@ -137,6 +137,8 @@ NT status value
 {
     WDFDEVICE       device;
     PDEVICE_CONTEXT pDeviceContext = Context;
+    PUCHAR          buffer;
+    HCI_EVENT       event;
 
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(Buffer);
@@ -164,20 +166,17 @@ NT status value
         "NumBytesTransferred %x\n",
         (ULONG)NumBytesTransferred);
 
-   // pDeviceContext->CurrentSwitchState = *switchState;
+    buffer = WdfMemoryGetBuffer(Buffer, NULL);
+    event = (HCI_EVENT)buffer[0];
 
-    //
-    // Handle any pending Interrupt Message IOCTLs. Note that the OSR USB device
-    // will generate an interrupt message when the the device resumes from a low
-    // power state. So if the Interrupt Message IOCTL was sent after the device
-    // has gone to a low power state, the pending Interrupt Message IOCTL will
-    // get completed in the function call below, before the user twiddles the
-    // dip switches on the OSR USB device. If this is not the desired behavior
-    // for your driver, then you could handle this condition by maintaining a
-    // state variable on D0Entry to track interrupt messages caused by power up.
-    //
-    //OsrUsbIoctlGetInterruptMessage(device, STATUS_SUCCESS);
-
+    switch (event)
+    {
+    case HCI_Command_Complete_EV:
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
+        break;
+    default:
+        break;
+    }
 }
 
 BOOLEAN
