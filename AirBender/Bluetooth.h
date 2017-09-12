@@ -17,9 +17,13 @@ typedef struct _BTH_HANDLE
 
 typedef struct _BTH_DEVICE
 {
-    BTH_HANDLE Handle;
+    BD_ADDR ClientAddress;
+
+    BTH_HANDLE ConnectionHandle;
 
     UT_hash_handle hh;
+
+    struct BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
@@ -28,12 +32,14 @@ typedef struct _BTH_DEVICE
 VOID FORCEINLINE 
 BTH_ADD_DEVICE(
     PBTH_DEVICE DeviceList, 
-    BTH_HANDLE Handle)
+    BD_ADDR Address)
 {
     PBTH_DEVICE device = (PBTH_DEVICE)malloc(sizeof(BTH_DEVICE));
-    device->Handle = Handle;
+    RtlZeroMemory(device, sizeof(BTH_DEVICE));
 
-    HASH_ADD(hh, DeviceList, Handle, sizeof(BTH_HANDLE), device);
+    device->ClientAddress = Address;
+
+    HASH_ADD(hh, DeviceList, ClientAddress, sizeof(BD_ADDR), device);
 #pragma warning( pop )  
 }
 
