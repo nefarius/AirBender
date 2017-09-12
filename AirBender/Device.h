@@ -42,6 +42,8 @@ typedef struct _DEVICE_CONTEXT
 
     BOOLEAN Initialized;
 
+    PBTH_DEVICE ClientDeviceList;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //

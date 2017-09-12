@@ -37,12 +37,8 @@ HCI_Command_Accept_Connection_Request(
 {
     BYTE buffer[10];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
+
     buffer[9] = role;
 
     return HCI_Command(Context, HCI_Accept_Connection_Request, buffer, 10);
@@ -56,12 +52,8 @@ HCI_Command_Reject_Connection_Request(
 {
     BYTE buffer[10];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
+
     buffer[9] = reason;
 
     return HCI_Command(Context, HCI_Reject_Connection_Request, buffer, 10);
@@ -74,12 +66,8 @@ HCI_Command_Remote_Name_Request(
 {
     BYTE buffer[13];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
+
     buffer[9] = 0x01;
     buffer[10] = 0x00;
     buffer[11] = 0x00;
@@ -133,14 +121,9 @@ HCI_Command_Link_Key_Request_Reply(
 {
     BYTE buffer[25];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
 
-    memcpy_s(&buffer[9], 25, BD_LINK, BD_LINK_LENGTH);
+    RtlCopyMemory(&buffer[9], BD_LINK, BD_LINK_LENGTH);
 
     return HCI_Command(Context, HCI_Link_Key_Request_Reply, buffer, 25);
 }
@@ -152,12 +135,7 @@ HCI_Command_Link_Key_Request_Negative_Reply(
 {
     BYTE buffer[9];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
 
     return HCI_Command(Context, HCI_Link_Key_Request_Negative_Reply, buffer, 9);
 }
@@ -169,12 +147,7 @@ HCI_Command_PIN_Code_Request_Negative_Reply(
 {
     BYTE buffer[16];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
 
     return HCI_Command(Context, HCI_Link_Key_Request_Negative_Reply, buffer, 16);
 }
@@ -200,12 +173,7 @@ HCI_Command_User_Confirmation_Request_Reply(
 {
     BYTE buffer[9];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
 
     return HCI_Command(Context, HCI_User_Confirmation_Request_Reply, buffer, 9);
 }
@@ -217,12 +185,8 @@ HCI_Command_IO_Capability_Request_Reply(
 {
     BYTE buffer[12];
 
-    buffer[3] = BdAddr.Address[0];
-    buffer[4] = BdAddr.Address[1];
-    buffer[5] = BdAddr.Address[2];
-    buffer[6] = BdAddr.Address[3];
-    buffer[7] = BdAddr.Address[4];
-    buffer[8] = BdAddr.Address[5];
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
+
     buffer[9] = 0x01;
     buffer[10] = 0x00;
     buffer[11] = 0x05;
@@ -446,7 +410,7 @@ HCI_Command_Delete_Stored_Link_Key(
 {
     BYTE buffer[10];
 
-    memcpy_s(&buffer[3], 10, &BdAddr, sizeof(BD_ADDR));
+    RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
     
     buffer[9] = 0x00;
 
