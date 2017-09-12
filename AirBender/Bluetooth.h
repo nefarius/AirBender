@@ -27,8 +27,6 @@ typedef struct _BTH_DEVICE
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
-#pragma warning( push )  
-#pragma warning( disable : 4702 ) 
 VOID FORCEINLINE 
 BTH_ADD_DEVICE(
     PBTH_DEVICE DeviceList, 
@@ -40,7 +38,6 @@ BTH_ADD_DEVICE(
     device->ClientAddress = Address;
 
     HASH_ADD(hh, DeviceList, ClientAddress, sizeof(BD_ADDR), device);
-#pragma warning( pop )  
 }
 
 VOID FORCEINLINE
