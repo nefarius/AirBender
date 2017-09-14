@@ -1,19 +1,28 @@
 #pragma once
 
-#include "uthash.h"
+
+#define BD_LINK_LENGTH  0x10
+#include <stdlib.h>
+
+static const BYTE BD_LINK[BD_LINK_LENGTH] =
+{
+    0x56, 0xE8, 0x81, 0x38, 0x08, 0x06, 0x51, 0x41,
+    0xC0, 0x7F, 0x12, 0xAA, 0xD9, 0x66, 0x3C, 0xCE
+};
+
 
 typedef struct _BD_ADDR
 {
     BYTE Address[6];
 
-} BD_ADDR;
+} BD_ADDR, *PBD_ADDR;
 
 typedef struct _BTH_HANDLE
 {
     BYTE Lsb;
     BYTE Msb;
 
-} BTH_HANDLE;
+} BTH_HANDLE, *PBTH_HANDLE;
 
 typedef struct _BTH_DEVICE
 {
@@ -21,45 +30,72 @@ typedef struct _BTH_DEVICE
 
     BTH_HANDLE ConnectionHandle;
 
-    UT_hash_handle hh;
-
-    struct BTH_DEVICE *next;
+    struct _BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
-VOID FORCEINLINE 
-BTH_ADD_DEVICE(
-    list *DeviceList, 
-    BD_ADDR Address)
+typedef struct _BTH_DEVICE_LIST
 {
-    PBTH_DEVICE device = (PBTH_DEVICE)malloc(sizeof(BTH_DEVICE));
-    RtlZeroMemory(device, sizeof(BTH_DEVICE));
+    ULONG logicalLength;
 
-    device->ClientAddress = Address;
+    PBTH_DEVICE head;
 
-    list_append(DeviceList, device);
+    PBTH_DEVICE tail;
+
+} BTH_DEVICE_LIST, *PBTH_DEVICE_LIST;
+
+VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
+    PBTH_DEVICE_LIST List
+)
+{
+    List->logicalLength = 0;
+    List->head = List->tail = NULL;
 }
 
-VOID FORCEINLINE
-BTH_REMOVE_DEVICE(
-    PBTH_DEVICE DeviceList,
-    PBTH_DEVICE Device)
+VOID FORCEINLINE BTH_DEVICE_LIST_ADD(
+    PBTH_DEVICE_LIST List,
+    PBD_ADDR Address
+)
 {
-    HASH_DEL(DeviceList, Device);
-    free(Device);
+    PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
+    RtlZeroMemory(node, sizeof(BTH_DEVICE));
+
+    RtlCopyMemory(&node->ClientAddress, Address, sizeof(BD_ADDR));
+
+    if (List->logicalLength == 0) {
+        List->head = List->tail = node;
+    }
+    else {
+        List->tail->next = node;
+        List->tail = node;
+    }
+
+    List->logicalLength++;
 }
 
-ULONG FORCEINLINE
-BTH_GET_DEVICE_COUNT(
-    list *DeviceList)
+ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT(
+    PBTH_DEVICE_LIST List
+)
 {
-    return list_size(DeviceList);
+    return List->logicalLength;
 }
 
-#define BD_LINK_LENGTH  0x10
+PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR(
+    PBTH_DEVICE_LIST List,
+    BD_ADDR Address
+)
+{
+    PBTH_DEVICE node = List->head;
 
-static const BYTE BD_LINK[BD_LINK_LENGTH] =
-{ 
-    0x56, 0xE8, 0x81, 0x38, 0x08, 0x06, 0x51, 0x41, 
-    0xC0, 0x7F, 0x12, 0xAA, 0xD9, 0x66, 0x3C, 0xCE 
-};
+    while (node != NULL)
+    {
+        if (node->ClientAddress.Address == Address.Address)
+        {
+            return node;
+        }
+
+        node = node->next;
+    }
+
+    return NULL;
+}
