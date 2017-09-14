@@ -29,7 +29,7 @@ typedef struct _BTH_DEVICE
 
 VOID FORCEINLINE 
 BTH_ADD_DEVICE(
-    PBTH_DEVICE DeviceList, 
+    list *DeviceList, 
     BD_ADDR Address)
 {
     PBTH_DEVICE device = (PBTH_DEVICE)malloc(sizeof(BTH_DEVICE));
@@ -37,7 +37,7 @@ BTH_ADD_DEVICE(
 
     device->ClientAddress = Address;
 
-    HASH_ADD(hh, DeviceList, ClientAddress, sizeof(BD_ADDR), device);
+    list_append(DeviceList, device);
 }
 
 VOID FORCEINLINE
@@ -51,9 +51,9 @@ BTH_REMOVE_DEVICE(
 
 ULONG FORCEINLINE
 BTH_GET_DEVICE_COUNT(
-    PBTH_DEVICE DeviceList)
+    list *DeviceList)
 {
-    return HASH_COUNT(DeviceList);
+    return list_size(DeviceList);
 }
 
 #define BD_LINK_LENGTH  0x10

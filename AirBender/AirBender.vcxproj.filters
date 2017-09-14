@@ -57,6 +57,9 @@
     <ClInclude Include="$(SolutionDir)uthash\src\uthash.h">
       <Filter>Header Files\uthash</Filter>
     </ClInclude>
+    <ClInclude Include="List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Device.c">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="HCI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="List.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

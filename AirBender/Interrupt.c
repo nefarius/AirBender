@@ -499,16 +499,16 @@ NT status value
 
         RtlCopyMemory(&clientAddr, &buffer[2], sizeof(BD_ADDR));
 
-        BTH_ADD_DEVICE(pDeviceContext->ClientDeviceList, clientAddr);
+        BTH_ADD_DEVICE(&pDeviceContext->ClientDeviceList, clientAddr);
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-            "Devices: %d", BTH_GET_DEVICE_COUNT(pDeviceContext->ClientDeviceList));
+            "Devices: %d", BTH_GET_DEVICE_COUNT(&pDeviceContext->ClientDeviceList));
 
         status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
         status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-            "Devices: %d", BTH_GET_DEVICE_COUNT(pDeviceContext->ClientDeviceList));
+            "Devices: %d", BTH_GET_DEVICE_COUNT(&pDeviceContext->ClientDeviceList));
 
         break;
 
@@ -530,7 +530,7 @@ NT status value
             status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
 
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, 
-                "Devices: %d", BTH_GET_DEVICE_COUNT(pDeviceContext->ClientDeviceList));
+                "Devices: %d", BTH_GET_DEVICE_COUNT(&pDeviceContext->ClientDeviceList));
         }
 
         break;

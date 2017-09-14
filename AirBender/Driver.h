@@ -20,6 +20,7 @@ Environment:
 #include <wdfusb.h>
 #include <initguid.h>
 
+#include "List.h"
 #include "device.h"
 #include "queue.h"
 #include "Bluetooth.h"

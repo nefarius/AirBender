@@ -39,6 +39,7 @@
     <ClCompile Include="Driver.c" />
     <ClCompile Include="HCI.c" />
     <ClCompile Include="Interrupt.c" />
+    <ClCompile Include="List.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
@@ -50,6 +51,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
+    <ClInclude Include="List.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>

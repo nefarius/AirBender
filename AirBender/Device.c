@@ -72,6 +72,8 @@ Return Value:
         //
         deviceContext = DeviceGetContext(device);
 
+        list_new(&deviceContext->ClientDeviceList, sizeof(BTH_DEVICE), NULL);
+
         WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
         pnpCapabilities.Removable = WdfTrue;
         pnpCapabilities.SurpriseRemovalOK = WdfTrue;
