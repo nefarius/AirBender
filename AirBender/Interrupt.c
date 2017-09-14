@@ -136,29 +136,20 @@ NT status value
 --*/
 {
     NTSTATUS        status;
-    WDFDEVICE       device;
     PDEVICE_CONTEXT pDeviceContext = Context;
     PUCHAR          buffer;
     HCI_EVENT       event;
     HCI_COMMAND     command;
-    BD_ADDR         clientAddr={0};
+    BD_ADDR         clientAddr;
     BTH_HANDLE      clientHandle;
 
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(Buffer);
 
-    device = WdfObjectContextGetObject(pDeviceContext);
-
-    //
-    // Make sure that there is data in the read packet.  Depending on the device
-    // specification, it is possible for it to return a 0 length read in
-    // certain conditions.
-    //
-
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
             "!FUNC! Zero length read "
-            "occured on the Interrupt Pipe's Continuous Reader\n"
+            "occurred on the Interrupt Pipe's Continuous Reader\n"
         );
         return;
     }
@@ -188,9 +179,9 @@ NT status value
 
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT, 
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
                     "-- Simple Pairing not supported on this device. [SSP Disabled]");
-                
+
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
                 break;
             default:
@@ -520,7 +511,9 @@ NT status value
         if (buffer[2] == 0x00)
         {
             clientHandle.Lsb = buffer[3];
-            clientHandle.Msb = buffer[4];
+            clientHandle.Msb = buffer[4] | 0x20;
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
 
             RtlCopyMemory(&clientAddr, &buffer[5], sizeof(BD_ADDR));
 

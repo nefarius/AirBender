@@ -113,3 +113,27 @@ VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
 
     node->ConnectionHandle = *Handle;
 }
+
+PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE(
+    PBTH_DEVICE_LIST List,
+    PBTH_HANDLE Handle
+)
+{
+    PBTH_DEVICE node = List->head;
+
+    while (node != NULL)
+    {
+        if (RtlCompareMemory(
+            &node->ConnectionHandle,
+            Handle,
+            sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
+        {
+            return node;
+        }
+
+        node = node->next;
+    }
+
+    return NULL;
+}
+

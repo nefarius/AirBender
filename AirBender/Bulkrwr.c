@@ -1,5 +1,5 @@
 #include "Driver.h"
-
+#include "L2CAP.h"
 
 #include "bulkrwr.tmh"
 
@@ -51,12 +51,41 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     WDFCONTEXT  Context
 )
 {
+    NTSTATUS            status;
+    PDEVICE_CONTEXT     pDeviceContext = Context;
+    PUCHAR              buffer;
+    BTH_HANDLE          clientHandle;
+
+    UNREFERENCED_PARAMETER(status);
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(Buffer);
     UNREFERENCED_PARAMETER(NumBytesTransferred);
-    UNREFERENCED_PARAMETER(Context);
+    UNREFERENCED_PARAMETER(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
+
+    if (NumBytesTransferred == 0) {
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
+            "!FUNC! Zero length read "
+            "occurred on the Interrupt Pipe's Continuous Reader\n"
+        );
+        return;
+    }
+
+    buffer = WdfMemoryGetBuffer(Buffer, NULL);
+
+    RtlCopyMemory(&clientHandle, buffer, sizeof(BTH_HANDLE));
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+        "BULK Devices: %d",
+        BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
+
+    PBTH_DEVICE d = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
+
+    if (d != NULL)
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Device found");
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 }

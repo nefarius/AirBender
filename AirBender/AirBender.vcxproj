@@ -50,6 +50,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
+    <ClInclude Include="L2CAP.h" />
     <ClInclude Include="List.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
