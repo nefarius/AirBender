@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bulkrwr.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="HCI.c" />
@@ -43,10 +44,8 @@
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(SolutionDir)uthash\src\utarray.h" />
-    <ClInclude Include="$(SolutionDir)uthash\src\uthash.h" />
-    <ClInclude Include="$(SolutionDir)uthash\src\utlist.h" />
     <ClInclude Include="Bluetooth.h" />
+    <ClInclude Include="Bulkrwr.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />

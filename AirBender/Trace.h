@@ -37,6 +37,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_AIRBENDER,
         WPP_DEFINE_BIT(TRACE_DEVICE)                                   \
         WPP_DEFINE_BIT(TRACE_QUEUE)                                    \
         WPP_DEFINE_BIT(TRACE_INTERRUPT)                                \
+        WPP_DEFINE_BIT(TRACE_BULKRWR)                                  \
         )                             
 
 #define WPP_FLAG_LEVEL_LOGGER(flag, level)                                  \

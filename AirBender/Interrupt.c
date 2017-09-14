@@ -103,7 +103,7 @@ NT status value
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
-            "OsrFxConfigContReaderForInterruptEndPoint failed %x\n",
+            "WdfUsbTargetPipeConfigContinuousReader failed %x\n",
             status);
         return status;
     }
@@ -497,16 +497,15 @@ NT status value
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
 
-        BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, (LPVOID)&buffer[2]);
+        RtlCopyMemory(&clientAddr, &buffer[2], sizeof(BD_ADDR));
+
+        BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr);
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "Devices: %d", BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
 
         status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
         status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-            "Devices: %d", BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
 
         break;
 
@@ -523,21 +522,19 @@ NT status value
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4];
 
+            RtlCopyMemory(&clientAddr, &buffer[5], sizeof(BD_ADDR));
+
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                 "Devices: %d",
                 BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
 
-            /*PBTH_DEVICE t = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, (LPVOID)&buffer[5]);
-
-            if(t != NULL)
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                    "NOT NULL");*/
+            BTH_DEVICE_LIST_SET_HANDLE(&pDeviceContext->ClientDeviceList, &clientAddr, &clientHandle);
 
             status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
         }
         else
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, "HCI_Connection_Complete_EV failed: 0x%X", buffer[2]);
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, "HCI_Connection_Complete_EV failed: %s", HCI_ERROR_DETAIL(buffer[2]));
         }
 
         break;

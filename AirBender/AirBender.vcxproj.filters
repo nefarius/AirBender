@@ -17,9 +17,6 @@
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
-    <Filter Include="Header Files\uthash">
-      <UniqueIdentifier>{168add89-19bd-45e7-af0f-84cb44b3c124}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="AirBender.inf">
@@ -48,16 +45,10 @@
     <ClInclude Include="Bluetooth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="$(SolutionDir)uthash\src\utlist.h">
-      <Filter>Header Files\uthash</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)uthash\src\utarray.h">
-      <Filter>Header Files\uthash</Filter>
-    </ClInclude>
-    <ClInclude Include="$(SolutionDir)uthash\src\uthash.h">
-      <Filter>Header Files\uthash</Filter>
-    </ClInclude>
     <ClInclude Include="List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bulkrwr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -78,6 +69,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="List.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Bulkrwr.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

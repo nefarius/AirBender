@@ -25,6 +25,7 @@ Environment:
 #include "queue.h"
 #include "Bluetooth.h"
 #include "Interrupt.h"
+#include "Bulkrwr.h"
 #include "HCI.h"
 #include "trace.h"
 

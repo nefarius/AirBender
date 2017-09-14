@@ -250,11 +250,13 @@ Return Value:
         return status;
     }
 
-    status = InitPowerManagement(Device, pDeviceContext);
-    if (!NT_SUCCESS(status))
-        return status;
+    //status = InitPowerManagement(Device, pDeviceContext);
+    //if (!NT_SUCCESS(status))
+    //    return status;
 
+    // TODO: check return values
     AirBenderConfigContReaderForInterruptEndPoint(pDeviceContext);
+    AirBenderConfigContReaderForBulkReadEndPoint(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
