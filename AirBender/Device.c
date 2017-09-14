@@ -334,6 +334,10 @@ AirBenderEvtDeviceD0Exit(
     UNREFERENCED_PARAMETER(Device);
     UNREFERENCED_PARAMETER(TargetState);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
     return STATUS_SUCCESS;
 }
 

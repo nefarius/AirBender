@@ -497,9 +497,7 @@ NT status value
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
 
-        RtlCopyMemory(&clientAddr, &buffer[2], sizeof(BD_ADDR));
-
-        BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr);
+        BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, (LPVOID)&buffer[2]);
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "Devices: %d", BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
@@ -525,12 +523,21 @@ NT status value
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4];
 
-            //BTH_ADD_DEVICE(pDeviceContext->ClientDeviceList, clientHandle);
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                "Devices: %d",
+                BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
+
+            /*PBTH_DEVICE t = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, (LPVOID)&buffer[5]);
+
+            if(t != NULL)
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                    "NOT NULL");*/
 
             status = HCI_Command_Remote_Name_Request(pDeviceContext, clientAddr);
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                "Devices: %d", BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT, "HCI_Connection_Complete_EV failed: 0x%X", buffer[2]);
         }
 
         break;
