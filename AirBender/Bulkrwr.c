@@ -55,6 +55,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     PDEVICE_CONTEXT     pDeviceContext = Context;
     PUCHAR              buffer;
     BTH_HANDLE          clientHandle;
+    PBTH_DEVICE         pClientDevice;
 
     UNREFERENCED_PARAMETER(status);
     UNREFERENCED_PARAMETER(Pipe);
@@ -74,7 +75,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     buffer = WdfMemoryGetBuffer(Buffer, NULL);
 
-    RtlCopyMemory(&clientHandle, buffer, sizeof(BTH_HANDLE));
+    BTH_HANDLE_FROM_BUFFER(clientHandle, buffer);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
 
@@ -82,10 +83,20 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
         "BULK Devices: %d",
         BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
 
-    PBTH_DEVICE d = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
+    pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
 
-    if (d != NULL)
+    if (pClientDevice != NULL)
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Device found");
+
+    if (L2CAP_IS_CONTROL_CHANNEL(buffer))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_CONTROL_CHANNEL");
+
+        if (L2CAP_IS_SIGNALLING_COMMAND_CODE(buffer))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_SIGNALLING_COMMAND_CODE");
+        }
+    }
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 }

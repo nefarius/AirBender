@@ -487,13 +487,9 @@ NT status value
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
-
-        RtlCopyMemory(&clientAddr, &buffer[2], sizeof(BD_ADDR));
-
+                
+        BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
         BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr);
-
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-            "Devices: %d", BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
 
         status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
         status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
@@ -515,11 +511,7 @@ NT status value
 
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
 
-            RtlCopyMemory(&clientAddr, &buffer[5], sizeof(BD_ADDR));
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                "Devices: %d",
-                BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
+            BD_ADDR_FROM_BUFFER(clientAddr, &buffer[5]);
 
             BTH_DEVICE_LIST_SET_HANDLE(&pDeviceContext->ClientDeviceList, &clientAddr, &clientHandle);
 

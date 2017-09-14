@@ -46,3 +46,18 @@ typedef enum _L2CAP_CODE
     L2CAP_Information_Request = 0x0A,
     L2CAP_Information_Response = 0x0B
 } L2CAP_CODE;
+
+#define L2CAP_IS_CONTROL_CHANNEL(_buf_)     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
+#define L2CAP_IS_HID_INPUT_REPORT(_buf_)    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
+
+BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
+    PUCHAR Buffer
+)
+{
+    for (UCHAR i = L2CAP_Command_Reject; i <= L2CAP_Information_Response; i++)
+    {
+        if (i == Buffer[8]) return TRUE;
+    }
+
+    return FALSE;
+}

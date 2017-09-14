@@ -44,6 +44,9 @@ typedef struct _BTH_DEVICE_LIST
 
 } BTH_DEVICE_LIST, *PBTH_DEVICE_LIST;
 
+#define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
+#define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
+
 VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
     PBTH_DEVICE_LIST List
 )
