@@ -1,8 +1,8 @@
 #pragma once
 
+#include <stdlib.h>
 
 #define BD_LINK_LENGTH  0x10
-#include <stdlib.h>
 
 static const BYTE BD_LINK[BD_LINK_LENGTH] =
 {
@@ -10,13 +10,22 @@ static const BYTE BD_LINK[BD_LINK_LENGTH] =
     0xC0, 0x7F, 0x12, 0xAA, 0xD9, 0x66, 0x3C, 0xCE
 };
 
-
+/**
+ * \typedef struct _BD_ADDR
+ *
+ * \brief   Defines a Bluetooth client MAC address.
+ */
 typedef struct _BD_ADDR
 {
     BYTE Address[6];
 
 } BD_ADDR, *PBD_ADDR;
 
+/**
+ * \typedef struct _BTH_HANDLE
+ *
+ * \brief   Defines a Bluetooth client handle.
+ */
 typedef struct _BTH_HANDLE
 {
     BYTE Lsb;
@@ -24,6 +33,11 @@ typedef struct _BTH_HANDLE
 
 } BTH_HANDLE, *PBTH_HANDLE;
 
+/**
+ * \typedef struct _BTH_DEVICE
+ *
+ * \brief   Defines a Bluetooth client device connection information set.
+ */
 typedef struct _BTH_DEVICE
 {
     BD_ADDR ClientAddress;
@@ -34,6 +48,11 @@ typedef struct _BTH_DEVICE
 
 } BTH_DEVICE, *PBTH_DEVICE;
 
+/**
+ * \typedef struct _BTH_DEVICE_LIST
+ *
+ * \brief   Defines a linked list of Bluetooth client devices.
+ */
 typedef struct _BTH_DEVICE_LIST
 {
     ULONG logicalLength;
@@ -47,6 +66,18 @@ typedef struct _BTH_DEVICE_LIST
 #define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
 
+/**
+ * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_INIT( PBTH_DEVICE_LIST List )
+ *
+ * \brief   Initializes a new Bluetooth client device list.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
     PBTH_DEVICE_LIST List
 )
@@ -55,6 +86,19 @@ VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
     List->head = List->tail = NULL;
 }
 
+/**
+ * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_ADD( PBTH_DEVICE_LIST List, PBD_ADDR Address )
+ *
+ * \brief   Adds a new device to the list identified by the clients MAC address.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ * \param   Address The client MAC address.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE BTH_DEVICE_LIST_ADD(
     PBTH_DEVICE_LIST List,
     PBD_ADDR Address
@@ -76,6 +120,18 @@ VOID FORCEINLINE BTH_DEVICE_LIST_ADD(
     List->logicalLength++;
 }
 
+/**
+ * \fn  ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT( PBTH_DEVICE_LIST List )
+ *
+ * \brief   Returns the element count of the list.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ *
+ * \return  The element count of the list.
+ */
 ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT(
     PBTH_DEVICE_LIST List
 )
@@ -83,6 +139,19 @@ ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT(
     return List->logicalLength;
 }
 
+/**
+ * \fn  PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR( PBTH_DEVICE_LIST List, PBD_ADDR Address )
+ *
+ * \brief   Returns a list element identified by the provided MAC address.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ * \param   Address The client MAC address.
+ *
+ * \return  A pointer to the list element, NULL if not found.
+ */
 PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR(
     PBTH_DEVICE_LIST List,
     PBD_ADDR Address
@@ -106,6 +175,21 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR(
     return NULL;
 }
 
+/**
+ * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE( PBTH_DEVICE_LIST List, PBD_ADDR Address, PBTH_HANDLE Handle )
+ *
+ * \brief   Sets the device handle value for a list element identified by the provided client MAC
+ *          address.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ * \param   Address The client MAC address.
+ * \param   Handle  The client device handle.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
     PBTH_DEVICE_LIST List,
     PBD_ADDR Address,
@@ -117,6 +201,19 @@ VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
     node->ConnectionHandle = *Handle;
 }
 
+/**
+ * \fn  PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE( PBTH_DEVICE_LIST List, PBTH_HANDLE Handle )
+ *
+ * \brief   Returns a list element identified by the provided client handle.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    15.09.2017
+ *
+ * \param   List    The device list.
+ * \param   Handle  The client handle.
+ *
+ * \return  A pointer to the list element, NULL if not found.
+ */
 PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE(
     PBTH_DEVICE_LIST List,
     PBTH_HANDLE Handle
