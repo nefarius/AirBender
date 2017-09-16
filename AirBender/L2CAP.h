@@ -170,3 +170,11 @@ L2CAP_Command_Connection_Response(
     L2CAP_CID SourceChannelId,
     L2CAP_CONNECTION_RESPONSE_RESULT Result,
     L2CAP_CONNECTION_RESPONSE_STATUS Status);
+
+NTSTATUS
+L2CAP_Command_Configuration_Request(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
+    BOOLEAN SetMtu);
