@@ -47,6 +47,73 @@ typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
     L2CAP_Information_Response = 0x0B
 } L2CAP_SIGNALLING_COMMAND_CODE;
 
+typedef enum _L2CAP_CONFIGURATION_RESPONSE_RESULT
+{
+    /// <summary>
+    ///     Success
+    /// </summary>
+    L2CAP_ConfigurationResponseResult_Success = 0x0000,
+
+    /// <summary>
+    ///     Failure – unacceptable parameters
+    /// </summary>
+    L2CAP_ConfigurationResponseResult_FailureUnacceptableParameters = 0x0001,
+
+    /// <summary>
+    ///     Failure – rejected (no reason provided)
+    /// </summary>
+    L2CAP_ConfigurationResponseResult_FailureRejected = 0x0002,
+
+    /// <summary>
+    ///     Failure – unknown options
+    /// </summary>
+    L2CAP_ConfigurationResponseResult_FailureUnknownOptions = 0x0003
+} L2CAP_CONFIGURATION_RESPONSE_RESULT;
+
+typedef enum _L2CAP_CONNECTION_RESPONSE_RESULT
+{
+    /// <summary>
+    ///     Connection successful.
+    /// </summary>
+    L2CAP_ConnectionResponseResult_ConnectionSuccessful = 0x0000,
+
+    /// <summary>
+    ///     Connection pending.
+    /// </summary>
+    L2CAP_ConnectionResponseResult_ConnectionPending = 0x0001,
+
+    /// <summary>
+    ///     Connection refused – PSM not supported.
+    /// </summary>
+    L2CAP_ConnectionResponseResult_ConnectionRefusedPsmNotNupported = 0x0002,
+
+    /// <summary>
+    ///     Connection refused – security block.
+    /// </summary>
+    L2CAP_ConnectionResponseResult_ConnectionRefusedSecurityBlock = 0x0003,
+
+    /// <summary>
+    ///     Connection refused – no resources available.
+    /// </summary>
+    L2CAP_ConnectionResponseResult_ConnectionRefusedNoResourcesAvailable = 0x0004
+} L2CAP_CONNECTION_RESPONSE_RESULT;
+
+typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
+{
+    /// <summary>
+    ///     No further information available.
+    /// </summary>
+    L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable = 0x0000,
+    /// <summary>
+    ///     Authentication pending.
+    /// </summary>
+    L2CAP_ConnectionResponseStatus_AuthenticationPending = 0x0001,
+    /// <summary>
+    ///     Authorisation pending.
+    /// </summary>
+    L2CAP_ConnectionResponseStatus_AuthorisationPending = 0x0002
+} L2CAP_CONNECTION_RESPONSE_STATUS;
+
 typedef enum _L2CAP_PSM
 {
     L2CAP_PSM_HID_Service = 0x01,
@@ -58,6 +125,7 @@ typedef enum _L2CAP_PSM
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
 #define L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_)            ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
 #define L2CAP_GET_PROTOCOL_SERVICE_MULTIPLEXER(_buf_)       ((L2CAP_PSM)_buf_[12])
+#define L2CAP_GET_CHANNEL_ID(_buf_)                         ((UCHAR)_buf_[9])
 
 BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     PUCHAR Buffer
