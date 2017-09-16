@@ -77,17 +77,20 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     WDFCONTEXT  Context
 )
 {
-    NTSTATUS            status;
-    PDEVICE_CONTEXT     pDeviceContext = Context;
-    PUCHAR              buffer;
-    BTH_HANDLE          clientHandle;
-    PBTH_DEVICE         pClientDevice;
+    NTSTATUS                        status;
+    PDEVICE_CONTEXT                 pDeviceContext = Context;
+    PUCHAR                          buffer;
+    BTH_HANDLE                      clientHandle;
+    PBTH_DEVICE                     pClientDevice;
+    L2CAP_CID                       L2_DCID;
+    L2CAP_CID                       scid;
+    L2CAP_SIGNALLING_COMMAND_CODE   code;
+    L2CAP_PSM                       psm;
 
     UNREFERENCED_PARAMETER(status);
     UNREFERENCED_PARAMETER(Pipe);
-    UNREFERENCED_PARAMETER(Buffer);
-    UNREFERENCED_PARAMETER(NumBytesTransferred);
     UNREFERENCED_PARAMETER(pDeviceContext);
+    UNREFERENCED_PARAMETER(L2_DCID);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
 
@@ -120,7 +123,26 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
         if (L2CAP_IS_SIGNALLING_COMMAND_CODE(buffer))
         {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_SIGNALLING_COMMAND_CODE");
+            code = L2CAP_GET_SIGNALLING_COMMAND_CODE(buffer);
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_SIGNALLING_COMMAND_CODE: 0x%02X", (BYTE)code);
+            
+            switch (code)
+            {
+            case L2CAP_Connection_Request:
+
+                L2CAP_GET_SOURCE_CHANNEL_ID(code, buffer, &scid);
+                psm = L2CAP_GET_PROTOCOL_SERVICE_MULTIPLEXER(buffer);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Request SCID: %02X %02X, PSM: %02X",
+                    scid.Lsb, scid.Msb, psm);
+
+                
+
+                break;
+            default:
+                break;
+            }
         }
     }
 

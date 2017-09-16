@@ -33,6 +33,13 @@ typedef struct _BTH_HANDLE
 
 } BTH_HANDLE, *PBTH_HANDLE;
 
+typedef struct _BTH_HANDLE_PAIR
+{
+    BTH_HANDLE Source;
+    BTH_HANDLE Destination;
+
+} BTH_HANDLE_PAIR;
+
 /**
  * \typedef struct _BTH_DEVICE
  *
@@ -42,7 +49,13 @@ typedef struct _BTH_DEVICE
 {
     BD_ADDR ClientAddress;
 
-    BTH_HANDLE ConnectionHandle;
+    BTH_HANDLE HCI_ConnectionHandle;
+
+    BTH_HANDLE_PAIR L2CAP_CommandHandle;
+
+    BTH_HANDLE_PAIR L2CAP_InterruptHandle;
+
+    BTH_HANDLE_PAIR L2CAP_ServiceHandle;
 
     struct _BTH_DEVICE *next;
 
@@ -198,7 +211,7 @@ VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
 {
     PBTH_DEVICE node = BTH_DEVICE_LIST_GET_BY_BD_ADDR(List, Address);
 
-    node->ConnectionHandle = *Handle;
+    node->HCI_ConnectionHandle = *Handle;
 }
 
 /**
@@ -224,7 +237,7 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE(
     while (node != NULL)
     {
         if (RtlCompareMemory(
-            &node->ConnectionHandle,
+            &node->HCI_ConnectionHandle,
             Handle,
             sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
         {

@@ -125,7 +125,7 @@ typedef struct _L2CAP_CID
 {
     BYTE Lsb;
     BYTE Msb;
-} L2CAP_CID;
+} L2CAP_CID, *PL2CAP_CID;
 
 #define L2CAP_IS_CONTROL_CHANNEL(_buf_)                     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
@@ -143,6 +143,43 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     }
 
     return FALSE;
+}
+
+VOID FORCEINLINE L2CAP_GET_SOURCE_CHANNEL_ID(
+    L2CAP_SIGNALLING_COMMAND_CODE Code,
+    PUCHAR Buffer,
+    PL2CAP_CID CID
+)
+{
+    switch (Code)
+    {
+    case L2CAP_Connection_Request:
+    case L2CAP_Disconnection_Request:
+        RtlCopyMemory((LPVOID)CID, &Buffer[14], sizeof(L2CAP_CID));
+        return;
+    case L2CAP_Connection_Response:
+    case L2CAP_Configuration_Request:
+        RtlCopyMemory((LPVOID)CID, &Buffer[12], sizeof(L2CAP_CID));
+        return;
+    default:
+        break;
+    }
+}
+
+VOID FORCEINLINE L2CAP_GET_DESTINATION_CHANNEL_ID(
+    L2CAP_SIGNALLING_COMMAND_CODE Code,
+    PUCHAR Buffer,
+    PL2CAP_CID CID
+)
+{
+    switch (Code)
+    {
+    case L2CAP_Connection_Response:
+        RtlCopyMemory((LPVOID)CID, &Buffer[14], sizeof(L2CAP_CID));
+        return;
+    default:
+        break;
+    }
 }
 
 
