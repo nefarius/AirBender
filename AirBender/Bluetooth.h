@@ -35,8 +35,8 @@ typedef struct _BTH_HANDLE
 
 typedef struct _BTH_HANDLE_PAIR
 {
-    BTH_HANDLE Client;
-    BTH_HANDLE Host;
+    BTH_HANDLE Source;
+    BTH_HANDLE Destination;
 
 } BTH_HANDLE_PAIR;
 
@@ -74,6 +74,8 @@ typedef struct _BTH_DEVICE_LIST
 
     PBTH_DEVICE tail;
 
+    BYTE L2CAP_DataIdentifier;
+
 } BTH_DEVICE_LIST, *PBTH_DEVICE_LIST;
 
 #define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
@@ -97,6 +99,7 @@ VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
 {
     List->logicalLength = 0;
     List->head = List->tail = NULL;
+    List->L2CAP_DataIdentifier = 0x01;
 }
 
 /**

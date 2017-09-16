@@ -90,7 +90,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(pDeviceContext);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
+    //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
 
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
@@ -104,20 +104,14 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     BTH_HANDLE_FROM_BUFFER(clientHandle, buffer);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LSB/MSB: %02X %02X", clientHandle.Lsb, clientHandle.Msb);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-        "BULK Devices: %d",
-        BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList));
-
     pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
 
-    if (pClientDevice != NULL)
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Device found");
+    //if (pClientDevice != NULL)
+    //    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Device found");
 
     if (L2CAP_IS_CONTROL_CHANNEL(buffer))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_CONTROL_CHANNEL");
+        //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_CONTROL_CHANNEL");
 
         if (L2CAP_IS_SIGNALLING_COMMAND_CODE(buffer))
         {
@@ -147,8 +141,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     pDeviceContext,
                     pClientDevice->HCI_ConnectionHandle,
                     data->Identifier,
-                    dcid,
                     scid,
+                    dcid,
                     L2CAP_ConnectionResponseResult_ConnectionPending,
                     L2CAP_ConnectionResponseStatus_AuthorisationPending);
 
@@ -161,14 +155,26 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     pDeviceContext,
                     pClientDevice->HCI_ConnectionHandle,
                     data->Identifier,
-                    dcid,
                     scid,
+                    dcid,
                     L2CAP_ConnectionResponseResult_ConnectionSuccessful,
                     L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable);
 
                 if (!NT_SUCCESS(status))
                 {
                     TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Response (SUCCESSFUL) failed");
+                }
+
+                status = L2CAP_Command_Configuration_Request(
+                    pDeviceContext,
+                    pClientDevice->HCI_ConnectionHandle,
+                    pDeviceContext->ClientDeviceList.L2CAP_DataIdentifier++,
+                    scid,
+                    FALSE);
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Request failed");
                 }
 
                 break;
@@ -187,13 +193,29 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request DCID: %02X %02X",
                     dcid.Lsb, dcid.Msb);
 
-                L2CAP_GET_HOST_CID(pClientDevice, dcid, &scid);
-                
+                L2CAP_DEVICE_GET_SCID(pClientDevice, dcid, &scid);
+
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request SCID: %02X %02X DCID: %02X %02X",
                     scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
 
+                status = L2CAP_Command_Configuration_Response(
+                    pDeviceContext,
+                    pClientDevice->HCI_ConnectionHandle,
+                    data->Identifier,
+                    scid);
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Response failed");
+                }
+
                 break;
             }
+            case L2CAP_Configuration_Response:
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Response");
+
+                break;
             case L2CAP_Disconnection_Request:
             {
                 PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&buffer[8];
@@ -207,12 +229,20 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 break;
             }
             default:
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR, "Unknown L2CAP command: 0x%02X", code);
                 break;
             }
         }
+    } else if (L2CAP_IS_HID_INPUT_REPORT(buffer))
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_HID_INPUT_REPORT");
+    }
+    else
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "U.N. Owen");
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
+    //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 }
 
 BOOLEAN
