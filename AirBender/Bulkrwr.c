@@ -43,6 +43,32 @@ AirBenderConfigContReaderForBulkReadEndPoint(
     return status;
 }
 
+NTSTATUS WriteBulkPipe(
+    PDEVICE_CONTEXT Context, 
+    PVOID Buffer, 
+    ULONG BufferLength,
+    PULONG BytesWritten)
+{
+    NTSTATUS                        status;
+    WDF_MEMORY_DESCRIPTOR           memDesc;
+
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
+        &memDesc,
+        Buffer,
+        BufferLength
+    );
+
+    status = WdfUsbTargetPipeWriteSynchronously(
+        Context->BulkWritePipe,
+        NULL,
+        NULL,
+        &memDesc,
+        BytesWritten
+    );
+
+    return status;
+}
+
 VOID
 AirBenderEvtUsbBulkReadPipeReadComplete(
     WDFUSBPIPE  Pipe,
