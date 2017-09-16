@@ -121,6 +121,12 @@ typedef enum _L2CAP_PSM
     L2CAP_PSM_HID_Interrupt = 0x13
 } L2CAP_PSM;
 
+typedef struct _L2CAP_CID
+{
+    BYTE Lsb;
+    BYTE Msb;
+} L2CAP_CID;
+
 #define L2CAP_IS_CONTROL_CHANNEL(_buf_)                     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
 #define L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_)            ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
@@ -146,3 +152,11 @@ L2CAP_Command(
     BTH_HANDLE Handle,
     PVOID Buffer,
     ULONG BufferLength);
+
+NTSTATUS
+L2CAP_Command_Connection_Request(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
+    L2CAP_PSM ProtocolServiceMultiplexer);
