@@ -185,3 +185,11 @@ L2CAP_Command_Configuration_Response(
     BTH_HANDLE Handle,
     BYTE Id,
     L2CAP_CID SourceChannelId);
+
+NTSTATUS
+L2CAP_Command_Disconnection_Request(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
+    L2CAP_CID SourceChannelId);

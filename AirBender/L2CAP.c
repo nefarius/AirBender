@@ -135,3 +135,25 @@ L2CAP_Command_Configuration_Response(
 
     return L2CAP_Command(Context, Handle, buffer, 10);
 }
+
+NTSTATUS 
+L2CAP_Command_Disconnection_Request(
+    PDEVICE_CONTEXT Context, 
+    BTH_HANDLE Handle, 
+    BYTE Id, 
+    L2CAP_CID DestinationChannelId, 
+    L2CAP_CID SourceChannelId)
+{
+    BYTE buffer[8];
+
+    buffer[0] = 0x06;
+    buffer[1] = Id;
+    buffer[2] = 0x04;
+    buffer[3] = 0x00;
+    buffer[4] = DestinationChannelId.Lsb;
+    buffer[5] = DestinationChannelId.Msb;
+    buffer[6] = SourceChannelId.Lsb;
+    buffer[7] = SourceChannelId.Msb;
+
+    return L2CAP_Command(Context, Handle, buffer, 8);
+}
