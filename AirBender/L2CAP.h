@@ -210,12 +210,12 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
 }
 
 VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
-    PDEVICE_CONTEXT Context,
-    PBTH_DEVICE Device,
-    L2CAP_PSM Type,
-    L2CAP_CID SourceChannelId,
-    PL2CAP_CID DestinationChannelId,
-    USHORT DCID
+    _In_ PDEVICE_CONTEXT Context,
+    _In_ PBTH_DEVICE Device,
+    _In_ L2CAP_PSM Type,
+    _In_ L2CAP_CID SourceChannelId,
+    _Out_ PL2CAP_CID DestinationChannelId,
+    _In_opt_ PL2CAP_CID DCID
 )
 {
     switch (Type)
@@ -240,8 +240,7 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
         break;
     case L2CAP_PSM_HID_Service:
         RtlCopyMemory(&Device->L2CAP_ServiceHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, &DCID, sizeof(BTH_HANDLE));
-        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_ServiceHandle.Destination, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, DCID, sizeof(BTH_HANDLE));
 
         Device->CanStartService = FALSE;
         Device->IsServiceStarted = TRUE;
