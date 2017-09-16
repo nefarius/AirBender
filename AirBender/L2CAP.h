@@ -233,6 +233,8 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
         RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, &Context->DCID, sizeof(BTH_HANDLE));
         RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(BTH_HANDLE));
 
+        Device->CanStartService = TRUE;
+
         Context->DCID++;
 
         break;
@@ -240,6 +242,9 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
         RtlCopyMemory(&Device->L2CAP_ServiceHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
         RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, &DCID, sizeof(BTH_HANDLE));
         RtlCopyMemory(DestinationChannelId, &Device->L2CAP_ServiceHandle.Destination, sizeof(BTH_HANDLE));
+
+        Device->CanStartService = FALSE;
+        Device->IsServiceStarted = TRUE;
 
         break;
     default:

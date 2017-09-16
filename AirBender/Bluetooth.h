@@ -57,6 +57,12 @@ typedef struct _BTH_DEVICE
 
     BTH_HANDLE_PAIR L2CAP_ServiceHandle;
 
+    BOOLEAN CanStartService;
+
+    BOOLEAN IsServiceStarted;
+
+    BOOLEAN CanStartHid;
+
     struct _BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;

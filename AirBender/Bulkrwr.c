@@ -121,6 +121,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
             switch (code)
             {
+#pragma region L2CAP_Connection_Request
+
             case L2CAP_Connection_Request:
             {
                 PL2CAP_SIGNALLING_CONNECTION_REQUEST data = (PL2CAP_SIGNALLING_CONNECTION_REQUEST)&buffer[8];
@@ -179,6 +181,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
                 break;
             }
+#pragma endregion
+
             case L2CAP_Connection_Response:
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Response");
@@ -209,13 +213,37 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Response failed");
                 }
 
+                if (pClientDevice->IsServiceStarted)
+                {
+                    pClientDevice->CanStartHid = TRUE;
+                    // TODO: action!
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "ACTION!");
+                }
+
                 break;
             }
             case L2CAP_Configuration_Response:
+            {
+                PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE data = (PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE)&buffer[8];
 
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Response");
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Response 0x%04X", data->Options);
+
+                if (pClientDevice->CanStartService)
+                {
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Requesting service connection");
+
+                    L2CAP_Command_Connection_Request(
+                        pDeviceContext,
+                        pClientDevice->HCI_ConnectionHandle,
+                        pDeviceContext->ClientDeviceList.L2CAP_DataIdentifier++,
+                        *(PL2CAP_CID)&pDeviceContext->DCID,
+                        L2CAP_PSM_HID_Service);
+
+                    pDeviceContext->DCID++;
+                }
 
                 break;
+            }
             case L2CAP_Disconnection_Request:
             {
                 PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&buffer[8];
@@ -233,7 +261,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 break;
             }
         }
-    } else if (L2CAP_IS_HID_INPUT_REPORT(buffer))
+    }
+    else if (L2CAP_IS_HID_INPUT_REPORT(buffer))
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_HID_INPUT_REPORT");
     }
