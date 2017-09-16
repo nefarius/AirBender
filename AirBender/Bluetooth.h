@@ -35,8 +35,8 @@ typedef struct _BTH_HANDLE
 
 typedef struct _BTH_HANDLE_PAIR
 {
-    BTH_HANDLE Source;
-    BTH_HANDLE Destination;
+    BTH_HANDLE Client;
+    BTH_HANDLE Host;
 
 } BTH_HANDLE_PAIR;
 
