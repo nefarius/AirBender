@@ -319,7 +319,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 dcid = data->DCID;
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "[CID: 0x%02X] L2CAP_Connection_Request SCID: %02X %02X DCID: %02X %02X",
+                    "[CID: 0x%02X] L2CAP_Disconnection_Request SCID: %02X %02X DCID: %02X %02X",
                     data->Identifier, scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
 
                 break;
