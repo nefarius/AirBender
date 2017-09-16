@@ -210,32 +210,31 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
 }
 
 VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
-    _In_ PDEVICE_CONTEXT Context,
+    _In_ PUSHORT DCID,
     _In_ PBTH_DEVICE Device,
     _In_ L2CAP_PSM Type,
     _In_ L2CAP_CID SourceChannelId,
-    _Out_ PL2CAP_CID DestinationChannelId,
-    _In_opt_ PL2CAP_CID DCID
+    _Out_ PL2CAP_CID DestinationChannelId
 )
 {
     switch (Type)
     {
     case L2CAP_PSM_HID_Command:
         RtlCopyMemory(&Device->L2CAP_CommandHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_CommandHandle.Destination, &Context->DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_CommandHandle.Destination, &DCID, sizeof(BTH_HANDLE));
         RtlCopyMemory(DestinationChannelId, &Device->L2CAP_CommandHandle.Destination, sizeof(BTH_HANDLE));
 
-        Context->DCID++;
+        *DCID++;
 
         break;
     case L2CAP_PSM_HID_Interrupt:
         RtlCopyMemory(&Device->L2CAP_InterruptHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, &Context->DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, &DCID, sizeof(BTH_HANDLE));
         RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(BTH_HANDLE));
 
         Device->CanStartService = TRUE;
 
-        Context->DCID++;
+        *DCID++;
 
         break;
     case L2CAP_PSM_HID_Service:
