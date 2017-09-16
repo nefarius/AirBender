@@ -276,12 +276,17 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                         scid,
                         &dcid);
 
-                    L2CAP_Command_Configuration_Request(
+                    status = L2CAP_Command_Configuration_Request(
                         pDeviceContext,
                         pClientDevice->HCI_ConnectionHandle,
                         CID++,
                         scid, 
                         FALSE);
+
+                    if (!NT_SUCCESS(status))
+                    {
+                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Request failed");
+                    }
 
                     break;
                 case L2CAP_ConnectionResponseResult_ConnectionPending:
