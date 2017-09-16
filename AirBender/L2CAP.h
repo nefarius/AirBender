@@ -178,3 +178,10 @@ L2CAP_Command_Configuration_Request(
     BYTE Id,
     L2CAP_CID DestinationChannelId,
     BOOLEAN SetMtu);
+
+NTSTATUS
+L2CAP_Command_Configuration_Response(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID SourceChannelId);

@@ -112,3 +112,26 @@ L2CAP_Command_Configuration_Request(
 
     return L2CAP_Command(Context, Handle, buffer, SetMtu ? 12 : 8);
 }
+
+NTSTATUS 
+L2CAP_Command_Configuration_Response(
+    PDEVICE_CONTEXT Context, 
+    BTH_HANDLE Handle, 
+    BYTE Id,
+    L2CAP_CID SourceChannelId)
+{
+    BYTE buffer[10];
+
+    buffer[0] = 0x05;
+    buffer[1] = Id;
+    buffer[2] = 0x06;
+    buffer[3] = 0x00;
+    buffer[4] = SourceChannelId.Lsb;
+    buffer[5] = SourceChannelId.Msb;
+    buffer[6] = 0x00;
+    buffer[7] = 0x00;
+    buffer[8] = 0x00;
+    buffer[9] = 0x00;
+
+    return L2CAP_Command(Context, Handle, buffer, 10);
+}
