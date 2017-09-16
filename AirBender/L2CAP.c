@@ -1,7 +1,8 @@
 #include "Driver.h"
 #include "L2CAP.h"
 
-NTSTATUS L2CAP_Command(
+NTSTATUS
+L2CAP_Command(
     PDEVICE_CONTEXT Context,
     BTH_HANDLE Handle,
     PVOID Buffer,
@@ -23,11 +24,12 @@ NTSTATUS L2CAP_Command(
     return WriteBulkPipe(Context, buffer, 64, NULL);
 }
 
-NTSTATUS L2CAP_Command_Connection_Request(
+NTSTATUS
+L2CAP_Command_Connection_Request(
     PDEVICE_CONTEXT Context,
     BTH_HANDLE Handle,
-    BYTE Id, 
-    L2CAP_CID DestinationChannelId, 
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
     L2CAP_PSM ProtocolServiceMultiplexer)
 {
     BYTE buffer[8];
@@ -42,4 +44,41 @@ NTSTATUS L2CAP_Command_Connection_Request(
     buffer[7] = DestinationChannelId.Msb;
 
     return L2CAP_Command(Context, Handle, buffer, 8);
+}
+
+NTSTATUS
+L2CAP_Command_Connection_Response(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
+    L2CAP_CID SourceChannelId,
+    L2CAP_CONNECTION_RESPONSE_RESULT Result,
+    L2CAP_CONNECTION_RESPONSE_STATUS Status)
+{
+    BYTE buffer[12];
+
+    buffer[0] = 0x03;
+    buffer[1] = Id;
+    buffer[2] = 0x08;
+    buffer[3] = 0x00;
+    buffer[4] = SourceChannelId.Lsb;
+    buffer[5] = SourceChannelId.Msb;
+    buffer[6] = DestinationChannelId.Lsb;
+    buffer[7] = DestinationChannelId.Msb;
+    buffer[8] = (BYTE)Result;
+    buffer[9] = 0x00;
+
+    if (Result == L2CAP_ConnectionResponseResult_ConnectionPending)
+    {
+        buffer[10] = (BYTE)Status;
+        buffer[11] = 0x00;
+    }
+    else
+    {
+        buffer[10] = 0x00;
+        buffer[11] = 0x00;
+    }
+
+    return L2CAP_Command(Context, Handle, buffer, 12);
 }
