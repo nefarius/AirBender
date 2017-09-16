@@ -138,3 +138,11 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
 
     return FALSE;
 }
+
+
+NTSTATUS
+L2CAP_Command(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    PVOID Buffer,
+    ULONG BufferLength);
