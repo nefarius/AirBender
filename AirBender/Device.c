@@ -74,6 +74,8 @@ Return Value:
 
         BTH_DEVICE_LIST_INIT(&deviceContext->ClientDeviceList);
 
+        deviceContext->DCID = 0x40;
+
         WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
         pnpCapabilities.Removable = WdfTrue;
         pnpCapabilities.SurpriseRemovalOK = WdfTrue;

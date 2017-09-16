@@ -44,6 +44,8 @@ typedef struct _DEVICE_CONTEXT
 
     BTH_DEVICE_LIST ClientDeviceList;
 
+    USHORT DCID;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //
