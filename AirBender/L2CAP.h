@@ -182,6 +182,44 @@ VOID FORCEINLINE L2CAP_GET_DESTINATION_CHANNEL_ID(
     }
 }
 
+VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    L2CAP_PSM Type,
+    L2CAP_CID SourceChannelId,
+    PL2CAP_CID DestinationChannelId,
+    USHORT DCID
+)
+{
+    switch (Type)
+    {
+    case L2CAP_PSM_HID_Command:
+        RtlCopyMemory(&Device->L2CAP_CommandHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_CommandHandle.Destination, &Context->DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_CommandHandle.Destination, sizeof(BTH_HANDLE));
+
+        Context->DCID++;
+
+        break;
+    case L2CAP_PSM_HID_Interrupt:
+        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, &Context->DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(BTH_HANDLE));
+
+        Context->DCID++;
+
+        break;
+    case L2CAP_PSM_HID_Service:
+        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, &DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_ServiceHandle.Destination, sizeof(BTH_HANDLE));
+
+        break;
+    default:
+        break;
+    }
+}
+
 
 NTSTATUS
 L2CAP_Command(

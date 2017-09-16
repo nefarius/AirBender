@@ -44,8 +44,8 @@ AirBenderConfigContReaderForBulkReadEndPoint(
 }
 
 NTSTATUS WriteBulkPipe(
-    PDEVICE_CONTEXT Context, 
-    PVOID Buffer, 
+    PDEVICE_CONTEXT Context,
+    PVOID Buffer,
     ULONG BufferLength,
     PULONG BytesWritten)
 {
@@ -82,15 +82,15 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     PUCHAR                          buffer;
     BTH_HANDLE                      clientHandle;
     PBTH_DEVICE                     pClientDevice;
-    L2CAP_CID                       L2_DCID;
+    L2CAP_CID                       dcid;
     L2CAP_CID                       scid;
     L2CAP_SIGNALLING_COMMAND_CODE   code;
     L2CAP_PSM                       psm;
+    BYTE                            channelId;
 
     UNREFERENCED_PARAMETER(status);
     UNREFERENCED_PARAMETER(Pipe);
     UNREFERENCED_PARAMETER(pDeviceContext);
-    UNREFERENCED_PARAMETER(L2_DCID);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
 
@@ -126,18 +126,56 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
             code = L2CAP_GET_SIGNALLING_COMMAND_CODE(buffer);
 
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_SIGNALLING_COMMAND_CODE: 0x%02X", (BYTE)code);
-            
+
             switch (code)
             {
             case L2CAP_Connection_Request:
 
                 L2CAP_GET_SOURCE_CHANNEL_ID(code, buffer, &scid);
                 psm = L2CAP_GET_PROTOCOL_SERVICE_MULTIPLEXER(buffer);
+                L2CAP_SET_CONNECTION_TYPE(pDeviceContext,
+                    pClientDevice,
+                    psm,
+                    scid,
+                    &dcid,
+                    0);
+                channelId = L2CAP_GET_CHANNEL_ID(buffer);
 
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Request SCID: %02X %02X, PSM: %02X",
-                    scid.Lsb, scid.Msb, psm);
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Request PSM: %02X SCID: %02X %02X DCID: %02X %02X",
+                    psm, scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
 
-                
+                status = L2CAP_Command_Connection_Response(
+                    pDeviceContext,
+                    pClientDevice->HCI_ConnectionHandle,
+                    channelId,
+                    dcid,
+                    scid,
+                    L2CAP_ConnectionResponseResult_ConnectionPending,
+                    L2CAP_ConnectionResponseStatus_AuthorisationPending);
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Response (PENDING) failed");
+                }
+
+                status = L2CAP_Command_Connection_Response(
+                    pDeviceContext,
+                    pClientDevice->HCI_ConnectionHandle,
+                    channelId,
+                    dcid,
+                    scid,
+                    L2CAP_ConnectionResponseResult_ConnectionSuccessful,
+                    L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable);
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Response (SUCCESSFUL) failed");
+                }
+
+                break;
+            case L2CAP_Connection_Response:
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Response");
 
                 break;
             default:
@@ -159,11 +197,11 @@ AirBenderEvtUsbBulkReadReadersFailed(
     WDFDEVICE device = WdfIoTargetGetDevice(WdfUsbTargetPipeGetIoTarget(Pipe));
     PDEVICE_CONTEXT pDeviceContext = DeviceGetContext(device);
 
-    UNREFERENCED_PARAMETER(UsbdStatus);
-    UNREFERENCED_PARAMETER(Status);
     UNREFERENCED_PARAMETER(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
+
+    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "Status: 0x%X, USBD_STATUS: 0x%X", Status, UsbdStatus);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 
