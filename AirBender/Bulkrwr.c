@@ -82,8 +82,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     PUCHAR                          buffer;
     BTH_HANDLE                      clientHandle;
     PBTH_DEVICE                     pClientDevice;
-    L2CAP_CID                       dcid;
-    L2CAP_CID                       scid;
+    L2CAP_CID                       dcid = { 0 };
+    L2CAP_CID                       scid = { 0 };
     L2CAP_SIGNALLING_COMMAND_CODE   code;
     L2CAP_PSM                       psm;
     BYTE                            channelId;
@@ -176,6 +176,19 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
             case L2CAP_Connection_Response:
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Connection_Response");
+
+                break;
+            case L2CAP_Configuration_Request:
+
+                L2CAP_GET_SOURCE_CHANNEL_ID(code, buffer, &scid);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request SCID: %02X %02X",
+                    scid.Lsb, scid.Msb);
+
+                L2CAP_DEVICE_GET_SCID(pClientDevice, dcid, &scid);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request SCID: %02X %02X DCID: %02X %02X",
+                    scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
 
                 break;
             default:

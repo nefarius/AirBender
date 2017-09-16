@@ -127,6 +127,72 @@ typedef struct _L2CAP_CID
     BYTE Msb;
 } L2CAP_CID, *PL2CAP_CID;
 
+typedef struct _L2CAP_SIGNALLING_CONNECTION_REQUEST
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    USHORT PSM;
+    L2CAP_CID SCID;
+
+} L2CAP_SIGNALLING_CONNECTION_REQUEST, *PL2CAP_SIGNALLING_CONNECTION_REQUEST;
+
+typedef struct _L2CAP_SIGNALLING_CONNECTION_RESPONSE
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    L2CAP_CID DCID;
+    L2CAP_CID SCID;
+    USHORT Result;
+    USHORT Status;
+
+} L2CAP_SIGNALLING_CONNECTION_RESPONSE, *PL2CAP_SIGNALLING_CONNECTION_RESPONSE;
+
+typedef struct _L2CAP_SIGNALLING_CONFIGURATION_REQUEST
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    L2CAP_CID DCID;
+    USHORT Flags;
+    ULONG Options;
+
+} L2CAP_SIGNALLING_CONFIGURATION_REQUEST, *PL2CAP_SIGNALLING_CONFIGURATION_REQUEST;
+
+typedef struct _L2CAP_SIGNALLING_CONFIGURATION_RESPONSE
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    L2CAP_CID SCID;
+    USHORT Flags;
+    USHORT Result;
+    USHORT Options;
+
+} L2CAP_SIGNALLING_CONFIGURATION_RESPONSE, *PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE;
+
+typedef struct _L2CAP_SIGNALLING_DISCONNECTION_REQUEST
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    L2CAP_CID DCID;
+    L2CAP_CID SCID;
+
+} L2CAP_SIGNALLING_DISCONNECTION_REQUEST, *PL2CAP_SIGNALLING_DISCONNECTION_REQUEST;
+
+typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
+{
+    BYTE Code;
+    BYTE Identifier;
+    USHORT Length;
+    L2CAP_CID DCID;
+    L2CAP_CID SCID;
+
+} L2CAP_SIGNALLING_DISCONNECTION_RESPONSE, *PL2CAP_SIGNALLING_DISCONNECTION_RESPONSE;
+
+
 #define L2CAP_IS_CONTROL_CHANNEL(_buf_)                     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
 #define L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_)            ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
@@ -217,6 +283,37 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
         break;
     default:
         break;
+    }
+}
+
+VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
+    PBTH_DEVICE Device,
+    L2CAP_CID DestinationChannelId,
+    PL2CAP_CID SourceChannelId
+)
+{
+    if (RtlCompareMemory(
+        &Device->L2CAP_CommandHandle.Destination,
+        &DestinationChannelId,
+        sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
+    {
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_CommandHandle.Source, sizeof(BTH_HANDLE));
+    }
+
+    if (RtlCompareMemory(
+        &Device->L2CAP_InterruptHandle.Destination,
+        &DestinationChannelId,
+        sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
+    {
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_InterruptHandle.Source, sizeof(BTH_HANDLE));
+    }
+
+    if (RtlCompareMemory(
+        &Device->L2CAP_ServiceHandle.Destination,
+        &DestinationChannelId,
+        sizeof(BTH_HANDLE)) == sizeof(BTH_HANDLE))
+    {
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_ServiceHandle.Source, sizeof(BTH_HANDLE));
     }
 }
 
