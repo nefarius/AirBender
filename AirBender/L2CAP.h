@@ -218,12 +218,25 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     return FALSE;
 }
 
+/**
+ * \fn  VOID FORCEINLINE L2CAP_GET_NEW_CID( PL2CAP_CID CID )
+ *
+ * \brief   Generates a unique dynamically allocated host-local channel identifier.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    17.09.2017
+ *
+ * \param   CID The Channel Identifier.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE L2CAP_GET_NEW_CID(
     PL2CAP_CID CID
 )
 {
     static USHORT GlobalCID = 0x40;
 
+    // 0x0040-0xFFFF = Dynamically allocated
     if (GlobalCID >= 0xFFFF)
     {
         GlobalCID = 0x40;
