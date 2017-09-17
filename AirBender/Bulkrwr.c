@@ -86,7 +86,6 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     L2CAP_CID                       scid = { 0 };
     L2CAP_SIGNALLING_COMMAND_CODE   code;
     
-    static USHORT DCID = 0x4000;
     static BYTE CID = 0x01;
 
     UNREFERENCED_PARAMETER(Pipe);
@@ -131,7 +130,6 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 scid = data->SCID;
 
                 L2CAP_SET_CONNECTION_TYPE(
-                    &DCID,
                     pClientDevice,
                     data->PSM,
                     scid,
@@ -205,7 +203,6 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_ConnectionResponseResult_ConnectionSuccessful");
 
                     L2CAP_SET_CONNECTION_TYPE(
-                        &DCID,
                         pClientDevice,
                         L2CAP_PSM_HID_Service,
                         scid,
@@ -301,14 +298,14 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 {
                     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Requesting service connection");
 
+                    L2CAP_GET_NEW_CID(&dcid);
+
                     L2CAP_Command_Connection_Request(
                         pDeviceContext,
                         pClientDevice->HCI_ConnectionHandle,
                         CID++,
-                        *(PL2CAP_CID)&DCID,
+                        dcid,
                         L2CAP_PSM_HID_Service);
-
-                    DCID++;
                 }
 
                 break;

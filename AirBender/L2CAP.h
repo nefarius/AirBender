@@ -209,8 +209,24 @@ BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     return FALSE;
 }
 
+VOID FORCEINLINE L2CAP_GET_NEW_CID(
+    PL2CAP_CID CID
+)
+{
+    static USHORT GlobalCID = 0x40;
+
+    if (GlobalCID >= 0xFFFF)
+    {
+        GlobalCID = 0x40;
+    }
+
+    CID->Lsb = (BYTE)((GlobalCID >> 0) & 0xFF);
+    CID->Msb = (BYTE)((GlobalCID >> 8) & 0xFF);
+
+    GlobalCID++;
+}
+
 VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
-    _In_ PUSHORT DCID,
     _In_ PBTH_DEVICE Device,
     _In_ L2CAP_PSM Type,
     _In_ L2CAP_CID SourceChannelId,
@@ -220,26 +236,24 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
     switch (Type)
     {
     case L2CAP_PSM_HID_Command:
-        RtlCopyMemory(&Device->L2CAP_CommandHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_CommandHandle.Destination, &DCID, sizeof(BTH_HANDLE));
-        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_CommandHandle.Destination, sizeof(BTH_HANDLE));
+        L2CAP_GET_NEW_CID(DestinationChannelId);
 
-        *DCID++;
+        RtlCopyMemory(&Device->L2CAP_CommandHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_CommandHandle.Destination, DestinationChannelId, sizeof(BTH_HANDLE));
 
         break;
     case L2CAP_PSM_HID_Interrupt:
+        L2CAP_GET_NEW_CID(DestinationChannelId);
+
         RtlCopyMemory(&Device->L2CAP_InterruptHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, &DCID, sizeof(BTH_HANDLE));
-        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_InterruptHandle.Destination, DestinationChannelId, sizeof(BTH_HANDLE));
 
         Device->CanStartService = TRUE;
-
-        *DCID++;
 
         break;
     case L2CAP_PSM_HID_Service:
         RtlCopyMemory(&Device->L2CAP_ServiceHandle.Source, &SourceChannelId, sizeof(BTH_HANDLE));
-        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, DCID, sizeof(BTH_HANDLE));
+        RtlCopyMemory(&Device->L2CAP_ServiceHandle.Destination, DestinationChannelId, sizeof(BTH_HANDLE));
 
         Device->CanStartService = FALSE;
         Device->IsServiceStarted = TRUE;
@@ -280,7 +294,6 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
         RtlCopyMemory(SourceChannelId, &Device->L2CAP_ServiceHandle.Source, sizeof(BTH_HANDLE));
     }
 }
-
 
 
 NTSTATUS
