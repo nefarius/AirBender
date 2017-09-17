@@ -145,8 +145,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     &dcid);
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
-                    "[CID: 0x%02X] L2CAP_Connection_Request PSM: %02X SCID: %02X %02X DCID: %02X %02X",
-                    data->Identifier, data->PSM, scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
+                    "[CID: 0x%02X] L2CAP_Connection_Request PSM: %02X SCID: %04X DCID: %04X",
+                    data->Identifier, data->PSM, *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
                 status = L2CAP_Command_Connection_Response(
                     pDeviceContext,
@@ -202,8 +202,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 dcid = data->DCID;
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "[CID: 0x%02X] L2CAP_Connection_Response SCID: %02X %02X DCID: %02X %02X",
-                    data->Identifier, scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
+                    "[CID: 0x%02X] L2CAP_Connection_Response SCID: %04X DCID: %04X",
+                    data->Identifier, *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
                 switch ((L2CAP_CONNECTION_RESPONSE_RESULT)data->Result)
                 {
@@ -222,7 +222,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                         pDeviceContext,
                         pClientDevice->HCI_ConnectionHandle,
                         CID++,
-                        scid,
+                        dcid,
                         TRUE);
 
                     if (!NT_SUCCESS(status))
@@ -264,13 +264,13 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 dcid = data->DCID;
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
-                    "[CID: 0x%02X] L2CAP_Configuration_Request DCID: %02X %02X",
-                    data->Identifier, dcid.Lsb, dcid.Msb);
+                    "[CID: 0x%02X] L2CAP_Configuration_Request DCID: %04X",
+                    data->Identifier, *(PUSHORT)&dcid.Lsb);
 
                 L2CAP_DEVICE_GET_SCID(pClientDevice, dcid, &scid);
 
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request SCID: %02X %02X DCID: %02X %02X",
-                    scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_Configuration_Request SCID: %04X DCID: %04X",
+                    *(PUSHORT)&scid.Msb, *(PUSHORT)&dcid);
 
                 status = L2CAP_Command_Configuration_Response(
                     pDeviceContext,
@@ -330,8 +330,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 dcid = data->DCID;
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "[CID: 0x%02X] L2CAP_Disconnection_Request SCID: %02X %02X DCID: %02X %02X",
-                    data->Identifier, scid.Lsb, scid.Msb, dcid.Lsb, dcid.Msb);
+                    "[CID: 0x%02X] L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
+                    data->Identifier, *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
                 break;
             }
