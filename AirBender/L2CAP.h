@@ -317,6 +317,26 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
     }
 }
 
+VOID FORCEINLINE L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+    PBTH_DEVICE Device,
+    L2CAP_PSM Type,
+    PL2CAP_CID SourceChannelId
+)
+{
+    switch (Type)
+    {
+    case L2CAP_PSM_HID_Command:
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_CommandHandle.Source, sizeof(L2CAP_CID));
+        break;
+    case L2CAP_PSM_HID_Interrupt:
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_InterruptHandle.Source, sizeof(L2CAP_CID));
+        break;
+    case L2CAP_PSM_HID_Service:
+        RtlCopyMemory(SourceChannelId, &Device->L2CAP_ServiceHandle.Source, sizeof(L2CAP_CID));
+        break;
+    }
+}
+
 
 NTSTATUS
 L2CAP_Command(
