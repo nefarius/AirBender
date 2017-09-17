@@ -121,6 +121,15 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
             switch (code)
             {
+            case L2CAP_Command_Reject:
+            {
+                PL2CAP_SIGNALLING_COMMAND_REJECT data = (PL2CAP_SIGNALLING_COMMAND_REJECT)&buffer[8];
+
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Reject: 0x%04X", data->Reason);
+
+                break;
+            }
+
 #pragma region L2CAP_Connection_Request
 
             case L2CAP_Connection_Request:
@@ -200,7 +209,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 {
                 case L2CAP_ConnectionResponseResult_ConnectionSuccessful:
 
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_ConnectionResponseResult_ConnectionSuccessful");
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_ConnectionResponseResult_ConnectionSuccessful SCID: 0x%04X", 
+                        *(PUSHORT)&scid);
 
                     L2CAP_SET_CONNECTION_TYPE(
                         pClientDevice,
