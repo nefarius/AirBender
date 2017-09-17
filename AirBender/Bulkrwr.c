@@ -69,6 +69,36 @@ NTSTATUS WriteBulkPipe(
     return status;
 }
 
+NTSTATUS 
+HID_Command(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    L2CAP_CID Channel,
+    PVOID Buffer,
+    ULONG BufferLength
+)
+{
+    NTSTATUS status;
+    PUCHAR buffer = malloc(BufferLength + 8);
+
+    buffer[0] = Handle.Lsb;
+    buffer[1] = Handle.Msb;
+    buffer[2] = (BYTE)((BufferLength + 4) % 256);
+    buffer[3] = (BYTE)((BufferLength + 4) / 256);
+    buffer[4] = (BYTE)(BufferLength % 256);
+    buffer[5] = (BYTE)(BufferLength / 256);
+    buffer[6] = Channel.Lsb;
+    buffer[7] = Channel.Msb;
+
+    RtlCopyMemory(&buffer[8], Buffer, BufferLength);
+
+    status = WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
+
+    free(buffer);
+
+    return status;
+}
+
 VOID
 AirBenderEvtUsbBulkReadPipeReadComplete(
     WDFUSBPIPE  Pipe,

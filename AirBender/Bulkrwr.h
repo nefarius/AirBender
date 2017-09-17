@@ -17,3 +17,4 @@ WriteBulkPipe(
     _In_ ULONG BufferLength,
     _Out_opt_ PULONG BytesWritten
 );
+

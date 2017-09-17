@@ -373,3 +373,12 @@ L2CAP_Command_Disconnection_Response(
     BYTE Id,
     L2CAP_CID DestinationChannelId,
     L2CAP_CID SourceChannelId);
+
+NTSTATUS
+HID_Command(
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    L2CAP_CID Channel,
+    PVOID Buffer,
+    ULONG BufferLength
+);
