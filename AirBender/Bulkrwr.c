@@ -136,8 +136,11 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
 
-    //if (pClientDevice != NULL)
-    //    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Device found");
+    if (pClientDevice == NULL)
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "PBTH_DEVICE not found");
+        return;
+    }
 
     if (L2CAP_IS_CONTROL_CHANNEL(buffer))
     {
