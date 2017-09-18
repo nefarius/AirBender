@@ -1,5 +1,10 @@
 #pragma once
 
+/**
+ * \typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
+ *
+ * \brief   Defines an alias representing an L2CAP signalling command code.
+ */
 typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
 {
     L2CAP_Reserved = 0x00,
@@ -47,6 +52,11 @@ typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
     L2CAP_Information_Response = 0x0B
 } L2CAP_SIGNALLING_COMMAND_CODE;
 
+/**
+ * \typedef enum _L2CAP_CONFIGURATION_RESPONSE_RESULT
+ *
+ * \brief   Defines an alias representing an L2CAP configuration response result.
+ */
 typedef enum _L2CAP_CONFIGURATION_RESPONSE_RESULT
 {
     /// <summary>
@@ -70,6 +80,11 @@ typedef enum _L2CAP_CONFIGURATION_RESPONSE_RESULT
     L2CAP_ConfigurationResponseResult_FailureUnknownOptions = 0x0003
 } L2CAP_CONFIGURATION_RESPONSE_RESULT;
 
+/**
+ * \typedef enum _L2CAP_CONNECTION_RESPONSE_RESULT
+ *
+ * \brief   Defines an alias representing an L2CAP connection response result.
+ */
 typedef enum _L2CAP_CONNECTION_RESPONSE_RESULT
 {
     /// <summary>
@@ -98,6 +113,11 @@ typedef enum _L2CAP_CONNECTION_RESPONSE_RESULT
     L2CAP_ConnectionResponseResult_ConnectionRefusedNoResourcesAvailable = 0x0004
 } L2CAP_CONNECTION_RESPONSE_RESULT;
 
+/**
+ * \typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
+ *
+ * \brief   Defines an alias representing an L2CAP connection response status.
+ */
 typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
 {
     /// <summary>
@@ -114,6 +134,11 @@ typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
     L2CAP_ConnectionResponseStatus_AuthorisationPending = 0x0002
 } L2CAP_CONNECTION_RESPONSE_STATUS;
 
+/**
+ * \typedef enum _L2CAP_PSM
+ *
+ * \brief   Defines an alias representing an L2CAP Protocol/Service Multiplexer.
+ */
 typedef enum _L2CAP_PSM
 {
     L2CAP_PSM_HID_Service = 0x01,
@@ -121,12 +146,22 @@ typedef enum _L2CAP_PSM
     L2CAP_PSM_HID_Interrupt = 0x13
 } L2CAP_PSM;
 
+/**
+ * \typedef struct _L2CAP_CID
+ *
+ * \brief   Defines an alias representing an L2CAP Channel Identifier.
+ */
 typedef struct _L2CAP_CID
 {
     BYTE Lsb;
     BYTE Msb;
 } L2CAP_CID, *PL2CAP_CID;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_COMMAND_REJECT
+ *
+ * \brief   Defines an alias representing data attached to COMMAND REJECT.
+ */
 typedef struct _L2CAP_SIGNALLING_COMMAND_REJECT
 {
     BYTE Code;
@@ -136,6 +171,11 @@ typedef struct _L2CAP_SIGNALLING_COMMAND_REJECT
 
 } L2CAP_SIGNALLING_COMMAND_REJECT, *PL2CAP_SIGNALLING_COMMAND_REJECT;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_CONNECTION_REQUEST
+ *
+ * \brief   Defines an alias representing data attached to CONNECTION REQUEST.
+ */
 typedef struct _L2CAP_SIGNALLING_CONNECTION_REQUEST
 {
     BYTE Code;
@@ -146,6 +186,11 @@ typedef struct _L2CAP_SIGNALLING_CONNECTION_REQUEST
 
 } L2CAP_SIGNALLING_CONNECTION_REQUEST, *PL2CAP_SIGNALLING_CONNECTION_REQUEST;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_CONNECTION_RESPONSE
+ *
+ * \brief   Defines an alias representing data attached to CONNECTION RESPONSE.
+ */
 typedef struct _L2CAP_SIGNALLING_CONNECTION_RESPONSE
 {
     BYTE Code;
@@ -158,6 +203,11 @@ typedef struct _L2CAP_SIGNALLING_CONNECTION_RESPONSE
 
 } L2CAP_SIGNALLING_CONNECTION_RESPONSE, *PL2CAP_SIGNALLING_CONNECTION_RESPONSE;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_CONFIGURATION_REQUEST
+ *
+ * \brief   Defines an alias representing data attached to CONFIGURATION REQUEST.
+ */
 typedef struct _L2CAP_SIGNALLING_CONFIGURATION_REQUEST
 {
     BYTE Code;
@@ -169,6 +219,11 @@ typedef struct _L2CAP_SIGNALLING_CONFIGURATION_REQUEST
 
 } L2CAP_SIGNALLING_CONFIGURATION_REQUEST, *PL2CAP_SIGNALLING_CONFIGURATION_REQUEST;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_CONFIGURATION_RESPONSE
+ *
+ * \brief   Defines an alias representing data attached to CONFIGURATION RESPONSE.
+ */
 typedef struct _L2CAP_SIGNALLING_CONFIGURATION_RESPONSE
 {
     BYTE Code;
@@ -181,6 +236,11 @@ typedef struct _L2CAP_SIGNALLING_CONFIGURATION_RESPONSE
 
 } L2CAP_SIGNALLING_CONFIGURATION_RESPONSE, *PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_DISCONNECTION_REQUEST
+ *
+ * \brief   Defines an alias representing data attached to DISCONNECTION REQUEST.
+ */
 typedef struct _L2CAP_SIGNALLING_DISCONNECTION_REQUEST
 {
     BYTE Code;
@@ -191,6 +251,11 @@ typedef struct _L2CAP_SIGNALLING_DISCONNECTION_REQUEST
 
 } L2CAP_SIGNALLING_DISCONNECTION_REQUEST, *PL2CAP_SIGNALLING_DISCONNECTION_REQUEST;
 
+/**
+ * \typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
+ *
+ * \brief   Defines an alias representing data attached to DISCONNECTION RESPONSE.
+ */
 typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
 {
     BYTE Code;
@@ -201,11 +266,54 @@ typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
 
 } L2CAP_SIGNALLING_DISCONNECTION_RESPONSE, *PL2CAP_SIGNALLING_DISCONNECTION_RESPONSE;
 
-
+/**
+ * \def L2CAP_IS_CONTROL_CHANNEL(_buf_) ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
+ *
+ * \brief   A macro that identifies the control channel.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   _buf_   The buffer.
+ */
 #define L2CAP_IS_CONTROL_CHANNEL(_buf_)                     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
+
+/**
+ * \def L2CAP_IS_HID_INPUT_REPORT(_buf_) ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
+ *
+ * \brief   A macro that identifies a HID input report.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   _buf_   The buffer.
+ */
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
+
+/**
+ * \def L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_) ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
+ *
+ * \brief   A macro that validates the signalling command code.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   _buf_   The buffer.
+ */
 #define L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_)            ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
 
+/**
+ * \fn  BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE( PUCHAR Buffer )
+ *
+ * \brief   Checks if the supplied buffer represents a valid L2CAP signalling command code.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   Buffer  The buffer.
+ *
+ * \return  TRUE if valid, FALSE otherwise.
+ */
 BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     PUCHAR Buffer
 )
@@ -248,6 +356,22 @@ VOID FORCEINLINE L2CAP_GET_NEW_CID(
     GlobalCID++;
 }
 
+/**
+ * \fn  VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE( _In_ PBTH_DEVICE Device, _In_ L2CAP_PSM Type, _In_ L2CAP_CID SourceChannelId, _Out_ PL2CAP_CID DestinationChannelId )
+ *
+ * \brief   Updates a provided BTH_DEVICE's channel handles to the provided CID pair.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   Device                  The BTH_DEVICE device handle.
+ * \param   Type                    The Protocol/Service Multiplexer type matching the channel to
+ *                                  update the channel identifiers for.
+ * \param   SourceChannelId         Identifier for the source channel.
+ * \param   DestinationChannelId    Identifier for the destination channel.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
     _In_ PBTH_DEVICE Device,
     _In_ L2CAP_PSM Type,
@@ -286,6 +410,20 @@ VOID FORCEINLINE L2CAP_SET_CONNECTION_TYPE(
     }
 }
 
+/**
+ * \fn  VOID FORCEINLINE L2CAP_DEVICE_GET_SCID( PBTH_DEVICE Device, L2CAP_CID DestinationChannelId, PL2CAP_CID SourceChannelId )
+ *
+ * \brief   Returns the SCID for a provided DCID.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   Device                  The BTH_DEVICE device handle.
+ * \param   DestinationChannelId    Identifier for the destination channel.
+ * \param   SourceChannelId         Identifier for the source channel.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
     PBTH_DEVICE Device,
     L2CAP_CID DestinationChannelId,
@@ -317,6 +455,20 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID(
     }
 }
 
+/**
+ * \fn  VOID FORCEINLINE L2CAP_DEVICE_GET_SCID_FOR_TYPE( PBTH_DEVICE Device, L2CAP_PSM Type, PL2CAP_CID SourceChannelId )
+ *
+ * \brief   Returns the SCID for a provided Protocol/Service Multiplexer channel.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    18.09.2017
+ *
+ * \param   Device          The BTH_DEVICE device handle.
+ * \param   Type            The Protocol/Service Multiplexer.
+ * \param   SourceChannelId Identifier for the source channel.
+ *
+ * \return  Nothing.
+ */
 VOID FORCEINLINE L2CAP_DEVICE_GET_SCID_FOR_TYPE(
     PBTH_DEVICE Device,
     L2CAP_PSM Type,
