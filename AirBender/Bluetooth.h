@@ -63,6 +63,8 @@ typedef struct _BTH_DEVICE
 
     BOOLEAN CanStartHid;
 
+    BYTE InitHidStage;
+
     struct _BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;
