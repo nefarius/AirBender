@@ -36,23 +36,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bulkrwr.c" />
+    <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="HCI.c" />
     <ClCompile Include="Interrupt.c" />
     <ClCompile Include="L2CAP.c" />
-    <ClCompile Include="List.c" />
     <ClCompile Include="Queue.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bluetooth.h" />
     <ClInclude Include="Bulkrwr.h" />
+    <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="L2CAP.h" />
-    <ClInclude Include="List.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
