@@ -44,6 +44,8 @@ typedef struct _DEVICE_CONTEXT
 
     BTH_DEVICE_LIST ClientDeviceList;
 
+    BYTE_ARRAY HidInitReports;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //
@@ -72,6 +74,10 @@ EVT_WDF_DEVICE_D0_EXIT AirBenderEvtDeviceD0Exit;
 NTSTATUS
 InitPowerManagement(
     IN WDFDEVICE  Device,
+    IN PDEVICE_CONTEXT Context);
+
+VOID
+InitHidInitReports(
     IN PDEVICE_CONTEXT Context);
 
 EXTERN_C_END

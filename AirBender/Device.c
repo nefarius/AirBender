@@ -16,7 +16,7 @@ Environment:
 
 #include "driver.h"
 #include "device.tmh"
-
+#include <stdlib.h>
 
 
 NTSTATUS
@@ -43,7 +43,7 @@ Return Value:
 {
     WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
     WDF_OBJECT_ATTRIBUTES   deviceAttributes;
-    PDEVICE_CONTEXT deviceContext;
+    PDEVICE_CONTEXT pDeviceContext;
     WDFDEVICE device;
     NTSTATUS status;
     WDF_DEVICE_PNP_CAPABILITIES pnpCapabilities;
@@ -70,9 +70,11 @@ Return Value:
         // If you pass a wrong object handle it will return NULL and assert if
         // run under framework verifier mode.
         //
-        deviceContext = DeviceGetContext(device);
+        pDeviceContext = DeviceGetContext(device);
 
-        BTH_DEVICE_LIST_INIT(&deviceContext->ClientDeviceList);
+        BTH_DEVICE_LIST_INIT(&pDeviceContext->ClientDeviceList);
+
+        InitHidInitReports(pDeviceContext);
 
         WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
         pnpCapabilities.Removable = WdfTrue;
@@ -404,5 +406,51 @@ InitPowerManagement(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
     return status;
+}
+
+VOID InitHidInitReports(IN PDEVICE_CONTEXT Context)
+{
+    InitByteArray(&Context->HidInitReports);
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x02, 0x00, 0x0F, 0x00, 0x08, 0x35, 0x03, 0x19,
+        0x12, 0x00, 0x00, 0x03, 0x00
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x04, 0x00, 0x10, 0x00, 0x0F, 0x00, 0x01, 0x00,
+        0x01, 0x00, 0x10, 0x35, 0x06, 0x09, 0x02, 0x01,
+        0x09, 0x02, 0x02, 0x00
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x06, 0x00, 0x11, 0x00, 0x0D, 0x35, 0x03, 0x19,
+        0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
+        0x06, 0x00
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x06, 0x00, 0x12, 0x00, 0x0F, 0x35, 0x03, 0x19,
+        0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
+        0x06, 0x02, 0x00, 0x7F
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x06, 0x00, 0x13, 0x00, 0x0F, 0x35, 0x03, 0x19, 
+        0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02, 
+        0x06, 0x02, 0x00, 0x59
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x06, 0x00, 0x14, 0x00, 0x0F, 0x35, 0x03, 0x19, 
+        0x11, 0x24, 0x01, 0x80, 0x35, 0x03, 0x09, 0x02,
+        0x06, 0x02, 0x00, 0x33
+    }));
+
+    APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
+        0x06, 0x00, 0x15, 0x00, 0x0F, 0x35, 0x03, 0x19,
+        0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02, 
+        0x06, 0x02, 0x00, 0x0D
+    }));
 }
 

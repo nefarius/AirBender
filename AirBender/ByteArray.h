@@ -3,6 +3,13 @@
 #define INITIAL_ARRAY_CAPACITY PAGE_SIZE
 #define ARRAY_POOL_TAG	'arrA'
 
+//
+// Some insane macro-magic =3
+// 
+#define P99_PROTECT(...) __VA_ARGS__
+#define APPEND_BYTE_ARRAY(_arr_, _bytes_)   do {BYTE b[] = _bytes_; \
+                                            AppendElementsByteArray(&_arr_, b, _countof(b)); } while (0)
+
 typedef struct _BYTE_ARRAY
 {
     UCHAR* Data;		//> array of data we're storing
