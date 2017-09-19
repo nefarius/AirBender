@@ -85,6 +85,18 @@ typedef struct _BTH_DEVICE_LIST
 } BTH_DEVICE_LIST, *PBTH_DEVICE_LIST;
 
 #define BD_ADDR_FROM_BUFFER(_addr_, _buf_)      (RtlCopyMemory(&_addr_, _buf_, sizeof(BD_ADDR)));
+
+/**
+ * \def BTH_HANDLE_FROM_BUFFER(_ch_, _buf_) (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
+ *
+ * \brief   A macro that extracts a BTH_HANDLE from a bulk input pipe buffer.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    19.09.2017
+ *
+ * \param   _ch_    The target client handle.
+ * \param   _buf_   The buffer.
+ */
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
 
 /**
