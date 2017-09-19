@@ -180,6 +180,10 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     &dcid);
 
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                    "! L2CAP_SET_CONNECTION_TYPE: PSM: %02X SCID: %04X DCID: %04X",
+                    data->PSM, *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
                     ">> L2CAP_Connection_Request PSM: %02X SCID: %04X DCID: %04X",
                     data->PSM, *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
@@ -266,6 +270,10 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                         &dcid);
 
                     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                        "! L2CAP_SET_CONNECTION_TYPE: L2CAP_PSM_HID_Service SCID: %04X DCID: %04X",
+                        *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
                         ">> >> L2CAP_ConnectionResponseResult_ConnectionSuccessful SCID: %04X DCID: %04X",
                         *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
@@ -322,6 +330,10 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
                 L2CAP_DEVICE_GET_SCID(pClientDevice, dcid, &scid);
 
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                    "! L2CAP_DEVICE_GET_SCID: DCID %04X -> SCID %04X",
+                    *(PUSHORT)&dcid, *(PUSHORT)&scid);
+
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
                     ">> L2CAP_Configuration_Request SCID: %04X DCID: %04X",
                     *(PUSHORT)&scid.Msb, *(PUSHORT)&dcid);
@@ -345,15 +357,17 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 if (pClientDevice->IsServiceStarted)
                 {
                     pClientDevice->CanStartHid = TRUE;
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "ACTION!");
-
+                    
                     if (pClientDevice->InitHidStage < 0x07)
                     {
                         L2CAP_DEVICE_GET_SCID_FOR_TYPE(
                             pClientDevice,
                             L2CAP_PSM_HID_Service,
                             &scid);
+
+                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
+                            "! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Service -> SCID %04X",
+                            *(PUSHORT)&scid);
                         
                         GetElementsByteArray(
                             &pDeviceContext->HidInitReports,
