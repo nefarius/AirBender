@@ -489,6 +489,40 @@ VOID FORCEINLINE L2CAP_DEVICE_GET_SCID_FOR_TYPE(
     }
 }
 
+/**
+ * \fn  VOID FORCEINLINE L2CAP_DEVICE_GET_DCID_FOR_TYPE( PBTH_DEVICE Device, L2CAP_PSM Type, PL2CAP_CID DestinationChannelId )
+ *
+ * \brief   Returns the DCID for a provided Protocol/Service Multiplexer channel.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    19.09.2017
+ *
+ * \param   Device                  The BTH_DEVICE device handle.
+ * \param   Type                    The Protocol/Service Multiplexer.
+ * \param   DestinationChannelId    Identifier for the destination channel.
+ *
+ * \return  A FORCEINLINE.
+ */
+VOID FORCEINLINE L2CAP_DEVICE_GET_DCID_FOR_TYPE(
+    PBTH_DEVICE Device,
+    L2CAP_PSM Type,
+    PL2CAP_CID DestinationChannelId
+)
+{
+    switch (Type)
+    {
+    case L2CAP_PSM_HID_Command:
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_CommandHandle.Destination, sizeof(L2CAP_CID));
+        break;
+    case L2CAP_PSM_HID_Interrupt:
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_InterruptHandle.Destination, sizeof(L2CAP_CID));
+        break;
+    case L2CAP_PSM_HID_Service:
+        RtlCopyMemory(DestinationChannelId, &Device->L2CAP_ServiceHandle.Destination, sizeof(L2CAP_CID));
+        break;
+    }
+}
+
 
 NTSTATUS
 L2CAP_Command(

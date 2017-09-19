@@ -334,7 +334,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     "! L2CAP_DEVICE_GET_SCID: DCID %04X -> SCID %04X",
                     *(PUSHORT)&dcid, *(PUSHORT)&scid);
 
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
                     ">> L2CAP_Configuration_Request SCID: %04X DCID: %04X",
                     *(PUSHORT)&scid.Msb, *(PUSHORT)&dcid);
 
@@ -357,7 +357,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                 if (pClientDevice->IsServiceStarted)
                 {
                     pClientDevice->CanStartHid = TRUE;
-                    
+
                     if (pClientDevice->InitHidStage < 0x07)
                     {
                         L2CAP_DEVICE_GET_SCID_FOR_TYPE(
@@ -365,10 +365,10 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                             L2CAP_PSM_HID_Service,
                             &scid);
 
-                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, 
+                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
                             "! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Service -> SCID %04X",
                             *(PUSHORT)&scid);
-                        
+
                         GetElementsByteArray(
                             &pDeviceContext->HidInitReports,
                             pClientDevice->InitHidStage++,
@@ -464,6 +464,48 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     else
     {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "U.N. Owen");
+
+        if (pClientDevice->InitHidStage < 0x07)
+        {
+            GetElementsByteArray(
+                &pDeviceContext->HidInitReports,
+                pClientDevice->InitHidStage++,
+                &pHidCmd,
+                &hidCmdLen);
+
+            status = HID_Command(
+                pDeviceContext,
+                pClientDevice->HCI_ConnectionHandle,
+                scid,
+                pHidCmd,
+                hidCmdLen);
+
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "HID_Command failed");
+            }
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                "<< HID_Command Index: %d, Length: %d",
+                pClientDevice->InitHidStage - 1, hidCmdLen);
+        }
+        else
+        {
+            L2CAP_DEVICE_GET_SCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &scid);
+            L2CAP_DEVICE_GET_DCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &dcid);
+
+            status = L2CAP_Command_Disconnection_Request(
+                pDeviceContext,
+                pClientDevice->HCI_ConnectionHandle,
+                CID++,
+                dcid,
+                scid);
+
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Disconnection_Request failed");
+            }
+        }
     }
 
     //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
