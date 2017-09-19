@@ -162,346 +162,83 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 #pragma region L2CAP_Connection_Request
 
             case L2CAP_Connection_Request:
-            {
-                PL2CAP_SIGNALLING_CONNECTION_REQUEST data = (PL2CAP_SIGNALLING_CONNECTION_REQUEST)&buffer[8];
 
-                scid = data->SCID;
-
-                L2CAP_SET_CONNECTION_TYPE(
+                status = Ds3ConnectionRequest(
+                    pDeviceContext,
                     pClientDevice,
-                    data->PSM,
-                    scid,
-                    &dcid);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "! L2CAP_SET_CONNECTION_TYPE: PSM: %02X SCID: %04X DCID: %04X",
-                    data->PSM, *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    ">> L2CAP_Connection_Request PSM: %02X SCID: %04X DCID: %04X",
-                    data->PSM, *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                status = L2CAP_Command_Connection_Response(
-                    pDeviceContext,
-                    pClientDevice->HCI_ConnectionHandle,
-                    data->Identifier,
-                    scid,
-                    dcid,
-                    L2CAP_ConnectionResponseResult_ConnectionPending,
-                    L2CAP_ConnectionResponseStatus_AuthorisationPending);
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Response (PENDING) failed");
-                    break;
-                }
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "<< L2CAP_Connection_Response SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                status = L2CAP_Command_Connection_Response(
-                    pDeviceContext,
-                    pClientDevice->HCI_ConnectionHandle,
-                    data->Identifier,
-                    scid,
-                    dcid,
-                    L2CAP_ConnectionResponseResult_ConnectionSuccessful,
-                    L2CAP_ConnectionResponseStatus_NoFurtherInformationAvailable);
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Response (SUCCESSFUL) failed");
-                    break;
-                }
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "<< L2CAP_Connection_Response SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                status = L2CAP_Command_Configuration_Request(
-                    pDeviceContext,
-                    pClientDevice->HCI_ConnectionHandle,
-                    CID++,
-                    scid,
-                    TRUE);
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Request failed");
-                    break;
-                }
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "<< L2CAP_Configuration_Request SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
+                    buffer,
+                    &CID);
 
                 break;
-            }
+
 #pragma endregion
 
 #pragma region L2CAP_Connection_Response
 
             case L2CAP_Connection_Response:
-            {
-                PL2CAP_SIGNALLING_CONNECTION_RESPONSE data = (PL2CAP_SIGNALLING_CONNECTION_RESPONSE)&buffer[8];
 
-                scid = data->SCID;
-                dcid = data->DCID;
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    ">> L2CAP_Connection_Response SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                switch ((L2CAP_CONNECTION_RESPONSE_RESULT)data->Result)
-                {
-                case L2CAP_ConnectionResponseResult_ConnectionSuccessful:
-
-                    L2CAP_SET_CONNECTION_TYPE(
-                        pClientDevice,
-                        L2CAP_PSM_HID_Service,
-                        dcid,
-                        &scid);
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        "! L2CAP_SET_CONNECTION_TYPE: L2CAP_PSM_HID_Service SCID: %04X DCID: %04X",
-                        *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        ">> >> L2CAP_ConnectionResponseResult_ConnectionSuccessful SCID: %04X DCID: %04X",
-                        *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                    status = L2CAP_Command_Configuration_Request(
-                        pDeviceContext,
-                        pClientDevice->HCI_ConnectionHandle,
-                        CID++,
-                        dcid,
-                        TRUE);
-
-                    if (!NT_SUCCESS(status))
-                    {
-                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
-                            "L2CAP_Command_Configuration_Request failed");
-                        break;
-                    }
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        "<< L2CAP_Configuration_Request SCID: %04X DCID: %04X",
-                        *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                    break;
-                case L2CAP_ConnectionResponseResult_ConnectionPending:
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        ">> >> L2CAP_ConnectionResponseResult_ConnectionPending");
-                    break;
-                case L2CAP_ConnectionResponseResult_ConnectionRefusedPsmNotNupported:
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
-                        "L2CAP_ConnectionResponseResult_ConnectionRefusedPsmNotNupported");
-                    break;
-                case L2CAP_ConnectionResponseResult_ConnectionRefusedSecurityBlock:
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
-                        "L2CAP_ConnectionResponseResult_ConnectionRefusedSecurityBlock");
-                    break;
-                case L2CAP_ConnectionResponseResult_ConnectionRefusedNoResourcesAvailable:
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR,
-                        "L2CAP_ConnectionResponseResult_ConnectionRefusedNoResourcesAvailable");
-                    break;
-                default:
-                    break;
-                }
+                status = Ds3ConnectionResponse(
+                    pDeviceContext,
+                    pClientDevice,
+                    buffer,
+                    &CID);
 
                 break;
-            }
+
 #pragma endregion
 
 #pragma region L2CAP_Configuration_Request
 
             case L2CAP_Configuration_Request:
-            {
-                PL2CAP_SIGNALLING_CONFIGURATION_REQUEST data = (PL2CAP_SIGNALLING_CONFIGURATION_REQUEST)&buffer[8];
 
-                dcid = data->DCID;
-
-                L2CAP_DEVICE_GET_SCID(pClientDevice, dcid, &scid);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "! L2CAP_DEVICE_GET_SCID: DCID %04X -> SCID %04X",
-                    *(PUSHORT)&dcid, *(PUSHORT)&scid);
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    ">> L2CAP_Configuration_Request SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid.Msb, *(PUSHORT)&dcid);
-
-                status = L2CAP_Command_Configuration_Response(
+                status = Ds3ConfigurationRequest(
                     pDeviceContext,
-                    pClientDevice->HCI_ConnectionHandle,
-                    data->Identifier,
-                    scid);
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Configuration_Response failed");
-                    break;
-                }
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "<< L2CAP_Configuration_Response SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                if (pClientDevice->IsServiceStarted)
-                {
-                    pClientDevice->CanStartHid = TRUE;
-
-                    if (pClientDevice->InitHidStage < 0x07)
-                    {
-                        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                            pClientDevice,
-                            L2CAP_PSM_HID_Service,
-                            &scid);
-
-                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                            "! L2CAP_DEVICE_GET_SCID_FOR_TYPE: L2CAP_PSM_HID_Service -> SCID %04X",
-                            *(PUSHORT)&scid);
-
-                        GetElementsByteArray(
-                            &pDeviceContext->HidInitReports,
-                            pClientDevice->InitHidStage++,
-                            &pHidCmd,
-                            &hidCmdLen);
-
-                        status = HID_Command(
-                            pDeviceContext,
-                            pClientDevice->HCI_ConnectionHandle,
-                            scid,
-                            pHidCmd,
-                            hidCmdLen);
-
-                        if (!NT_SUCCESS(status))
-                        {
-                            TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "HID_Command failed");
-                            break;
-                        }
-
-                        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                            "<< HID_Command Index: %d, Length: %d",
-                            pClientDevice->InitHidStage - 1, hidCmdLen);
-                    }
-                }
+                    pClientDevice,
+                    buffer);
 
                 break;
-            }
+
 #pragma endregion
 
 #pragma region L2CAP_Configuration_Response
 
             case L2CAP_Configuration_Response:
-            {
-                PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE data = (PL2CAP_SIGNALLING_CONFIGURATION_RESPONSE)&buffer[8];
 
-                scid = data->SCID;
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    ">> L2CAP_Configuration_Response SCID: 0x%04X",
-                    *(PUSHORT)&scid);
-
-                if (pClientDevice->CanStartService)
-                {
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "Requesting service connection");
-
-                    L2CAP_GET_NEW_CID(&dcid);
-
-                    status = L2CAP_Command_Connection_Request(
-                        pDeviceContext,
-                        pClientDevice->HCI_ConnectionHandle,
-                        CID++,
-                        dcid,
-                        L2CAP_PSM_HID_Service);
-
-                    if (!NT_SUCCESS(status))
-                    {
-                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Connection_Request failed");
-                        break;
-                    }
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        "<< L2CAP_Connection_Request SCID: %04X DCID: %04X",
-                        *(PUSHORT)&scid, *(PUSHORT)&dcid);
-                }
+                status = Ds3ConfigurationResponse(
+                    pDeviceContext,
+                    pClientDevice,
+                    buffer,
+                    &CID);
 
                 break;
-            }
+
 #pragma endregion
 
 #pragma region L2CAP_Disconnection_Request
 
             case L2CAP_Disconnection_Request:
-            {
-                PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&buffer[8];
 
-                scid = data->SCID;
-                dcid = data->DCID;
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    ">> L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-                status = L2CAP_Command_Disconnection_Response(
+                status = Ds3DisconnectionRequest(
                     pDeviceContext,
-                    pClientDevice->HCI_ConnectionHandle,
-                    data->Identifier,
-                    dcid,
-                    scid);
-
-                if (!NT_SUCCESS(status))
-                {
-                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Disconnection_Response failed");
-                    break;
-                }
-
-                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                    "<< L2CAP_Disconnection_Response SCID: %04X DCID: %04X",
-                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
+                    pClientDevice,
+                    buffer);
 
                 break;
-            }
 
 #pragma endregion
 
 #pragma region L2CAP_Disconnection_Response
 
             case L2CAP_Disconnection_Response:
-            {
-                if (pClientDevice->CanStartHid)
-                {
-                    pClientDevice->IsServiceStarted = FALSE;
 
-                    BYTE hidCommandEnable[] = { 0x53, 0xF4, 0x42, 0x03, 0x00, 0x00 };
-
-                    L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                        pClientDevice,
-                        L2CAP_PSM_HID_Command,
-                        &scid);
-
-                    status = HID_Command(
-                        pDeviceContext,
-                        pClientDevice->HCI_ConnectionHandle,
-                        scid,
-                        hidCommandEnable,
-                        _countof(hidCommandEnable));
-
-                    if (!NT_SUCCESS(status))
-                    {
-                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "HID_Command failed");
-                        break;
-                    }
-
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                        "<< HID_Command INIT sent");
-                }
+                status = Ds3DisconnectionResponse(
+                    pDeviceContext,
+                    pClientDevice);
 
                 break;
-            }
+
 #pragma endregion
+
             default:
                 TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR, "Unknown L2CAP command: 0x%02X", code);
                 break;

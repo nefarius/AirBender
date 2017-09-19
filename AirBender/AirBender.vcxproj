@@ -39,6 +39,7 @@
     <ClCompile Include="ByteArray.c" />
     <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
+    <ClCompile Include="Ds3.c" />
     <ClCompile Include="HCI.c" />
     <ClCompile Include="Interrupt.c" />
     <ClCompile Include="L2CAP.c" />
@@ -50,6 +51,7 @@
     <ClInclude Include="ByteArray.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
+    <ClInclude Include="Ds3.h" />
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="L2CAP.h" />

@@ -27,6 +27,7 @@ Environment:
 #include "Interrupt.h"
 #include "Bulkrwr.h"
 #include "HCI.h"
+#include "Ds3.h"
 #include "trace.h"
 
 EXTERN_C_START
