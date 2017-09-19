@@ -266,8 +266,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     L2CAP_SET_CONNECTION_TYPE(
                         pClientDevice,
                         L2CAP_PSM_HID_Service,
-                        scid,
-                        &dcid);
+                        dcid,
+                        &scid);
 
                     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
                         "! L2CAP_SET_CONNECTION_TYPE: L2CAP_PSM_HID_Service SCID: %04X DCID: %04X",
