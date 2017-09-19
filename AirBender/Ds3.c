@@ -386,7 +386,7 @@ Ds3InitHidReportStage(
     PBTH_DEVICE Device, 
     PBYTE CID)
 {
-    NTSTATUS    status;
+    NTSTATUS    status = STATUS_SUCCESS;
     L2CAP_CID   dcid;
     L2CAP_CID   scid;
     PVOID       pHidCmd;
@@ -422,7 +422,7 @@ Ds3InitHidReportStage(
             "<< HID_Command Index: %d, Length: %d",
             Device->InitHidStage - 1, hidCmdLen);
     }
-    else
+    else if(Device->IsServiceStarted)
     {
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &scid);
         L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &dcid);
