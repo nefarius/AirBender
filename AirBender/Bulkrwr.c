@@ -122,8 +122,6 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     UNREFERENCED_PARAMETER(Pipe);
 
-    //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Entry");
-
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR,
             "!FUNC! Zero length read "
@@ -146,13 +144,9 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     if (L2CAP_IS_CONTROL_CHANNEL(buffer))
     {
-        //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_CONTROL_CHANNEL");
-
         if (L2CAP_IS_SIGNALLING_COMMAND_CODE(buffer))
         {
             code = L2CAP_GET_SIGNALLING_COMMAND_CODE(buffer);
-
-            //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_SIGNALLING_COMMAND_CODE: 0x%02X", (BYTE)code);
 
             switch (code)
             {
@@ -438,6 +432,8 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
             }
 #pragma endregion
 
+#pragma region L2CAP_Disconnection_Request
+
             case L2CAP_Disconnection_Request:
             {
                 PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&buffer[8];
@@ -449,8 +445,63 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
                     ">> L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
                     *(PUSHORT)&scid, *(PUSHORT)&dcid);
 
+                status = L2CAP_Command_Disconnection_Response(
+                    pDeviceContext,
+                    pClientDevice->HCI_ConnectionHandle,
+                    data->Identifier,
+                    dcid,
+                    scid);
+
+                if (!NT_SUCCESS(status))
+                {
+                    TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Disconnection_Response failed");
+                    break;
+                }
+
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                    "<< L2CAP_Disconnection_Response SCID: %04X DCID: %04X",
+                    *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
                 break;
             }
+
+#pragma endregion
+
+#pragma region L2CAP_Disconnection_Response
+
+            case L2CAP_Disconnection_Response:
+            {
+                if (pClientDevice->CanStartHid)
+                {
+                    pClientDevice->IsServiceStarted = FALSE;
+
+                    BYTE hidCommandEnable[] = { 0x53, 0xF4, 0x42, 0x03, 0x00, 0x00 };
+
+                    L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+                        pClientDevice,
+                        L2CAP_PSM_HID_Command,
+                        &scid);
+
+                    status = HID_Command(
+                        pDeviceContext,
+                        pClientDevice->HCI_ConnectionHandle,
+                        scid,
+                        hidCommandEnable,
+                        _countof(hidCommandEnable));
+
+                    if (!NT_SUCCESS(status))
+                    {
+                        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "HID_Command failed");
+                        break;
+                    }
+
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                        "<< HID_Command INIT sent");
+                }
+
+                break;
+            }
+#pragma endregion
             default:
                 TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR, "Unknown L2CAP command: 0x%02X", code);
                 break;
@@ -463,10 +514,13 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     }
     else
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "U.N. Owen");
-
         if (pClientDevice->InitHidStage < 0x07)
         {
+            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+                pClientDevice,
+                L2CAP_PSM_HID_Service,
+                &scid);
+
             GetElementsByteArray(
                 &pDeviceContext->HidInitReports,
                 pClientDevice->InitHidStage++,
@@ -494,12 +548,16 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
             L2CAP_DEVICE_GET_SCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &scid);
             L2CAP_DEVICE_GET_DCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &dcid);
 
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
+                "<< L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
+                *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
             status = L2CAP_Command_Disconnection_Request(
                 pDeviceContext,
                 pClientDevice->HCI_ConnectionHandle,
                 CID++,
-                dcid,
-                scid);
+                scid,
+                dcid);
 
             if (!NT_SUCCESS(status))
             {
@@ -507,8 +565,6 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
             }
         }
     }
-
-    //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "%!FUNC! Exit");
 }
 
 BOOLEAN
