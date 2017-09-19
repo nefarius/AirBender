@@ -348,6 +348,9 @@ Ds3DisconnectionResponse(
     L2CAP_CID   scid;
     BYTE        hidCommandEnable[] = { 0x53, 0xF4, 0x42, 0x03, 0x00, 0x00 };
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+        ">> L2CAP_Disconnection_Response");
+
     if (Device->CanStartHid)
     {
         Device->IsServiceStarted = FALSE;
@@ -371,7 +374,7 @@ Ds3DisconnectionResponse(
         }
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
-            "<< HID_Command INIT sent");
+            "<< HID_Command ENABLE sent");
     }
 
     return status;
