@@ -376,3 +376,70 @@ Ds3DisconnectionResponse(
 
     return status;
 }
+
+NTSTATUS
+Ds3InitHidReportStage(
+    PDEVICE_CONTEXT Context, 
+    PBTH_DEVICE Device, 
+    PBYTE CID)
+{
+    NTSTATUS    status;
+    L2CAP_CID   dcid;
+    L2CAP_CID   scid;
+    PVOID       pHidCmd;
+    ULONG       hidCmdLen;
+
+    if (Device->InitHidStage < 0x07)
+    {
+        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+            Device,
+            L2CAP_PSM_HID_Service,
+            &scid);
+
+        GetElementsByteArray(
+            &Context->HidInitReports,
+            Device->InitHidStage++,
+            &pHidCmd,
+            &hidCmdLen);
+
+        status = HID_Command(
+            Context,
+            Device->HCI_ConnectionHandle,
+            scid,
+            pHidCmd,
+            hidCmdLen);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HID_Command failed");
+            return status;
+        }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< HID_Command Index: %d, Length: %d",
+            Device->InitHidStage - 1, hidCmdLen);
+    }
+    else
+    {
+        L2CAP_DEVICE_GET_SCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &scid);
+        L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &dcid);
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "<< L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
+            *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
+        status = L2CAP_Command_Disconnection_Request(
+            Context,
+            Device->HCI_ConnectionHandle,
+            (*CID)++,
+            scid,
+            dcid);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Disconnection_Request failed");
+        }
+    }
+
+    return status;
+}

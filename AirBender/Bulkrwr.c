@@ -112,11 +112,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     PUCHAR                          buffer;
     BTH_HANDLE                      clientHandle;
     PBTH_DEVICE                     pClientDevice;
-    L2CAP_CID                       dcid = { 0 };
-    L2CAP_CID                       scid = { 0 };
     L2CAP_SIGNALLING_COMMAND_CODE   code;
-    PVOID                           pHidCmd;
-    ULONG                           hidCmdLen;
 
     static BYTE CID = 0x01;
 
@@ -251,56 +247,10 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     }
     else
     {
-        if (pClientDevice->InitHidStage < 0x07)
-        {
-            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                pClientDevice,
-                L2CAP_PSM_HID_Service,
-                &scid);
-
-            GetElementsByteArray(
-                &pDeviceContext->HidInitReports,
-                pClientDevice->InitHidStage++,
-                &pHidCmd,
-                &hidCmdLen);
-
-            status = HID_Command(
-                pDeviceContext,
-                pClientDevice->HCI_ConnectionHandle,
-                scid,
-                pHidCmd,
-                hidCmdLen);
-
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "HID_Command failed");
-            }
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                "<< HID_Command Index: %d, Length: %d",
-                pClientDevice->InitHidStage - 1, hidCmdLen);
-        }
-        else
-        {
-            L2CAP_DEVICE_GET_SCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &scid);
-            L2CAP_DEVICE_GET_DCID_FOR_TYPE(pClientDevice, L2CAP_PSM_HID_Service, &dcid);
-
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR,
-                "<< L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
-                *(PUSHORT)&scid, *(PUSHORT)&dcid);
-
-            status = L2CAP_Command_Disconnection_Request(
-                pDeviceContext,
-                pClientDevice->HCI_ConnectionHandle,
-                CID++,
-                scid,
-                dcid);
-
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "L2CAP_Command_Disconnection_Request failed");
-            }
-        }
+        status = Ds3InitHidReportStage(
+            pDeviceContext,
+            pClientDevice,
+            &CID);
     }
 }
 

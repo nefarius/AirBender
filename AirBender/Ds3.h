@@ -37,3 +37,9 @@ NTSTATUS
 Ds3DisconnectionResponse(
     PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device);
+
+NTSTATUS
+Ds3InitHidReportStage(
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
+    PBYTE CID);
