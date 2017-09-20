@@ -40,6 +40,13 @@ typedef struct _BTH_HANDLE_PAIR
 
 } BTH_HANDLE_PAIR;
 
+typedef enum _BTH_DEVICE_TYPE
+{
+    DualShock3,
+    DualShock4
+
+} BTH_DEVICE_TYPE;
+
 /**
  * \typedef struct _BTH_DEVICE
  *
@@ -64,6 +71,10 @@ typedef struct _BTH_DEVICE
     BOOLEAN CanStartHid;
 
     BYTE InitHidStage;
+
+    LPSTR RemoteName;
+
+    BTH_DEVICE_TYPE DeviceType;
 
     struct _BTH_DEVICE *next;
 
@@ -98,6 +109,25 @@ typedef struct _BTH_DEVICE_LIST
  * \param   _buf_   The buffer.
  */
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
+
+/**
+ * \fn  VOID FORCEINLINE BTH_DEVICE_FREE( PBTH_DEVICE Device )
+ *
+ * \brief   Frees ressources allocated by provided BTH_DEVICE.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    20.09.2017
+ *
+ * \param   Device  The BTH_DEVICE handle.
+ *
+ * \return  Nothing.
+ */
+VOID FORCEINLINE BTH_DEVICE_FREE(
+    PBTH_DEVICE Device
+)
+{
+    free(Device->RemoteName);
+}
 
 /**
  * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_INIT( PBTH_DEVICE_LIST List )

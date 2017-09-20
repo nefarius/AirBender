@@ -1,6 +1,6 @@
 #pragma once
 
-#define HCI_SUCCESS(_x_)    ((BOOLEAN)(((PUCHAR)_x_)[5] == 0))
+#define HCI_COMMAND_SUCCESS(_x_)    ((BOOLEAN)(((PUCHAR)_x_)[5] == 0))
 
 typedef enum _HCI_COMMAND
 {

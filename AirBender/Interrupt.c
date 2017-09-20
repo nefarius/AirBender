@@ -203,7 +203,7 @@ NT status value
 
         //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Command_Complete_EV");
 
-        if (command == HCI_Reset && HCI_SUCCESS(buffer) && !pDeviceContext->Started)
+        if (command == HCI_Reset && HCI_COMMAND_SUCCESS(buffer) && !pDeviceContext->Started)
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Reset SUCCESS");
 
@@ -212,7 +212,7 @@ NT status value
             status = HCI_Command_Read_BD_Addr(pDeviceContext);
         }
 
-        if (command == HCI_Read_BD_ADDR && HCI_SUCCESS(buffer))
+        if (command == HCI_Read_BD_ADDR && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_BD_ADDR SUCCESS");
 
@@ -226,14 +226,14 @@ NT status value
             status = HCI_Command_Read_Buffer_Size(pDeviceContext);
         }
 
-        if (command == HCI_Read_Buffer_Size && HCI_SUCCESS(buffer))
+        if (command == HCI_Read_Buffer_Size && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Buffer_Size SUCCESS");
 
             status = HCI_Command_Read_Local_Version_Info(pDeviceContext);
         }
 
-        if (command == HCI_Read_Local_Version_Info && HCI_SUCCESS(buffer))
+        if (command == HCI_Read_Local_Version_Info && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Local_Version_Info SUCCESS");
 
@@ -349,7 +349,7 @@ NT status value
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Simple_Pairing_Mode");
 
-            if (HCI_SUCCESS(buffer))
+            if (HCI_COMMAND_SUCCESS(buffer))
             {
                 status = HCI_Command_Write_Simple_Pairing_Debug_Mode(pDeviceContext);
             }
@@ -374,7 +374,7 @@ NT status value
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Authentication_Enable");
 
-            if (HCI_SUCCESS(buffer))
+            if (HCI_COMMAND_SUCCESS(buffer))
             {
                 status = HCI_Command_Set_Event_Mask(pDeviceContext);
             }
@@ -393,7 +393,7 @@ NT status value
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Set_Event_Mask");
 
-            if (HCI_SUCCESS(buffer))
+            if (HCI_COMMAND_SUCCESS(buffer))
             {
                 status = HCI_Command_Write_Page_Timeout(pDeviceContext);
             }
@@ -407,70 +407,70 @@ NT status value
             }
         }
 
-        if (command == HCI_Write_Page_Timeout && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Page_Timeout && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Timeout");
 
             status = HCI_Command_Write_Page_Scan_Activity(pDeviceContext);
         }
 
-        if (command == HCI_Write_Page_Scan_Activity && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Page_Scan_Activity && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Scan_Activity");
 
             status = HCI_Command_Write_Page_Scan_Type(pDeviceContext);
         }
 
-        if (command == HCI_Write_Page_Scan_Type && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Page_Scan_Type && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Page_Scan_Type");
 
             status = HCI_Command_Write_Inquiry_Scan_Activity(pDeviceContext);
         }
 
-        if (command == HCI_Write_Inquiry_Scan_Activity && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Inquiry_Scan_Activity && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Scan_Activity");
 
             status = HCI_Command_Write_Inquiry_Scan_Type(pDeviceContext);
         }
 
-        if (command == HCI_Write_Inquiry_Scan_Type && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Inquiry_Scan_Type && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Scan_Type");
 
             status = HCI_Command_Write_Inquiry_Mode(pDeviceContext);
         }
 
-        if (command == HCI_Write_Inquiry_Mode && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Inquiry_Mode && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Inquiry_Mode");
 
             status = HCI_Command_Write_Class_of_Device(pDeviceContext);
         }
 
-        if (command == HCI_Write_Class_of_Device && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Class_of_Device && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Class_of_Device");
 
             status = HCI_Command_Write_Extended_Inquiry_Response(pDeviceContext);
         }
 
-        if (command == HCI_Write_Extended_Inquiry_Response && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Extended_Inquiry_Response && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Extended_Inquiry_Response");
 
             status = HCI_Command_Write_Local_Name(pDeviceContext);
         }
 
-        if (command == HCI_Write_Local_Name && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Local_Name && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Local_Name");
 
             status = HCI_Command_Write_Scan_Enable(pDeviceContext);
         }
 
-        if (command == HCI_Write_Scan_Enable && HCI_SUCCESS(buffer))
+        if (command == HCI_Write_Scan_Enable && HCI_COMMAND_SUCCESS(buffer))
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Write_Scan_Enable");
 
@@ -545,8 +545,40 @@ NT status value
 #pragma region HCI_Remote_Name_Request_Complete_EV
 
     case HCI_Remote_Name_Request_Complete_EV:
-
+    
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Remote_Name_Request_Complete_EV");
+
+        if (buffer[2] == 0x00)
+        {
+            BD_ADDR_FROM_BUFFER(clientAddr, &buffer[3]);
+
+            PBTH_DEVICE device = BTH_DEVICE_LIST_GET_BY_BD_ADDR(
+                &pDeviceContext->ClientDeviceList,
+                &clientAddr);
+
+            ULONG length;
+
+            //
+            // Scan through rest of buffer until null-terminator is found
+            // 
+            for (length = 1;
+                buffer[length + 8] != 0x00
+                && (length + 8) < NumBytesTransferred;
+                length++);
+               
+            //
+            // Allocate memory for name (including null-terminator)
+            // 
+            device->RemoteName = malloc(length);
+
+            //
+            // Store remote name in device context
+            // 
+            RtlCopyMemory(device->RemoteName, &buffer[9], length);
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, 
+                "Remote name: %s, length: %d", device->RemoteName, length);
+        }
 
         break;
 
