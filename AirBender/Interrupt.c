@@ -576,8 +576,15 @@ NT status value
             // 
             RtlCopyMemory(device->RemoteName, &buffer[9], length);
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, 
-                "Remote name: %s, length: %d", device->RemoteName, length);
+            //
+            // Remote name is used to distinguish device type
+            // 
+            device->DeviceType = 
+                (strcmp("Wireless Controller", device->RemoteName) == 0) ? DualShock4 : DualShock3;
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                "Remote name: %s, length: %d, device: %d", 
+                device->RemoteName, length, device->DeviceType);
         }
 
         break;
