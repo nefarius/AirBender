@@ -16,7 +16,7 @@ namespace SokkaServer
                 });
                 x.RunAsLocalSystem();                            
 
-                x.SetDescription("Enables communication with AirBender Bluetooth Host Devices.");        
+                x.SetDescription("Communicates with AirBender Bluetooth Host Devices.");        
                 x.SetDisplayName("SokkaServer");                       
                 x.SetServiceName("SokkaServer");                                
             });
