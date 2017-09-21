@@ -6,6 +6,7 @@
 #include <SetupAPI.h>
 #include <initguid.h>
 #include <usbiodef.h>
+#include <AirBender.h>
 
 #pragma comment(lib, "setupapi.lib")
 
