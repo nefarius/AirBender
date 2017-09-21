@@ -1,4 +1,5 @@
-﻿using Topshelf;
+﻿using Serilog;
+using Topshelf;
 
 namespace SokkaServer
 {
@@ -6,6 +7,11 @@ namespace SokkaServer
     {
         static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .CreateLogger();
+
             HostFactory.Run(x =>                                 
             {
                 x.Service<SokkaService>(s =>                     
