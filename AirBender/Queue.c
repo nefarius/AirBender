@@ -192,12 +192,34 @@ AirBenderEvtIoRead(
     size_t  Length
 )
 {
-    UNREFERENCED_PARAMETER(Queue);
+    NTSTATUS status;
+    WDFMEMORY mem;
+    PVOID buffer;
+    size_t length;
+    PDEVICE_CONTEXT pDeviceContext;
+
     UNREFERENCED_PARAMETER(Length);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
     
-    WdfRequestComplete(Request, STATUS_SUCCESS);
+    //
+    // TODO: PoC hack, re-implement!
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+    pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
+
+    status = WdfRequestRetrieveOutputMemory(Request, &mem);
+    if(!NT_SUCCESS(status))
+    {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, 
+            "WdfRequestRetrieveOutputMemory failed with status 0x%X", status);
+    }
+
+    buffer = WdfMemoryGetBuffer(mem, &length);
+
+    RtlCopyMemory(buffer, pDeviceContext->HidInputReport, 96);
+
+    WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, length);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }

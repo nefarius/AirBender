@@ -38,12 +38,12 @@ void EnumUsbDevices()
 
         // bus found, open it
         auto handle = CreateFile(detailDataBuffer->DevicePath,
-                                 GENERIC_READ | GENERIC_WRITE,
-                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                 nullptr,
-                                 OPEN_EXISTING,
-                                 FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
-                                 nullptr);
+            GENERIC_READ | GENERIC_WRITE,
+            FILE_SHARE_READ | FILE_SHARE_WRITE,
+            nullptr,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+            nullptr);
 
         if (handle != INVALID_HANDLE_VALUE)
             CloseHandle(handle);
@@ -58,16 +58,31 @@ int main()
     auto device = L"\\\\?\\usb#vid_0a12&pid_0001#6&22bce1d6&0&3#{a5dcbf10-6530-11d2-901f-00c04fb951ed}";
 
     //EnumUsbDevices();
-    
+
     auto handle = CreateFile(device,
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_READ | FILE_SHARE_WRITE,
         nullptr,
         OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,
+        FILE_ATTRIBUTE_NORMAL,
         nullptr);
 
-    DeviceIoControl(handle, 0x00, nullptr, 0, nullptr, 0, nullptr, nullptr);
+    BYTE buffer[96];
+    DWORD bytesRead = 0;
+
+    while (TRUE)
+    {
+        ReadFile(handle, buffer, 96, &bytesRead, NULL);
+                
+        for(int i = 0; i < 50; i++)
+        {
+            printf("%02X ", buffer[i]);
+        }
+
+        printf("\r\n");
+
+        Sleep(10);
+    }
 
     CloseHandle(handle);
 

@@ -76,6 +76,8 @@ Return Value:
 
         InitHidInitReports(pDeviceContext);
 
+        RtlZeroMemory(pDeviceContext->HidInputReport, 96);
+
         WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCapabilities);
         pnpCapabilities.Removable = WdfTrue;
         pnpCapabilities.SurpriseRemovalOK = WdfTrue;

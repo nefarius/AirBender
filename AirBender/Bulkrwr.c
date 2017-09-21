@@ -243,7 +243,9 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
     }
     else if (L2CAP_IS_HID_INPUT_REPORT(buffer))
     {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_HID_INPUT_REPORT");
+        //TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_BULKRWR, "L2CAP_IS_HID_INPUT_REPORT");
+        
+        RtlCopyMemory(pDeviceContext->HidInputReport, &buffer[9], 49);
     }
     else
     {

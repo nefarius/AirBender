@@ -45,6 +45,11 @@ typedef struct _DEVICE_CONTEXT
     BTH_DEVICE_LIST ClientDeviceList;
 
     BYTE_ARRAY HidInitReports;
+    
+    // 
+    // TODO: hack for tests, remove!
+    // 
+    BYTE HidInputReport[96];
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
