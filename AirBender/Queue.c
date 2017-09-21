@@ -20,7 +20,7 @@ Environment:
 NTSTATUS
 AirBenderQueueInitialize(
     _In_ WDFDEVICE Device
-    )
+)
 /*++
 
 Routine Description:
@@ -46,29 +46,29 @@ Return Value:
     WDFQUEUE queue;
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG    queueConfig;
-    
+
     //
     // Configure a default queue so that requests that are not
     // configure-fowarded using WdfDeviceConfigureRequestDispatching to goto
     // other queues get dispatched here.
     //
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
-         &queueConfig,
+        &queueConfig,
         WdfIoQueueDispatchParallel
-        );
+    );
 
     queueConfig.EvtIoDeviceControl = AirBenderEvtIoDeviceControl;
     queueConfig.EvtIoStop = AirBenderEvtIoStop;
     queueConfig.EvtIoRead = AirBenderEvtIoRead;
 
     status = WdfIoQueueCreate(
-                 Device,
-                 &queueConfig,
-                 WDF_NO_OBJECT_ATTRIBUTES,
-                 &queue
-                 );
+        Device,
+        &queueConfig,
+        WDF_NO_OBJECT_ATTRIBUTES,
+        &queue
+    );
 
-    if( !NT_SUCCESS(status) ) {
+    if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
@@ -83,7 +83,7 @@ AirBenderEvtIoDeviceControl(
     _In_ size_t OutputBufferLength,
     _In_ size_t InputBufferLength,
     _In_ ULONG IoControlCode
-    )
+)
 /*++
 
 Routine Description:
@@ -109,18 +109,41 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
-                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
+    NTSTATUS                        status = STATUS_SUCCESS;
+    PAIRBENDER_GET_HOST_BD_ADDR     pGetBdAddr;
+    SIZE_T                          bufferLength;
+    ULONG                           transferred = 0;
+    PDEVICE_CONTEXT                 pDeviceContext;
 
-    WdfRequestComplete(Request, STATUS_SUCCESS);
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_QUEUE,
+        "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
+        Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
 
-    //
-    // TODO: implement or delete
-    // 
+    pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
 
-    return;
+    switch (IoControlCode)
+    {
+    case IOCTL_AIRBENDER_GET_HOST_BD_ADDR:
+
+        status = WdfRequestRetrieveOutputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_HOST_BD_ADDR),
+            (LPVOID)&pGetBdAddr,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && pGetBdAddr->Size == sizeof(AIRBENDER_GET_HOST_BD_ADDR))
+        {
+            RtlCopyMemory(&pGetBdAddr->Host, &pDeviceContext->BluetoothHostAddress, sizeof(BD_ADDR));
+        }
+
+        break;
+    default:
+        status = STATUS_INVALID_PARAMETER;
+        break;
+    }
+
+    WdfRequestCompleteWithInformation(Request, status, transferred);
 }
 
 VOID
@@ -152,10 +175,10 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", 
-                Queue, Request, ActionFlags);
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_QUEUE,
+        "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d",
+        Queue, Request, ActionFlags);
 
     //
     // In most cases, the EvtIoStop callback function completes, cancels, or postpones
@@ -201,7 +224,7 @@ AirBenderEvtIoRead(
     UNREFERENCED_PARAMETER(Length);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
-    
+
     //
     // TODO: PoC hack, re-implement!
 
@@ -209,9 +232,9 @@ AirBenderEvtIoRead(
     pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
 
     status = WdfRequestRetrieveOutputMemory(Request, &mem);
-    if(!NT_SUCCESS(status))
+    if (!NT_SUCCESS(status))
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, 
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
             "WdfRequestRetrieveOutputMemory failed with status 0x%X", status);
     }
 

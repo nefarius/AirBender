@@ -11,17 +11,6 @@ static const BYTE BD_LINK[BD_LINK_LENGTH] =
 };
 
 /**
- * \typedef struct _BD_ADDR
- *
- * \brief   Defines a Bluetooth client MAC address.
- */
-typedef struct _BD_ADDR
-{
-    BYTE Address[6];
-
-} BD_ADDR, *PBD_ADDR;
-
-/**
  * \typedef struct _BTH_HANDLE
  *
  * \brief   Defines a Bluetooth client handle.

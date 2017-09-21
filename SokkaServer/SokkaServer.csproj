@@ -86,6 +86,7 @@
     <Compile Include="SokkaService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AirBender.Native.cs" />
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>

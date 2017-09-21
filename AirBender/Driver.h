@@ -20,6 +20,7 @@ Environment:
 #include <wdfusb.h>
 #include <initguid.h>
 
+#include <AirBender.h>
 #include "ByteArray.h"
 #include "device.h"
 #include "queue.h"
