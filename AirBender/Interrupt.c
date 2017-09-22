@@ -207,6 +207,12 @@ NT status value
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Reset SUCCESS");
 
+            //
+            // By this time the host controller should've dropped all
+            // connections so we are safe to remove all allocated resources.
+            // 
+            BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
+
             pDeviceContext->Started = TRUE;
 
             status = HCI_Command_Read_BD_Addr(pDeviceContext);
@@ -224,7 +230,7 @@ NT status value
             pDeviceContext->BluetoothHostAddress.Address[4] = buffer[7];
             pDeviceContext->BluetoothHostAddress.Address[5] = buffer[6];
 
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, 
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                 "HCI_Read_BD_ADDR SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
                 pDeviceContext->BluetoothHostAddress.Address[0],
                 pDeviceContext->BluetoothHostAddress.Address[1],
@@ -342,6 +348,12 @@ NT status value
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                     "Unsupported Bluetooth Specification, aborting communication");
                 status = HCI_Command_Reset(pDeviceContext);
+
+                if (NT_SUCCESS(status))
+                {
+                    pDeviceContext->Started = FALSE;
+                }
+
                 break;
             }
 
@@ -367,7 +379,7 @@ NT status value
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT, 
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
                     "-- Simple Pairing not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
@@ -499,7 +511,7 @@ NT status value
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
             "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
-                
+
         BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
         BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr);
 
@@ -557,7 +569,7 @@ NT status value
 #pragma region HCI_Remote_Name_Request_Complete_EV
 
     case HCI_Remote_Name_Request_Complete_EV:
-    
+
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Remote_Name_Request_Complete_EV");
 
         if (buffer[2] == 0x00)
@@ -577,7 +589,7 @@ NT status value
                 buffer[length + 8] != 0x00
                 && (length + 8) < NumBytesTransferred;
                 length++);
-               
+
             //
             // Allocate memory for name (including null-terminator)
             // 
@@ -591,11 +603,11 @@ NT status value
             //
             // Remote name is used to distinguish device type
             // 
-            device->DeviceType = 
+            device->DeviceType =
                 (strcmp("Wireless Controller", device->RemoteName) == 0) ? DualShock4 : DualShock3;
 
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
-                "Remote name: %s, length: %d, device: %d", 
+                "Remote name: %s, length: %d, device: %d",
                 device->RemoteName, length, device->DeviceType);
 
             //
