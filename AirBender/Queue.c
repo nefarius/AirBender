@@ -148,6 +148,16 @@ Return Value:
         }
 
         break;
+
+    case IOCTL_AIRBENDER_HOST_RESET:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_HOST_RESET");
+
+        pDeviceContext->Started = FALSE;
+        status = HCI_Command_Reset(pDeviceContext);
+
+        break;
     default:
         status = STATUS_INVALID_PARAMETER;
         break;

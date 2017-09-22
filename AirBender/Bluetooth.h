@@ -22,6 +22,11 @@ typedef struct _BTH_HANDLE
 
 } BTH_HANDLE, *PBTH_HANDLE;
 
+/**
+ * \typedef struct _BTH_HANDLE_PAIR
+ *
+ * \brief   Defines a handle pair connecting a device CID to a host CID.
+ */
 typedef struct _BTH_HANDLE_PAIR
 {
     BTH_HANDLE Source;
@@ -29,12 +34,24 @@ typedef struct _BTH_HANDLE_PAIR
 
 } BTH_HANDLE_PAIR;
 
+/**
+ * \typedef enum _BTH_DEVICE_TYPE
+ *
+ * \brief   Defines an alias representing the possible types of the BTH_DEVICE.
+ */
 typedef enum _BTH_DEVICE_TYPE
 {
     DualShock3,
     DualShock4
 
 } BTH_DEVICE_TYPE;
+
+typedef struct _BTH_DEVICE_HID_REPORT
+{
+    LPVOID Data;
+    ULONG Length;
+
+} BTH_DEVICE_HID_REPORT, *PBTH_DEVICE_HID_REPORT;
 
 /**
  * \typedef struct _BTH_DEVICE
@@ -64,6 +81,10 @@ typedef struct _BTH_DEVICE
     LPSTR RemoteName;
 
     BTH_DEVICE_TYPE DeviceType;
+
+    BTH_DEVICE_HID_REPORT HidInputReport;
+
+    BTH_DEVICE_HID_REPORT HidOutputReport;
 
     struct _BTH_DEVICE *next;
 

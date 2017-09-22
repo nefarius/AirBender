@@ -15,6 +15,9 @@ namespace SokkaServer
         {
             DevicePath = devicePath;
 
+            //
+            // Open device
+            // 
             _deviceHandle = Kernel32.CreateFile(DevicePath,
                 Kernel32.ACCESS_MASK.GenericRight.GENERIC_READ | Kernel32.ACCESS_MASK.GenericRight.GENERIC_WRITE,
                 Kernel32.FileShare.FILE_SHARE_READ | Kernel32.FileShare.FILE_SHARE_WRITE,
@@ -30,7 +33,10 @@ namespace SokkaServer
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
 
-            var ret = Kernel32.DeviceIoControl(
+            //
+            // Request host MAC address
+            // 
+            Kernel32.DeviceIoControl(
                 _deviceHandle,
                 unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
                 IntPtr.Zero, 0, pData, length,
@@ -39,6 +45,15 @@ namespace SokkaServer
             HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
 
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
+
+            //
+            // Request host controller to reset and clean up resources
+            // 
+            Kernel32.DeviceIoControl(
+                _deviceHandle,
+                unchecked((int)IOCTL_AIRBENDER_HOST_RESET),
+                IntPtr.Zero, 0, IntPtr.Zero, 0,
+                out bytesReturned, IntPtr.Zero);
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);

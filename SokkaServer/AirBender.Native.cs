@@ -6,6 +6,7 @@ namespace SokkaServer
     partial class AirBender
     {
         private const uint IOCTL_AIRBENDER_GET_HOST_BD_ADDR = 0xFFDC6000;
+        private const uint IOCTL_AIRBENDER_HOST_RESET = 0xFFDC2004;
 
         [StructLayout(LayoutKind.Sequential)]
         private struct BD_ADDR

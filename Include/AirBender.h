@@ -4,12 +4,17 @@
 #define FILE_DEVICE_AIRBENDER   65500U
 
 #define IOCTL_AIRBENDER_GET_HOST_BD_ADDR        CTL_CODE(FILE_DEVICE_AIRBENDER, \
-                                                            IOCTL_INDEX, \
+                                                            IOCTL_INDEX + 0x00, \
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS)
 
-#define IOCTL_AIRBENDER_GET_HID_REPORT          CTL_CODE(FILE_DEVICE_AIRBENDER, \
+#define IOCTL_AIRBENDER_HOST_RESET              CTL_CODE(FILE_DEVICE_AIRBENDER, \
                                                             IOCTL_INDEX + 0x01, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_ANY_ACCESS)
+
+#define IOCTL_AIRBENDER_GET_HID_REPORT          CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x02, \
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
