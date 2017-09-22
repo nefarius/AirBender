@@ -36,11 +36,14 @@ namespace SokkaServer
             //
             // Request host MAC address
             // 
-            Kernel32.DeviceIoControl(
+            var ret = Kernel32.DeviceIoControl(
                 _deviceHandle,
-                unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
+                unchecked((int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
                 IntPtr.Zero, 0, pData, length,
                 out bytesReturned, IntPtr.Zero);
+
+            if (!ret)
+                throw new InvalidOperationException("IOCTL_AIRBENDER_GET_HOST_BD_ADDR failed");
 
             HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
 
@@ -51,11 +54,14 @@ namespace SokkaServer
             //
             // Request host controller to reset and clean up resources
             // 
-            Kernel32.DeviceIoControl(
+            ret = Kernel32.DeviceIoControl(
                 _deviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_HOST_RESET),
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned, IntPtr.Zero);
+
+            if (!ret)
+                throw new InvalidOperationException("IOCTL_AIRBENDER_HOST_RESET failed");
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);

@@ -1,4 +1,5 @@
-﻿using Nefarius.Devcon;
+﻿using System;
+using Nefarius.Devcon;
 using Serilog;
 
 namespace SokkaServer
@@ -13,11 +14,18 @@ namespace SokkaServer
 
             string path = string.Empty, instance = string.Empty;
 
-            if (Devcon.Find(AirBender.ClassGuid, ref path, ref instance))
+            try
             {
-                Log.Information($"Found AirBender device {path} ({instance})");
+                if (Devcon.Find(AirBender.ClassGuid, ref path, ref instance))
+                {
+                    Log.Information($"Found AirBender device {path} ({instance})");
 
-                BthHost = new AirBender(path);
+                    BthHost = new AirBender(path);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal($"Unexpected error: {ex}");
             }
         }
 
