@@ -26,7 +26,7 @@ namespace SokkaServer
             if (_deviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
-            var length = Marshal.SizeOf(typeof(BD_ADDR));
+            var length = Marshal.SizeOf(typeof(AIRBENDER_GET_HOST_BD_ADDR));
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
 
