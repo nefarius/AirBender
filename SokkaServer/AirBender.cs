@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using PInvoke;
 using Serilog;
+using SokkaServer.Properties;
 
 namespace SokkaServer
 {
@@ -40,7 +41,7 @@ namespace SokkaServer
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
         }
 
-        public static Guid ClassGuid => Guid.Parse("a775e97e-a41b-4bfc-868e-25be84643b62");
+        public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
 
         public string DevicePath { get; }
 
