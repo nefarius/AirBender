@@ -114,6 +114,7 @@ Return Value:
     SIZE_T                          bufferLength;
     ULONG                           transferred = 0;
     PDEVICE_CONTEXT                 pDeviceContext;
+    PAIRBENDER_GET_CLIENT_COUNT     pGetClientCount;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
@@ -158,12 +159,41 @@ Return Value:
         status = HCI_Command_Reset(pDeviceContext);
 
         break;
+
+    case IOCTL_AIRBENDER_GET_CLIENT_COUNT:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_COUNT");
+
+        status = WdfRequestRetrieveOutputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_CLIENT_COUNT),
+            (LPVOID)&pGetClientCount,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_CLIENT_COUNT))
+        {
+            transferred = sizeof(AIRBENDER_GET_CLIENT_COUNT);
+            pGetClientCount->Count = BTH_DEVICE_LIST_GET_COUNT(&pDeviceContext->ClientDeviceList);
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "Buffer size mismatch: %d != %d",
+                (ULONG)OutputBufferLength, sizeof(AIRBENDER_GET_CLIENT_COUNT));
+        }
+
+        break;
     default:
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_QUEUE, "Unknown IOCTL code");
         status = STATUS_INVALID_PARAMETER;
         break;
     }
 
     WdfRequestCompleteWithInformation(Request, status, transferred);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
 VOID

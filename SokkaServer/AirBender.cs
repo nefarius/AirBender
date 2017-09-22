@@ -54,6 +54,7 @@ namespace SokkaServer
 
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
 
+#if TEST
             //
             // Request host controller to reset and clean up resources
             // 
@@ -65,6 +66,28 @@ namespace SokkaServer
 
             if (!ret)
                 throw new InvalidOperationException("IOCTL_AIRBENDER_HOST_RESET failed");
+#endif
+
+            length = Marshal.SizeOf(typeof(AIRBENDER_GET_CLIENT_COUNT));
+            pData = Marshal.AllocHGlobal(length);
+            bytesReturned = 0;
+
+            //
+            // Request host MAC address
+            // 
+            ret = Kernel32.DeviceIoControl(
+                _deviceHandle,
+                unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_COUNT),
+                IntPtr.Zero, 0, pData, length,
+                out bytesReturned, IntPtr.Zero);
+
+            if (!ret)
+            {
+                Marshal.FreeHGlobal(pData);
+                throw new InvalidOperationException("IOCTL_AIRBENDER_GET_CLIENT_COUNT failed");
+            }
+
+            Log.Information($"Currently connected devices: {Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count}");
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
