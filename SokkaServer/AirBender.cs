@@ -49,7 +49,7 @@ namespace SokkaServer
 
         ~AirBender()
         {
-            _deviceHandle.Close();
+            _deviceHandle?.Close();
         }
     }
 }
