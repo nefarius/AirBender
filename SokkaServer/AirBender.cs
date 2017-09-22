@@ -43,7 +43,10 @@ namespace SokkaServer
                 out bytesReturned, IntPtr.Zero);
 
             if (!ret)
+            {
+                Marshal.FreeHGlobal(pData);
                 throw new InvalidOperationException("IOCTL_AIRBENDER_GET_HOST_BD_ADDR failed");
+            }
 
             HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
 
