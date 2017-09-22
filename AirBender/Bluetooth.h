@@ -136,7 +136,14 @@ VOID FORCEINLINE BTH_DEVICE_FREE(
     PBTH_DEVICE Device
 )
 {
-    free(Device->RemoteName);
+    if (Device->RemoteName)
+        free(Device->RemoteName);
+
+    if (Device->HidInputReport.Data)
+        free(Device->HidInputReport.Data);
+
+    if (Device->HidOutputReport.Data)
+        free(Device->HidOutputReport.Data);
 }
 
 /**
@@ -308,5 +315,33 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE(
     }
 
     return NULL;
+}
+
+/**
+ * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_FREE( PBTH_DEVICE_LIST List )
+ *
+ * \brief   Cleans the device list and disposes resources allocated by all children.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    22.09.2017
+ *
+ * \param   List    The device list.
+ *
+ * \return  Nothing.
+ */
+VOID FORCEINLINE BTH_DEVICE_LIST_FREE(
+    PBTH_DEVICE_LIST List
+)
+{
+    PBTH_DEVICE node = List->head;
+
+    while (node != NULL)
+    {
+        BTH_DEVICE_FREE(node);
+
+        node = node->next;
+    }
+
+    RtlZeroMemory(List, sizeof(BTH_DEVICE_LIST));
 }
 
