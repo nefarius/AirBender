@@ -13,6 +13,8 @@
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
+#include <pshpack1.h>
+
 /**
 * \typedef struct _BD_ADDR
 *
@@ -26,8 +28,8 @@ typedef struct _BD_ADDR
 
 typedef struct _AIRBENDER_GET_HOST_BD_ADDR
 {
-    ULONG Size;
-
     BD_ADDR Host;
 
 } AIRBENDER_GET_HOST_BD_ADDR, *PAIRBENDER_GET_HOST_BD_ADDR;
+
+#include <poppack.h>

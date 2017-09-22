@@ -117,7 +117,7 @@ Return Value:
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
-        "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
+        "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode 0x%X",
         Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
 
     pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
@@ -126,15 +126,25 @@ Return Value:
     {
     case IOCTL_AIRBENDER_GET_HOST_BD_ADDR:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_HOST_BD_ADDR");
+
         status = WdfRequestRetrieveOutputBuffer(
             Request,
             sizeof(AIRBENDER_GET_HOST_BD_ADDR),
             (LPVOID)&pGetBdAddr,
             &bufferLength);
 
-        if (NT_SUCCESS(status) && pGetBdAddr->Size == sizeof(AIRBENDER_GET_HOST_BD_ADDR))
+        if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_HOST_BD_ADDR))
         {
-            RtlCopyMemory(&pGetBdAddr->Host, &pDeviceContext->BluetoothHostAddress, sizeof(BD_ADDR));
+            transferred = sizeof(BD_ADDR);
+            RtlCopyMemory(&pGetBdAddr->Host, &pDeviceContext->BluetoothHostAddress, transferred);
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "Buffer size mismatch: %d != %d",
+                (ULONG)OutputBufferLength, sizeof(AIRBENDER_GET_HOST_BD_ADDR));
         }
 
         break;

@@ -2,13 +2,12 @@
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using PInvoke;
+using Serilog;
 
 namespace SokkaServer
 {
-    partial class AirBender
+    internal partial class AirBender
     {
-        public static Guid ClassGuid => Guid.Parse("a775e97e-a41b-4bfc-868e-25be84643b62");
-
         public AirBender(string devicePath)
         {
             DevicePath = devicePath;
@@ -24,32 +23,32 @@ namespace SokkaServer
             if (DeviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
-            var data = new AIRBENDER_GET_HOST_BD_ADDR();
-            var pData = IntPtr.Zero;
+            var length = Marshal.SizeOf(typeof(BD_ADDR));
+            var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
 
-            Marshal.StructureToPtr(data, pData, false);
-
-            Kernel32.DeviceIoControl(
+            var ret = Kernel32.DeviceIoControl(
                 DeviceHandle,
-                (int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR,
-                IntPtr.Zero, 
-                0, 
-                pData, 
-                Marshal.SizeOf(data), 
-                out bytesReturned, 
-                IntPtr.Zero);
-        }
+                unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
+                IntPtr.Zero, 0, pData, length,
+                out bytesReturned, IntPtr.Zero);
 
-        ~AirBender()
-        {
-            DeviceHandle.Close();
+            HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
+
+            Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
         }
+        
+        public static Guid ClassGuid => Guid.Parse("a775e97e-a41b-4bfc-868e-25be84643b62");
 
         public string DevicePath { get; }
 
         private Kernel32.SafeObjectHandle DeviceHandle { get; }
 
         public PhysicalAddress HostAddress { get; }
+
+        ~AirBender()
+        {
+            DeviceHandle.Close();
+        }
     }
 }

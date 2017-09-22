@@ -17,8 +17,6 @@ namespace SokkaServer
         [StructLayout(LayoutKind.Sequential)]
         private struct AIRBENDER_GET_HOST_BD_ADDR
         {
-            public UInt32 Size;
-
             public BD_ADDR Host;
         }
     }

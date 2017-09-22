@@ -213,15 +213,22 @@ NT status value
         }
 
         if (command == HCI_Read_BD_ADDR && HCI_COMMAND_SUCCESS(buffer))
-        {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_BD_ADDR SUCCESS");
-
+        {            
             pDeviceContext->BluetoothHostAddress.Address[0] = buffer[11];
             pDeviceContext->BluetoothHostAddress.Address[1] = buffer[10];
             pDeviceContext->BluetoothHostAddress.Address[2] = buffer[9];
             pDeviceContext->BluetoothHostAddress.Address[3] = buffer[8];
             pDeviceContext->BluetoothHostAddress.Address[4] = buffer[7];
             pDeviceContext->BluetoothHostAddress.Address[5] = buffer[6];
+
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, 
+                "HCI_Read_BD_ADDR SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
+                pDeviceContext->BluetoothHostAddress.Address[0],
+                pDeviceContext->BluetoothHostAddress.Address[1],
+                pDeviceContext->BluetoothHostAddress.Address[2],
+                pDeviceContext->BluetoothHostAddress.Address[3],
+                pDeviceContext->BluetoothHostAddress.Address[4],
+                pDeviceContext->BluetoothHostAddress.Address[5]);
 
             status = HCI_Command_Read_Buffer_Size(pDeviceContext);
         }
