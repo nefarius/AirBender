@@ -8,11 +8,13 @@ namespace SokkaServer
 {
     internal partial class AirBender
     {
+        private readonly Kernel32.SafeObjectHandle _deviceHandle;
+
         public AirBender(string devicePath)
         {
             DevicePath = devicePath;
 
-            DeviceHandle = Kernel32.CreateFile(DevicePath,
+            _deviceHandle = Kernel32.CreateFile(DevicePath,
                 Kernel32.ACCESS_MASK.GenericRight.GENERIC_READ | Kernel32.ACCESS_MASK.GenericRight.GENERIC_WRITE,
                 Kernel32.FileShare.FILE_SHARE_READ | Kernel32.FileShare.FILE_SHARE_WRITE,
                 IntPtr.Zero, Kernel32.CreationDisposition.OPEN_EXISTING,
@@ -20,7 +22,7 @@ namespace SokkaServer
                 Kernel32.SafeObjectHandle.Null
             );
 
-            if (DeviceHandle.IsInvalid)
+            if (_deviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
             var length = Marshal.SizeOf(typeof(BD_ADDR));
@@ -28,7 +30,7 @@ namespace SokkaServer
             var bytesReturned = 0;
 
             var ret = Kernel32.DeviceIoControl(
-                DeviceHandle,
+                _deviceHandle,
                 unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
                 IntPtr.Zero, 0, pData, length,
                 out bytesReturned, IntPtr.Zero);
@@ -37,18 +39,16 @@ namespace SokkaServer
 
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
         }
-        
+
         public static Guid ClassGuid => Guid.Parse("a775e97e-a41b-4bfc-868e-25be84643b62");
 
         public string DevicePath { get; }
-
-        private Kernel32.SafeObjectHandle DeviceHandle { get; }
 
         public PhysicalAddress HostAddress { get; }
 
         ~AirBender()
         {
-            DeviceHandle.Close();
+            _deviceHandle.Close();
         }
     }
 }

@@ -213,7 +213,10 @@ NT status value
         }
 
         if (command == HCI_Read_BD_ADDR && HCI_COMMAND_SUCCESS(buffer))
-        {            
+        {
+            //
+            // Reverse byte order to represent MAC address
+            // 
             pDeviceContext->BluetoothHostAddress.Address[0] = buffer[11];
             pDeviceContext->BluetoothHostAddress.Address[1] = buffer[10];
             pDeviceContext->BluetoothHostAddress.Address[2] = buffer[9];
@@ -364,7 +367,8 @@ NT status value
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                //Log.Warn("-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT, 
+                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
             }
@@ -408,7 +412,8 @@ NT status value
             {
                 pDeviceContext->DisableSSP = TRUE;
 
-                //Log.Warn("-- Simple Pairing not supported on this device. [SSP Disabled]");
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
+                    "-- Simple Pairing not supported on this device. [SSP Disabled]");
 
                 status = HCI_Command_Write_Scan_Enable(pDeviceContext);
             }
@@ -602,6 +607,8 @@ NT status value
 
     case HCI_Link_Key_Request_EV:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Link_Key_Request_EV");
+
         break;
 
 #pragma endregion 
@@ -609,6 +616,8 @@ NT status value
 #pragma region HCI_PIN_Code_Request_EV
 
     case HCI_PIN_Code_Request_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_PIN_Code_Request_EV");
 
         break;
 
@@ -618,6 +627,8 @@ NT status value
 
     case HCI_IO_Capability_Request_EV:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_IO_Capability_Request_EV");
+
         break;
 
 #pragma endregion
@@ -626,6 +637,8 @@ NT status value
 
     case HCI_User_Confirmation_Request_EV:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_User_Confirmation_Request_EV");
+
         break;
 
 #pragma endregion
@@ -633,6 +646,8 @@ NT status value
 #pragma region HCI_Link_Key_Notification_EV
 
     case HCI_Link_Key_Notification_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Link_Key_Notification_EV");
 
         break;
 
