@@ -44,6 +44,8 @@ namespace SokkaServer
 
             HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
 
+            Marshal.FreeHGlobal(pData);
+
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
 
             //
