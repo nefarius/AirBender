@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using PInvoke;
 using Serilog;
 using SokkaServer.Properties;
@@ -88,6 +89,27 @@ namespace SokkaServer
             }
 
             Log.Information($"Currently connected devices: {Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count}");
+
+            var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_STATE_REQUEST>();
+            var responseSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_STATE_RESPONSE>();
+            var requestBuffer = Marshal.AllocHGlobal(requestSize);
+            var responseBuffer = Marshal.AllocHGlobal(responseSize);
+
+            Marshal.StructureToPtr(
+                new AIRBENDER_GET_CLIENT_STATE_REQUEST()
+                {
+                    ClientIndex = 0,
+                    ResponseBufferSize = 0
+                },
+                requestBuffer, false);
+
+            ret = Kernel32.DeviceIoControl(
+                _deviceHandle,
+                unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_STATE),
+                requestBuffer, requestSize, responseBuffer, responseSize,
+                out bytesReturned, IntPtr.Zero);
+
+
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);

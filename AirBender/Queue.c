@@ -109,12 +109,14 @@ Return Value:
 
 --*/
 {
-    NTSTATUS                        status = STATUS_SUCCESS;
-    PAIRBENDER_GET_HOST_BD_ADDR     pGetBdAddr;
-    SIZE_T                          bufferLength;
-    ULONG                           transferred = 0;
-    PDEVICE_CONTEXT                 pDeviceContext;
-    PAIRBENDER_GET_CLIENT_COUNT     pGetClientCount;
+    NTSTATUS                                status = STATUS_SUCCESS;
+    PAIRBENDER_GET_HOST_BD_ADDR             pGetBdAddr;
+    SIZE_T                                  bufferLength;
+    ULONG                                   transferred = 0;
+    PDEVICE_CONTEXT                         pDeviceContext;
+    PAIRBENDER_GET_CLIENT_COUNT             pGetClientCount;
+    PAIRBENDER_GET_CLIENT_STATE_REQUEST     pGetStateReq;
+    PAIRBENDER_GET_CLIENT_STATE_RESPONSE    pGetStateResp;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
@@ -181,6 +183,36 @@ Return Value:
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE, "Buffer size mismatch: %d != %d",
                 (ULONG)OutputBufferLength, sizeof(AIRBENDER_GET_CLIENT_COUNT));
+        }
+
+        break;
+
+    case IOCTL_AIRBENDER_GET_CLIENT_STATE:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_STATE");
+
+        status = WdfRequestRetrieveInputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_CLIENT_STATE_REQUEST),
+            (LPVOID)&pGetStateReq,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_GET_CLIENT_STATE_REQUEST))
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE, "Requesting state for device #%d", pGetStateReq->ClientIndex);
+
+            status = WdfRequestRetrieveOutputBuffer(
+                Request,
+                sizeof(AIRBENDER_GET_CLIENT_STATE_RESPONSE),
+                (LPVOID)&pGetStateResp,
+                &bufferLength);
+
+            if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_CLIENT_STATE_RESPONSE))
+            {
+                pGetStateResp->ClientIndex = pGetStateReq->ClientIndex;
+            }
         }
 
         break;

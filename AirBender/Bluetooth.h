@@ -34,18 +34,6 @@ typedef struct _BTH_HANDLE_PAIR
 
 } BTH_HANDLE_PAIR;
 
-/**
- * \typedef enum _BTH_DEVICE_TYPE
- *
- * \brief   Defines an alias representing the possible types of the BTH_DEVICE.
- */
-typedef enum _BTH_DEVICE_TYPE
-{
-    DualShock3,
-    DualShock4
-
-} BTH_DEVICE_TYPE;
-
 typedef struct _BTH_DEVICE_HID_REPORT
 {
     LPVOID Data;
