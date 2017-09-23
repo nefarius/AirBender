@@ -108,18 +108,18 @@ typedef struct _BTH_DEVICE_LIST
  */
 #define BTH_HANDLE_FROM_BUFFER(_ch_, _buf_)     (RtlCopyMemory(&_ch_, _buf_, sizeof(BTH_HANDLE)));
 
-/**
- * \fn  VOID FORCEINLINE BTH_DEVICE_FREE( PBTH_DEVICE Device )
- *
- * \brief   Frees ressources allocated by provided BTH_DEVICE.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    20.09.2017
- *
- * \param   Device  The BTH_DEVICE handle.
- *
- * \return  Nothing.
- */
+ /**
+  * \fn  VOID FORCEINLINE BTH_DEVICE_FREE( PBTH_DEVICE Device )
+  *
+  * \brief   Frees ressources allocated by provided BTH_DEVICE.
+  *
+  * \author  Benjamin "Nefarius" Höglinger
+  * \date    20.09.2017
+  *
+  * \param   Device  The BTH_DEVICE handle.
+  *
+  * \return  Nothing.
+  */
 VOID FORCEINLINE BTH_DEVICE_FREE(
     PBTH_DEVICE Device
 )
@@ -331,5 +331,34 @@ VOID FORCEINLINE BTH_DEVICE_LIST_FREE(
     }
 
     RtlZeroMemory(List, sizeof(BTH_DEVICE_LIST));
+}
+
+/**
+ * \fn  PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_INDEX( PBTH_DEVICE_LIST List, ULONG Index )
+ *
+ * \brief   Returns a list element identified by the provided node index.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    24.09.2017
+ *
+ * \param   List    The device list.
+ * \param   Index   Zero-based index of the desired node.
+ *
+ * \return  A FORCEINLINE.
+ */
+PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_INDEX(
+    PBTH_DEVICE_LIST List,
+    ULONG Index
+)
+{
+    PBTH_DEVICE node = List->head;
+    ULONG i = 0;
+
+    while (node != NULL)
+    {
+        if (i++ == Index) return node;
+    }
+
+    return NULL;
 }
 
