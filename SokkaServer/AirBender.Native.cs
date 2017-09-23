@@ -29,7 +29,7 @@ namespace SokkaServer
             public UInt32 Count;
         }
 
-        public enum BTH_DEVICE_TYPE : uint
+        public enum BTH_DEVICE_TYPE : UInt32
         {
             DualShock3,
             DualShock4
@@ -43,7 +43,7 @@ namespace SokkaServer
             public UInt32 ResponseBufferSize;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct AIRBENDER_GET_CLIENT_STATE_RESPONSE
         {
             UInt32 ClientIndex;
@@ -52,7 +52,7 @@ namespace SokkaServer
 
             UInt32 ResponseBufferSize;
 
-            UInt32 ResponseBuffer;
+            UIntPtr ResponseBuffer;
         }
     }
 }

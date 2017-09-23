@@ -117,6 +117,7 @@ Return Value:
     PAIRBENDER_GET_CLIENT_COUNT             pGetClientCount;
     PAIRBENDER_GET_CLIENT_STATE_REQUEST     pGetStateReq;
     PAIRBENDER_GET_CLIENT_STATE_RESPONSE    pGetStateResp;
+    PBTH_DEVICE                             pBthDevice;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
@@ -211,8 +212,50 @@ Return Value:
 
             if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_CLIENT_STATE_RESPONSE))
             {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "Writing output buffer");
+
+                transferred = sizeof(AIRBENDER_GET_CLIENT_STATE_RESPONSE);
                 pGetStateResp->ClientIndex = pGetStateReq->ClientIndex;
+
+                pBthDevice = BTH_DEVICE_LIST_GET_BY_INDEX(&pDeviceContext->ClientDeviceList, pGetStateReq->ClientIndex);
+
+                if (pBthDevice == NULL)
+                {
+                    TraceEvents(TRACE_LEVEL_INFORMATION,
+                        TRACE_QUEUE, "Device not found");
+
+                    status = STATUS_DEVICE_DOES_NOT_EXIST;
+                    break;
+                }
+
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "pBthDevice = %p", pBthDevice);
+
+                if (pGetStateReq->ResponseBufferSize == pBthDevice->HidInputReport.Length)
+                {
+                    TraceEvents(TRACE_LEVEL_INFORMATION,
+                        TRACE_QUEUE, "Valid buffer length provided: %d", 
+                        pGetStateReq->ResponseBufferSize);
+
+                    RtlCopyMemory(pGetStateResp->ResponseBuffer, 
+                        pBthDevice->HidInputReport.Data, 
+                        pGetStateReq->ResponseBufferSize);
+                }
+                else
+                {
+                    TraceEvents(TRACE_LEVEL_INFORMATION,
+                        TRACE_QUEUE, "Buffer too small: %d",
+                        pGetStateReq->ResponseBufferSize);
+
+                    status = STATUS_BUFFER_TOO_SMALL;
+
+                    pGetStateResp->ResponseBufferSize = pBthDevice->HidInputReport.Length;
+                }
             }
+
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE, "Done");
         }
 
         break;

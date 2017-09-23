@@ -109,7 +109,10 @@ namespace SokkaServer
                 requestBuffer, requestSize, responseBuffer, responseSize,
                 out bytesReturned, IntPtr.Zero);
 
-
+            if (ret)
+            {
+                var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_STATE_RESPONSE>(responseBuffer);
+            }
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
