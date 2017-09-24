@@ -14,6 +14,9 @@ namespace SokkaServer
 
         internal const int ERROR_DEV_NOT_EXIST = 0x37;
 
+        private const int DS3_HID_INPUT_REPORT_SIZE = 0x31;
+        private const int DS3_HID_OUTPUT_REPORT_SIZE = 0x32;
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct BD_ADDR
         {
@@ -52,7 +55,7 @@ namespace SokkaServer
         internal struct AIRBENDER_GET_DS3_INPUT_REPORT
         {
             public BD_ADDR ClientAddress;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 49)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = DS3_HID_INPUT_REPORT_SIZE)]
             public byte[] ReportBuffer;
         }
 
@@ -60,7 +63,7 @@ namespace SokkaServer
         internal struct AIRBENDER_SET_DS3_OUTPUT_REPORT
         {
             public BD_ADDR ClientAddress;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = DS3_HID_OUTPUT_REPORT_SIZE)]
             public byte[] ReportBuffer;
         }
     }

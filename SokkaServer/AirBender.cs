@@ -14,12 +14,8 @@ namespace SokkaServer
 {
     internal partial class AirBender
     {
-        public Kernel32.SafeObjectHandle DeviceHandle { get; }
-
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
-        private IDisposable _deviceLookupTask;
-
-        private List<AirBenderChildDevice> Children { get; }
+        private readonly IDisposable _deviceLookupTask;
 
         public AirBender(string devicePath)
         {
@@ -43,25 +39,29 @@ namespace SokkaServer
             var length = Marshal.SizeOf(typeof(AIRBENDER_GET_HOST_BD_ADDR));
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
+            bool ret;
 
-            //
-            // Request host MAC address
-            // 
-            var ret = Kernel32.DeviceIoControl(
-                DeviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
-                IntPtr.Zero, 0, pData, length,
-                out bytesReturned, IntPtr.Zero);
+            try
+            {
+                //
+                // Request host MAC address
+                // 
+                ret = Kernel32.DeviceIoControl(
+                    DeviceHandle,
+                    unchecked((int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
+                    IntPtr.Zero, 0, pData, length,
+                    out bytesReturned, IntPtr.Zero);
 
-            if (!ret)
+                if (!ret)
+                    throw new InvalidOperationException("IOCTL_AIRBENDER_GET_HOST_BD_ADDR failed");
+
+                HostAddress =
+                    new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
+            }
+            finally
             {
                 Marshal.FreeHGlobal(pData);
-                throw new InvalidOperationException("IOCTL_AIRBENDER_GET_HOST_BD_ADDR failed");
             }
-
-            HostAddress = new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
-
-            Marshal.FreeHGlobal(pData);
 
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
 
@@ -79,6 +79,16 @@ namespace SokkaServer
 
             _deviceLookupTask = _deviceLookupSchedule.Subscribe(OnLookup);
         }
+
+        public Kernel32.SafeObjectHandle DeviceHandle { get; }
+
+        private List<AirBenderChildDevice> Children { get; }
+
+        public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
+
+        public string DevicePath { get; }
+
+        public PhysicalAddress HostAddress { get; }
 
         private void OnLookup(long l)
         {
@@ -115,7 +125,8 @@ namespace SokkaServer
                 PhysicalAddress address;
                 BTH_DEVICE_TYPE type;
 
-                GetDeviceStateByIndex(i, out address, out type);
+                if (!GetDeviceStateByIndex(i, out address, out type))
+                    continue;
 
                 switch (type)
                 {
@@ -135,7 +146,7 @@ namespace SokkaServer
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             Marshal.StructureToPtr(
-                new AIRBENDER_GET_CLIENT_DETAILS()
+                new AIRBENDER_GET_CLIENT_DETAILS
                 {
                     ClientIndex = clientIndex
                 },
@@ -176,12 +187,6 @@ namespace SokkaServer
 
             return false;
         }
-
-        public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
-
-        public string DevicePath { get; }
-
-        public PhysicalAddress HostAddress { get; }
 
         ~AirBender()
         {
