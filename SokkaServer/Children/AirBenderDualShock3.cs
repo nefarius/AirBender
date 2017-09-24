@@ -45,7 +45,7 @@ namespace SokkaServer.Children
                 int bytesReturned;
                 var ret = Kernel32.DeviceIoControl(
                     HostDevice.DeviceHandle,
-                    unchecked((int) AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                    unchecked((int)AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned, IntPtr.Zero);
 
@@ -60,14 +60,22 @@ namespace SokkaServer.Children
 
                     var sb = new StringBuilder();
 
-                    var report = new DualShock3InputReport(resp.ReportBuffer);
+                    //foreach (var b in resp.ReportBuffer)
+                    //{
+                    //    sb.Append($"{b:X2} ");
+                    //}
 
+                    var report = new DualShock3InputReport(resp.ReportBuffer);
+                    
                     foreach (var engagedButton in report.EngagedButtons)
                     {
                         Log.Information($"Button pressed: {engagedButton}");
                     }
+                    
+                    Log.Information($"{report.Cross}");
 
-                    Log.Information(sb.ToString());
+                    if (sb.Length > 0)
+                        Log.Information(sb.ToString());
                 }
             }
             finally

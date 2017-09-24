@@ -45,5 +45,37 @@ namespace SokkaServer.Children.DualShock3
                     .Where(button => (buttons & (uint) button) == (uint) button);
             }
         }
+
+        public byte LeftThumbX => Buffer[6];
+
+        public byte LeftThumbY => Buffer[7];
+
+        public byte RightThumbX => Buffer[8];
+
+        public byte RightThumbY => Buffer[9];
+
+        public byte DPadUp => Buffer[14];
+
+        public byte DPadRight => Buffer[15];
+
+        public byte DPadDown => Buffer[16];
+
+        public byte DPadLeft => Buffer[17];
+
+        public byte LeftTrigger => Buffer[18];
+
+        public byte RightTrigger => Buffer[19];
+
+        public byte LeftShoulder => Buffer[20];
+
+        public byte RightShoulder => Buffer[21];
+
+        public byte Triangle => Buffer[22];
+
+        public byte Circle => Buffer[23];
+
+        public byte Cross => Buffer[24];
+
+        public byte Square => Buffer[25];
     }
 }
