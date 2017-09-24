@@ -109,14 +109,15 @@ Return Value:
 
 --*/
 {
-    NTSTATUS                          status = STATUS_SUCCESS;
-    PAIRBENDER_GET_HOST_BD_ADDR       pGetBdAddr;
-    SIZE_T                            bufferLength;
-    ULONG                             transferred = 0;
-    PDEVICE_CONTEXT                   pDeviceContext;
-    PAIRBENDER_GET_CLIENT_COUNT       pGetClientCount;
-    PAIRBENDER_GET_CLIENT_DETAILS     pGetStateReq;
-    PBTH_DEVICE                       pBthDevice;
+    NTSTATUS                            status = STATUS_SUCCESS;
+    PAIRBENDER_GET_HOST_BD_ADDR         pGetBdAddr;
+    SIZE_T                              bufferLength;
+    ULONG                               transferred = 0;
+    PDEVICE_CONTEXT                     pDeviceContext;
+    PAIRBENDER_GET_CLIENT_COUNT         pGetClientCount;
+    PAIRBENDER_GET_CLIENT_DETAILS       pGetStateReq;
+    PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
+    PBTH_DEVICE                         pBthDevice;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
@@ -234,6 +235,52 @@ Return Value:
 
             TraceEvents(TRACE_LEVEL_INFORMATION,
                 TRACE_QUEUE, "Done");
+        }
+
+        break;
+
+    case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
+
+        status = WdfRequestRetrieveInputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_DS3_INPUT_REPORT),
+            (LPVOID)&pGetDs3Input,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_GET_DS3_INPUT_REPORT))
+        {
+            AIRBENDER_GET_DS3_INPUT_REPORT report = *pGetDs3Input;
+
+            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &report.ClientAddress);
+
+            if (pBthDevice == NULL)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "Device not found");
+
+                status = STATUS_DEVICE_DOES_NOT_EXIST;
+                break;
+            }
+
+            status = WdfRequestRetrieveOutputBuffer(
+                Request,
+                sizeof(AIRBENDER_GET_DS3_INPUT_REPORT),
+                (LPVOID)&pGetDs3Input,
+                &bufferLength);
+
+            if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_DS3_INPUT_REPORT))
+            {
+                pGetDs3Input->ClientAddress = report.ClientAddress;
+
+                transferred = sizeof(AIRBENDER_GET_DS3_INPUT_REPORT);
+
+                RtlCopyMemory(&pGetDs3Input->ReportBuffer,
+                    pBthDevice->HidInputReport.Data,
+                    pBthDevice->HidInputReport.Length);
+            }
         }
 
         break;

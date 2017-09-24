@@ -23,6 +23,11 @@
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
+#define IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT    CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x04, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_READ_ACCESS | FILE_WRITE_ACCESS)
+
 #include <pshpack1.h>
 
 /**
@@ -70,5 +75,13 @@ typedef struct _AIRBENDER_GET_CLIENT_DETAILS
     BD_ADDR ClientAddress;
 
 } AIRBENDER_GET_CLIENT_DETAILS, *PAIRBENDER_GET_CLIENT_DETAILS;
+
+typedef struct _AIRBENDER_GET_DS3_INPUT_REPORT
+{
+    BD_ADDR ClientAddress;
+
+    UCHAR ReportBuffer[49];
+
+} AIRBENDER_GET_DS3_INPUT_REPORT, *PAIRBENDER_GET_DS3_INPUT_REPORT;
 
 #include <poppack.h>

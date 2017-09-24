@@ -95,10 +95,9 @@ namespace SokkaServer
             GetHidInputBufferSize();
         }
 
-        private uint GetHidInputBufferSize(uint clientIndex = 0)
+        private void GetHidInputBufferSize(uint clientIndex = 0)
         {
             int bytesReturned;
-            uint requiredSize = 0;
             var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_DETAILS>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
@@ -127,11 +126,49 @@ namespace SokkaServer
                 var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
                 
                 var client = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
+
+                GetHidInputReport(client);
             }
 
             Marshal.FreeHGlobal(requestBuffer);
 
-            return requiredSize;
+
+        }
+
+        private void GetHidInputReport(PhysicalAddress client)
+        {
+            int bytesReturned;
+            var requestSize = Marshal.SizeOf<AIRBENDER_GET_DS3_INPUT_REPORT>();
+            var requestBuffer = Marshal.AllocHGlobal(requestSize);
+
+            Marshal.StructureToPtr(
+                new AIRBENDER_GET_DS3_INPUT_REPORT()
+                {
+                    ClientAddress = client.ToNativeBdAddr()
+                },
+                requestBuffer, false);
+
+            var ret = Kernel32.DeviceIoControl(
+                _deviceHandle,
+                unchecked((int)IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                requestBuffer, requestSize, requestBuffer, requestSize,
+                out bytesReturned, IntPtr.Zero);
+
+            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
+            {
+                Marshal.FreeHGlobal(requestBuffer);
+
+                throw new AirBenderDeviceNotFoundException();
+            }
+
+            if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
+            {
+                var resp = Marshal.PtrToStructure<AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
+
+               
+            }
+
+            Marshal.FreeHGlobal(requestBuffer);
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
