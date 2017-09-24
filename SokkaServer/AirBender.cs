@@ -127,7 +127,24 @@ namespace SokkaServer
                 
                 var client = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
 
-                GetHidInputReport(client);
+                //GetHidInputReport(client);
+
+                byte[] hidOutputReport =
+                {
+                    0x52, 0x01,
+                    0x00, 0xFF, 0x00, 0xFF, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xFF, 0x27, 0x10, 0x00, 0x32,
+                    0xFF, 0x27, 0x10, 0x00, 0x32,
+                    0xFF, 0x27, 0x10, 0x00, 0x32,
+                    0xFF, 0x27, 0x10, 0x00, 0x32,
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00
+                };
+
+                SetHidOutputReport(client, hidOutputReport);
             }
 
             Marshal.FreeHGlobal(requestBuffer);
@@ -166,6 +183,36 @@ namespace SokkaServer
                 var resp = Marshal.PtrToStructure<AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
 
                
+            }
+
+            Marshal.FreeHGlobal(requestBuffer);
+        }
+
+        private void SetHidOutputReport(PhysicalAddress client, byte[]report)
+        {
+            int bytesReturned;
+            var requestSize = Marshal.SizeOf<AIRBENDER_SET_DS3_OUTPUT_REPORT>();
+            var requestBuffer = Marshal.AllocHGlobal(requestSize);
+
+            Marshal.StructureToPtr(
+                new AIRBENDER_SET_DS3_OUTPUT_REPORT()
+                {
+                    ClientAddress = client.ToNativeBdAddr(),
+                    ReportBuffer = report
+                },
+                requestBuffer, false);
+
+            var ret = Kernel32.DeviceIoControl(
+                _deviceHandle,
+                unchecked((int)IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
+                requestBuffer, requestSize, IntPtr.Zero, 0,
+                out bytesReturned, IntPtr.Zero);
+
+            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
+            {
+                Marshal.FreeHGlobal(requestBuffer);
+
+                throw new AirBenderDeviceNotFoundException();
             }
 
             Marshal.FreeHGlobal(requestBuffer);

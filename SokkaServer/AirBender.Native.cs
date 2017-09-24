@@ -1,7 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 
 namespace SokkaServer
@@ -13,6 +10,7 @@ namespace SokkaServer
         private const uint IOCTL_AIRBENDER_GET_CLIENT_COUNT = 0x8000600C;
         private const uint IOCTL_AIRBENDER_GET_CLIENT_STATE = 0x8000E010;
         private const uint IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT = 0x8000E014;
+        private const uint IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT = 0x8000A018;
 
         private const int ERROR_DEV_NOT_EXIST = 0x37;
 
@@ -54,6 +52,14 @@ namespace SokkaServer
         {
             public BD_ADDR ClientAddress;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 49)]
+            public byte[] ReportBuffer;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct AIRBENDER_SET_DS3_OUTPUT_REPORT
+        {
+            public BD_ADDR ClientAddress;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 50)]
             public byte[] ReportBuffer;
         }
     }

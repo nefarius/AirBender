@@ -1,8 +1,5 @@
 #pragma once
 
-#define DS3_HID_INPUT_REPORT_SIZE   0x31
-#define DS3_HID_OUTPUT_REPORT_SIZE  0x32
-
 NTSTATUS
 Ds3ConnectionRequest(
     PDEVICE_CONTEXT Context,

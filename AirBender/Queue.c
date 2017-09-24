@@ -16,6 +16,7 @@ Environment:
 
 #include "driver.h"
 #include "queue.tmh"
+#include "L2CAP.h"
 
 NTSTATUS
 AirBenderQueueInitialize(
@@ -114,10 +115,11 @@ Return Value:
     SIZE_T                              bufferLength;
     ULONG                               transferred = 0;
     PDEVICE_CONTEXT                     pDeviceContext;
+    PBTH_DEVICE                         pBthDevice;
     PAIRBENDER_GET_CLIENT_COUNT         pGetClientCount;
     PAIRBENDER_GET_CLIENT_DETAILS       pGetStateReq;
     PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
-    PBTH_DEVICE                         pBthDevice;
+    PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
 
     TraceEvents(TRACE_LEVEL_INFORMATION,
         TRACE_QUEUE,
@@ -284,6 +286,53 @@ Return Value:
         }
 
         break;
+
+    case IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_DETAILS");
+
+        status = WdfRequestRetrieveInputBuffer(
+            Request,
+            sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT),
+            (LPVOID)&pSetDs3Output,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT))
+        {
+            L2CAP_CID scid;
+
+            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &pSetDs3Output->ClientAddress);
+
+            if (pBthDevice == NULL)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "Device not found");
+
+                status = STATUS_DEVICE_DOES_NOT_EXIST;
+                break;
+            }
+
+            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+                pBthDevice,
+                L2CAP_PSM_HID_Command,
+                &scid);
+
+            status = HID_Command(
+                pDeviceContext,
+                pBthDevice->HCI_ConnectionHandle,
+                scid,
+                pSetDs3Output->ReportBuffer,
+                DS3_HID_OUTPUT_REPORT_SIZE);
+
+            if (!NT_SUCCESS(status))
+            {
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE, "HID_Command failed");
+            }
+        }
+
+        break;
     default:
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_QUEUE, "Unknown IOCTL code");
@@ -293,7 +342,7 @@ Return Value:
 
     WdfRequestCompleteWithInformation(Request, status, transferred);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%X", IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT);
 }
 
 VOID
