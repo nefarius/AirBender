@@ -163,6 +163,9 @@ Return Value:
         pDeviceContext->Started = FALSE;
         status = HCI_Command_Reset(pDeviceContext);
 
+        BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
+        BTH_DEVICE_LIST_INIT(&pDeviceContext->ClientDeviceList);
+
         break;
 
     case IOCTL_AIRBENDER_GET_CLIENT_COUNT:
@@ -342,7 +345,7 @@ Return Value:
 
     WdfRequestCompleteWithInformation(Request, status, transferred);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%X", IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
 VOID

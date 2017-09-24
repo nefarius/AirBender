@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using PInvoke;
 using Serilog;
+using SokkaServer.Children;
 using SokkaServer.Exceptions;
 using SokkaServer.Properties;
 
@@ -12,16 +14,22 @@ namespace SokkaServer
 {
     internal partial class AirBender
     {
-        private readonly Kernel32.SafeObjectHandle _deviceHandle;
+        public Kernel32.SafeObjectHandle DeviceHandle { get; }
+
+        private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
+        private IDisposable _deviceLookupTask;
+
+        private List<AirBenderChildDevice> Children { get; }
 
         public AirBender(string devicePath)
         {
+            Children = new List<AirBenderChildDevice>();
             DevicePath = devicePath;
 
             //
             // Open device
             // 
-            _deviceHandle = Kernel32.CreateFile(DevicePath,
+            DeviceHandle = Kernel32.CreateFile(DevicePath,
                 Kernel32.ACCESS_MASK.GenericRight.GENERIC_READ | Kernel32.ACCESS_MASK.GenericRight.GENERIC_WRITE,
                 Kernel32.FileShare.FILE_SHARE_READ | Kernel32.FileShare.FILE_SHARE_WRITE,
                 IntPtr.Zero, Kernel32.CreationDisposition.OPEN_EXISTING,
@@ -29,7 +37,7 @@ namespace SokkaServer
                 Kernel32.SafeObjectHandle.Null
             );
 
-            if (_deviceHandle.IsInvalid)
+            if (DeviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
             var length = Marshal.SizeOf(typeof(AIRBENDER_GET_HOST_BD_ADDR));
@@ -40,7 +48,7 @@ namespace SokkaServer
             // Request host MAC address
             // 
             var ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
+                DeviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
                 IntPtr.Zero, 0, pData, length,
                 out bytesReturned, IntPtr.Zero);
@@ -57,29 +65,32 @@ namespace SokkaServer
 
             Log.Information($"Bluetooth Host Address: {HostAddress.AsFriendlyName()}");
 
-#if TEST
             //
             // Request host controller to reset and clean up resources
             // 
             ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
+                DeviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_HOST_RESET),
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned, IntPtr.Zero);
 
             if (!ret)
-                throw new InvalidOperationException("IOCTL_AIRBENDER_HOST_RESET failed");
-#endif
+                throw new AirBenderHostResetFailedException();
 
-            length = Marshal.SizeOf(typeof(AIRBENDER_GET_CLIENT_COUNT));
-            pData = Marshal.AllocHGlobal(length);
-            bytesReturned = 0;
+            _deviceLookupTask = _deviceLookupSchedule.Subscribe(OnLookup);
+        }
+
+        private void OnLookup(long l)
+        {
+            var length = Marshal.SizeOf(typeof(AIRBENDER_GET_CLIENT_COUNT));
+            var pData = Marshal.AllocHGlobal(length);
+            var bytesReturned = 0;
 
             //
-            // Request host MAC address
+            // Request client count
             // 
-            ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
+            var ret = Kernel32.DeviceIoControl(
+                DeviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_COUNT),
                 IntPtr.Zero, 0, pData, length,
                 out bytesReturned, IntPtr.Zero);
@@ -87,15 +98,37 @@ namespace SokkaServer
             if (!ret)
             {
                 Marshal.FreeHGlobal(pData);
-                throw new InvalidOperationException("IOCTL_AIRBENDER_GET_CLIENT_COUNT failed");
+                throw new AirbenderGetClientCountFailedException();
             }
 
-            Log.Information($"Currently connected devices: {Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count}");
+            var count = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count;
 
-            GetHidInputBufferSize();
+            //
+            // Return if no children or all children are already known
+            // 
+            if (count == 0 || count == Children.Count) return;
+
+            Log.Information($"Currently connected devices: {count}");
+
+            for (uint i = 0; i < count; i++)
+            {
+                PhysicalAddress address;
+                BTH_DEVICE_TYPE type;
+
+                GetDeviceStateByIndex(i, out address, out type);
+
+                switch (type)
+                {
+                    case BTH_DEVICE_TYPE.DualShock3:
+                        Children.Add(new AirBenderDualShock3(this, address));
+                        break;
+                    case BTH_DEVICE_TYPE.DualShock4:
+                        break;
+                }
+            }
         }
 
-        private void GetHidInputBufferSize(uint clientIndex = 0)
+        private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BTH_DEVICE_TYPE type)
         {
             int bytesReturned;
             var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_DETAILS>();
@@ -109,7 +142,7 @@ namespace SokkaServer
                 requestBuffer, false);
 
             var ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
+                DeviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_STATE),
                 requestBuffer, requestSize, requestBuffer, requestSize,
                 out bytesReturned, IntPtr.Zero);
@@ -121,101 +154,27 @@ namespace SokkaServer
                 throw new AirBenderDeviceNotFoundException();
             }
 
-            if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
+            try
             {
-                var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
-                
-                var client = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
-
-                //GetHidInputReport(client);
-
-                byte[] hidOutputReport =
+                if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
                 {
-                    0x52, 0x01,
-                    0x00, 0xFF, 0x00, 0xFF, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00,
-                    0xFF, 0x27, 0x10, 0x00, 0x32,
-                    0xFF, 0x27, 0x10, 0x00, 0x32,
-                    0xFF, 0x27, 0x10, 0x00, 0x32,
-                    0xFF, 0x27, 0x10, 0x00, 0x32,
-                    0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00
-                };
+                    var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
 
-                SetHidOutputReport(client, hidOutputReport);
+                    type = resp.DeviceType;
+                    address = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
+
+                    return true;
+                }
             }
-
-            Marshal.FreeHGlobal(requestBuffer);
-
-
-        }
-
-        private void GetHidInputReport(PhysicalAddress client)
-        {
-            int bytesReturned;
-            var requestSize = Marshal.SizeOf<AIRBENDER_GET_DS3_INPUT_REPORT>();
-            var requestBuffer = Marshal.AllocHGlobal(requestSize);
-
-            Marshal.StructureToPtr(
-                new AIRBENDER_GET_DS3_INPUT_REPORT()
-                {
-                    ClientAddress = client.ToNativeBdAddr()
-                },
-                requestBuffer, false);
-
-            var ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
-                requestBuffer, requestSize, requestBuffer, requestSize,
-                out bytesReturned, IntPtr.Zero);
-
-            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
+            finally
             {
                 Marshal.FreeHGlobal(requestBuffer);
-
-                throw new AirBenderDeviceNotFoundException();
             }
 
-            if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
-            {
-                var resp = Marshal.PtrToStructure<AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
+            type = BTH_DEVICE_TYPE.Unknown;
+            address = PhysicalAddress.None;
 
-               
-            }
-
-            Marshal.FreeHGlobal(requestBuffer);
-        }
-
-        private void SetHidOutputReport(PhysicalAddress client, byte[]report)
-        {
-            int bytesReturned;
-            var requestSize = Marshal.SizeOf<AIRBENDER_SET_DS3_OUTPUT_REPORT>();
-            var requestBuffer = Marshal.AllocHGlobal(requestSize);
-
-            Marshal.StructureToPtr(
-                new AIRBENDER_SET_DS3_OUTPUT_REPORT()
-                {
-                    ClientAddress = client.ToNativeBdAddr(),
-                    ReportBuffer = report
-                },
-                requestBuffer, false);
-
-            var ret = Kernel32.DeviceIoControl(
-                _deviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
-                requestBuffer, requestSize, IntPtr.Zero, 0,
-                out bytesReturned, IntPtr.Zero);
-
-            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
-            {
-                Marshal.FreeHGlobal(requestBuffer);
-
-                throw new AirBenderDeviceNotFoundException();
-            }
-
-            Marshal.FreeHGlobal(requestBuffer);
+            return false;
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
@@ -226,7 +185,8 @@ namespace SokkaServer
 
         ~AirBender()
         {
-            _deviceHandle?.Close();
+            _deviceLookupTask?.Dispose();
+            DeviceHandle?.Close();
         }
     }
 }
