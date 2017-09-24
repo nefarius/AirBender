@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
 using PInvoke;
-using Serilog;
 using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 
@@ -16,7 +14,8 @@ namespace SokkaServer.Children
 {
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {
-        private readonly byte[] _ledOffsets = { 0x02, 0x04, 0x08, 0x10 };
+        private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
+        private readonly DualShock4Controller _ds4;
 
         private readonly byte[] _hidOutputReport =
         {
@@ -29,9 +28,11 @@ namespace SokkaServer.Children
             0x00, 0x00
         };
 
+        private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
+
         public AirBenderDualShock3(AirBender host, PhysicalAddress client) : base(host, client)
         {
-            _btnMap = new Dictionary<DualShock3Buttons, DualShock4Buttons>()
+            _btnMap = new Dictionary<DualShock3Buttons, DualShock4Buttons>
             {
                 {DualShock3Buttons.Select, DualShock4Buttons.Share},
                 {DualShock3Buttons.LeftThumb, DualShock4Buttons.ThumbLeft},
@@ -52,10 +53,6 @@ namespace SokkaServer.Children
             _ds4.Connect();
         }
 
-        private readonly DualShock4Controller _ds4;
-
-        private Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
-
         protected override void OnInputReport(long l)
         {
             var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>();
@@ -73,19 +70,20 @@ namespace SokkaServer.Children
                 int bytesReturned;
                 var ret = Kernel32.DeviceIoControl(
                     HostDevice.DeviceHandle,
-                    unchecked((int)AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                    unchecked((int) AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned, IntPtr.Zero);
 
                 if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
-                {
                     OnChildDeviceDisconnected(EventArgs.Empty);
-                }
 
                 if (ret)
                 {
                     var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
 
+                    //
+                    // TODO: demo-code, remove!
+                    // 
                     var report = new DualShock3InputReport(resp.ReportBuffer);
                     var ds4Report = new DualShock4Report();
 
@@ -97,9 +95,29 @@ namespace SokkaServer.Children
                     ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
 
                     foreach (var engagedButton in report.EngagedButtons)
-                    {
                         ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value).ToArray());
-                    }
+
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                        ds4Report.SetDPad(DualShock4DPadValues.North);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                        ds4Report.SetDPad(DualShock4DPadValues.East);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                        ds4Report.SetDPad(DualShock4DPadValues.South);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                        ds4Report.SetDPad(DualShock4DPadValues.West);
+
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
+                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                        ds4Report.SetDPad(DualShock4DPadValues.Northeast);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
+                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                        ds4Report.SetDPad(DualShock4DPadValues.Southeast);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
+                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                        ds4Report.SetDPad(DualShock4DPadValues.Southwest);
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
+                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                        ds4Report.SetDPad(DualShock4DPadValues.Northwest);
 
                     _ds4.SendReport(ds4Report);
 
@@ -138,7 +156,7 @@ namespace SokkaServer.Children
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             Marshal.StructureToPtr(
-                new AirBender.AIRBENDER_SET_DS3_OUTPUT_REPORT()
+                new AirBender.AIRBENDER_SET_DS3_OUTPUT_REPORT
                 {
                     ClientAddress = ClientAddress.ToNativeBdAddr(),
                     ReportBuffer = _hidOutputReport
@@ -147,7 +165,7 @@ namespace SokkaServer.Children
 
             var ret = Kernel32.DeviceIoControl(
                 HostDevice.DeviceHandle,
-                unchecked((int)AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
+                unchecked((int) AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
                 requestBuffer, requestSize, IntPtr.Zero, 0,
                 out bytesReturned, IntPtr.Zero);
 
