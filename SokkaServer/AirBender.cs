@@ -48,7 +48,7 @@ namespace SokkaServer
                 // 
                 ret = Kernel32.DeviceIoControl(
                     DeviceHandle,
-                    unchecked((int)IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
+                    unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned, IntPtr.Zero);
 
@@ -70,7 +70,7 @@ namespace SokkaServer
             // 
             ret = Kernel32.DeviceIoControl(
                 DeviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_HOST_RESET),
+                unchecked((int) IOCTL_AIRBENDER_HOST_RESET),
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned, IntPtr.Zero);
 
@@ -101,7 +101,7 @@ namespace SokkaServer
             // 
             var ret = Kernel32.DeviceIoControl(
                 DeviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_COUNT),
+                unchecked((int) IOCTL_AIRBENDER_GET_CLIENT_COUNT),
                 IntPtr.Zero, 0, pData, length,
                 out bytesReturned, IntPtr.Zero);
 
@@ -131,12 +131,20 @@ namespace SokkaServer
                 switch (type)
                 {
                     case BTH_DEVICE_TYPE.DualShock3:
-                        Children.Add(new AirBenderDualShock3(this, address));
+                        var device = new AirBenderDualShock3(this, address);
+                        device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
+                        Children.Add(device);
                         break;
                     case BTH_DEVICE_TYPE.DualShock4:
+                        throw new NotImplementedException();
                         break;
                 }
             }
+        }
+
+        private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
+        {
+            throw new NotImplementedException();
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BTH_DEVICE_TYPE type)
@@ -154,7 +162,7 @@ namespace SokkaServer
 
             var ret = Kernel32.DeviceIoControl(
                 DeviceHandle,
-                unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_STATE),
+                unchecked((int) IOCTL_AIRBENDER_GET_CLIENT_STATE),
                 requestBuffer, requestSize, requestBuffer, requestSize,
                 out bytesReturned, IntPtr.Zero);
 

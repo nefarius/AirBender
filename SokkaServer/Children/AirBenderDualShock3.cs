@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using PInvoke;
 using Serilog;
+using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 
 namespace SokkaServer.Children
@@ -29,7 +30,6 @@ namespace SokkaServer.Children
 
         protected override void OnInputReport(long l)
         {
-            int bytesReturned;
             var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
@@ -40,34 +40,40 @@ namespace SokkaServer.Children
                 },
                 requestBuffer, false);
 
-            var ret = Kernel32.DeviceIoControl(
-                HostDevice.DeviceHandle,
-                unchecked((int)AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
-                requestBuffer, requestSize, requestBuffer, requestSize,
-                out bytesReturned, IntPtr.Zero);
-
-            if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
+            try
             {
-                Marshal.FreeHGlobal(requestBuffer);
+                int bytesReturned;
+                var ret = Kernel32.DeviceIoControl(
+                    HostDevice.DeviceHandle,
+                    unchecked((int) AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                    requestBuffer, requestSize, requestBuffer, requestSize,
+                    out bytesReturned, IntPtr.Zero);
 
-                throw new AirBenderDeviceNotFoundException();
-            }
-
-            if (ret)
-            {
-                var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
-
-                var sb = new StringBuilder();
-
-                foreach (var b in resp.ReportBuffer)
+                if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
                 {
-                    sb.Append($"{b:X2} ");
+                    OnChildDeviceDisconnected(EventArgs.Empty);
                 }
 
-                Log.Information(sb.ToString());
-            }
+                if (ret)
+                {
+                    var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
 
-            Marshal.FreeHGlobal(requestBuffer);
+                    var sb = new StringBuilder();
+
+                    var report = new DualShock3InputReport(resp.ReportBuffer);
+
+                    foreach (var engagedButton in report.EngagedButtons)
+                    {
+                        Log.Information($"Button pressed: {engagedButton}");
+                    }
+
+                    Log.Information(sb.ToString());
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(requestBuffer);
+            }
         }
 
         protected override void OnOutputReport(long l)

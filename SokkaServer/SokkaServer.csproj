@@ -105,6 +105,7 @@
     <Compile Include="AirBender.cs" />
     <Compile Include="AirBenderChildDevice.cs" />
     <Compile Include="Children\AirBenderDualShock3.cs" />
+    <Compile Include="Children\DualShock3\DualShock3InputReport.cs" />
     <Compile Include="Exceptions\AirBenderDeviceNotFoundException.cs" />
     <Compile Include="Exceptions\AirbenderGetClientCountFailedException.cs" />
     <Compile Include="Exceptions\AirBenderGetClientStateFailedException.cs" />
