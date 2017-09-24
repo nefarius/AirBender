@@ -18,7 +18,7 @@
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS)
 
-#define IOCTL_AIRBENDER_GET_CLIENT_STATE        CTL_CODE(FILE_DEVICE_AIRBENDER, \
+#define IOCTL_AIRBENDER_GET_CLIENT_DETAILS      CTL_CODE(FILE_DEVICE_AIRBENDER, \
                                                             IOCTL_INDEX + 0x03, \
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS | FILE_WRITE_ACCESS)
@@ -61,24 +61,14 @@ typedef struct _AIRBENDER_GET_CLIENT_COUNT
 
 } AIRBENDER_GET_CLIENT_COUNT, *PAIRBENDER_GET_CLIENT_COUNT;
 
-typedef struct _AIRBENDER_GET_CLIENT_STATE_REQUEST
-{
-    ULONG ClientIndex;
-
-    ULONG ResponseBufferSize;
-
-} AIRBENDER_GET_CLIENT_STATE_REQUEST, *PAIRBENDER_GET_CLIENT_STATE_REQUEST;
-
-typedef struct _AIRBENDER_GET_CLIENT_STATE_RESPONSE
+typedef struct _AIRBENDER_GET_CLIENT_DETAILS
 {
     ULONG ClientIndex;
 
     BTH_DEVICE_TYPE DeviceType;
 
-    ULONG ResponseBufferSize;
+    BD_ADDR ClientAddress;
 
-    LPVOID ResponseBuffer;
-
-} AIRBENDER_GET_CLIENT_STATE_RESPONSE, *PAIRBENDER_GET_CLIENT_STATE_RESPONSE;
+} AIRBENDER_GET_CLIENT_DETAILS, *PAIRBENDER_GET_CLIENT_DETAILS;
 
 #include <poppack.h>

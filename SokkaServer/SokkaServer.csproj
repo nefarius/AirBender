@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AirBender.cs" />
+    <Compile Include="Exceptions\AirBenderDeviceNotFoundException.cs" />
     <Compile Include="PhysicalAddressExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

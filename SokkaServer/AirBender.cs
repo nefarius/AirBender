@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using PInvoke;
 using Serilog;
+using SokkaServer.Exceptions;
 using SokkaServer.Properties;
 
 namespace SokkaServer
@@ -90,29 +92,46 @@ namespace SokkaServer
 
             Log.Information($"Currently connected devices: {Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count}");
 
-            var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_STATE_REQUEST>();
-            var responseSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_STATE_RESPONSE>();
+            GetHidInputBufferSize();
+        }
+
+        private uint GetHidInputBufferSize(uint clientIndex = 0)
+        {
+            int bytesReturned;
+            uint requiredSize = 0;
+            var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_DETAILS>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
-            var responseBuffer = Marshal.AllocHGlobal(responseSize);
 
             Marshal.StructureToPtr(
-                new AIRBENDER_GET_CLIENT_STATE_REQUEST()
+                new AIRBENDER_GET_CLIENT_DETAILS()
                 {
-                    ClientIndex = 0,
-                    ResponseBufferSize = 0
+                    ClientIndex = clientIndex
                 },
                 requestBuffer, false);
 
-            ret = Kernel32.DeviceIoControl(
+            var ret = Kernel32.DeviceIoControl(
                 _deviceHandle,
                 unchecked((int)IOCTL_AIRBENDER_GET_CLIENT_STATE),
-                requestBuffer, requestSize, responseBuffer, responseSize,
+                requestBuffer, requestSize, requestBuffer, requestSize,
                 out bytesReturned, IntPtr.Zero);
 
-            if (ret)
+            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
             {
-                var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_STATE_RESPONSE>(responseBuffer);
+                Marshal.FreeHGlobal(requestBuffer);
+
+                throw new AirBenderDeviceNotFoundException();
             }
+
+            if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
+            {
+                var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
+                
+                var client = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
+            }
+
+            Marshal.FreeHGlobal(requestBuffer);
+
+            return requiredSize;
         }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);

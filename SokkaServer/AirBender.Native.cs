@@ -10,14 +10,16 @@ namespace SokkaServer
         private const uint IOCTL_AIRBENDER_GET_CLIENT_COUNT = 0x8000600C;
         private const uint IOCTL_AIRBENDER_GET_CLIENT_STATE = 0x8000E010;
 
+        private const int ERROR_DEV_NOT_EXIST = 0x37;
+
         [StructLayout(LayoutKind.Sequential)]
         private struct BD_ADDR
         {
-			[MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
             public byte[] Address;
         }
 
-        [StructLayout(LayoutKind.Sequential)]
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct AIRBENDER_GET_HOST_BD_ADDR
         {
             public BD_ADDR Host;
@@ -35,24 +37,12 @@ namespace SokkaServer
             DualShock4
         }
 
-        [StructLayout(LayoutKind.Sequential)]
-        private struct AIRBENDER_GET_CLIENT_STATE_REQUEST
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        private struct AIRBENDER_GET_CLIENT_DETAILS
         {
             public UInt32 ClientIndex;
-
-            public UInt32 ResponseBufferSize;
-        }
-
-        [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        public struct AIRBENDER_GET_CLIENT_STATE_RESPONSE
-        {
-            UInt32 ClientIndex;
-
-            BTH_DEVICE_TYPE DeviceType;
-
-            UInt32 ResponseBufferSize;
-
-            UIntPtr ResponseBuffer;
+            public BTH_DEVICE_TYPE DeviceType;
+            public BD_ADDR ClientAddress;
         }
     }
 }
