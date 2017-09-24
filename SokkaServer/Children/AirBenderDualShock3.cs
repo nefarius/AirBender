@@ -28,7 +28,7 @@ namespace SokkaServer.Children
             0x00, 0x00
         };
 
-        private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
+        private readonly byte[] _ledOffsets = { 0x02, 0x04, 0x08, 0x10 };
 
         public AirBenderDualShock3(AirBender host, PhysicalAddress client) : base(host, client)
         {
@@ -70,7 +70,7 @@ namespace SokkaServer.Children
                 int bytesReturned;
                 var ret = Kernel32.DeviceIoControl(
                     HostDevice.DeviceHandle,
-                    unchecked((int) AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                    unchecked((int)AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned, IntPtr.Zero);
 
@@ -119,6 +119,9 @@ namespace SokkaServer.Children
                         && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
                         ds4Report.SetDPad(DualShock4DPadValues.Northwest);
 
+                    if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
+                        ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
+
                     _ds4.SendReport(ds4Report);
 
 #if TEST
@@ -165,7 +168,7 @@ namespace SokkaServer.Children
 
             var ret = Kernel32.DeviceIoControl(
                 HostDevice.DeviceHandle,
-                unchecked((int) AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
+                unchecked((int)AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
                 requestBuffer, requestSize, IntPtr.Zero, 0,
                 out bytesReturned, IntPtr.Zero);
 
