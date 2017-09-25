@@ -112,6 +112,7 @@
     <Compile Include="Exceptions\AirBenderDeviceNotFoundException.cs" />
     <Compile Include="Exceptions\AirbenderGetClientCountFailedException.cs" />
     <Compile Include="Exceptions\AirBenderGetClientStateFailedException.cs" />
+    <Compile Include="Exceptions\AirBenderGetHostBdAddrFailedException.cs" />
     <Compile Include="Exceptions\AirBenderHostResetFailedException.cs" />
     <Compile Include="PhysicalAddressExtensions.cs" />
     <Compile Include="Program.cs" />
@@ -122,6 +123,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SokkaService.cs" />
+    <Compile Include="Util\Driver.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AirBender.Native.cs" />

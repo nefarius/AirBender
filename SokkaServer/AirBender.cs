@@ -4,11 +4,13 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using PInvoke;
 using Serilog;
 using SokkaServer.Children;
 using SokkaServer.Exceptions;
 using SokkaServer.Properties;
+using SokkaServer.Util;
 
 namespace SokkaServer
 {
@@ -29,7 +31,7 @@ namespace SokkaServer
                 Kernel32.ACCESS_MASK.GenericRight.GENERIC_READ | Kernel32.ACCESS_MASK.GenericRight.GENERIC_WRITE,
                 Kernel32.FileShare.FILE_SHARE_READ | Kernel32.FileShare.FILE_SHARE_WRITE,
                 IntPtr.Zero, Kernel32.CreationDisposition.OPEN_EXISTING,
-                Kernel32.CreateFileFlags.FILE_ATTRIBUTE_NORMAL /*| Kernel32.CreateFileFlags.FILE_FLAG_OVERLAPPED*/,
+                Kernel32.CreateFileFlags.FILE_ATTRIBUTE_NORMAL | Kernel32.CreateFileFlags.FILE_FLAG_OVERLAPPED,
                 Kernel32.SafeObjectHandle.Null
             );
 
@@ -46,14 +48,14 @@ namespace SokkaServer
                 //
                 // Request host MAC address
                 // 
-                ret = Kernel32.DeviceIoControl(
+                ret = Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    unchecked((int) IOCTL_AIRBENDER_GET_HOST_BD_ADDR),
+                    IOCTL_AIRBENDER_GET_HOST_BD_ADDR,
                     IntPtr.Zero, 0, pData, length,
-                    out bytesReturned, IntPtr.Zero);
+                    out bytesReturned);
 
                 if (!ret)
-                    throw new InvalidOperationException("IOCTL_AIRBENDER_GET_HOST_BD_ADDR failed");
+                    throw new AirBenderGetHostBdAddrFailedException();
 
                 HostAddress =
                     new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
@@ -68,11 +70,11 @@ namespace SokkaServer
             //
             // Request host controller to reset and clean up resources
             // 
-            ret = Kernel32.DeviceIoControl(
+            ret = Driver.OverlappedDeviceIoControl(
                 DeviceHandle,
-                unchecked((int) IOCTL_AIRBENDER_HOST_RESET),
+                IOCTL_AIRBENDER_HOST_RESET,
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
-                out bytesReturned, IntPtr.Zero);
+                out bytesReturned);
 
             if (!ret)
                 throw new AirBenderHostResetFailedException();
@@ -99,11 +101,11 @@ namespace SokkaServer
             //
             // Request client count
             // 
-            var ret = Kernel32.DeviceIoControl(
+            var ret = Driver.OverlappedDeviceIoControl(
                 DeviceHandle,
-                unchecked((int) IOCTL_AIRBENDER_GET_CLIENT_COUNT),
+                IOCTL_AIRBENDER_GET_CLIENT_COUNT,
                 IntPtr.Zero, 0, pData, length,
-                out bytesReturned, IntPtr.Zero);
+                out bytesReturned);
 
             if (!ret)
             {
@@ -160,11 +162,11 @@ namespace SokkaServer
                 },
                 requestBuffer, false);
 
-            var ret = Kernel32.DeviceIoControl(
+            var ret = Driver.OverlappedDeviceIoControl(
                 DeviceHandle,
-                unchecked((int) IOCTL_AIRBENDER_GET_CLIENT_STATE),
+                IOCTL_AIRBENDER_GET_CLIENT_STATE,
                 requestBuffer, requestSize, requestBuffer, requestSize,
-                out bytesReturned, IntPtr.Zero);
+                out bytesReturned);
 
             if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
             {

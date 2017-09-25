@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
-using PInvoke;
 using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
+using SokkaServer.Util;
 
 namespace SokkaServer.Children
 {
@@ -68,11 +68,11 @@ namespace SokkaServer.Children
             try
             {
                 int bytesReturned;
-                var ret = Kernel32.DeviceIoControl(
+                var ret = Driver.OverlappedDeviceIoControl(
                     HostDevice.DeviceHandle,
-                    unchecked((int)AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT),
+                    AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT,
                     requestBuffer, requestSize, requestBuffer, requestSize,
-                    out bytesReturned, IntPtr.Zero);
+                    out bytesReturned);
 
                 if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
                     OnChildDeviceDisconnected(EventArgs.Empty);
@@ -166,16 +166,15 @@ namespace SokkaServer.Children
                 },
                 requestBuffer, false);
 
-            var ret = Kernel32.DeviceIoControl(
+            var ret = Driver.OverlappedDeviceIoControl(
                 HostDevice.DeviceHandle,
-                unchecked((int)AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT),
+                AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT,
                 requestBuffer, requestSize, IntPtr.Zero, 0,
-                out bytesReturned, IntPtr.Zero);
+                out bytesReturned);
 
             if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
             {
                 Marshal.FreeHGlobal(requestBuffer);
-
                 throw new AirBenderDeviceNotFoundException();
             }
 
