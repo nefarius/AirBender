@@ -135,6 +135,7 @@ namespace SokkaServer.Children
 
                         _ds4.SendReport(ds4Report);
 
+#if DEBUG
                         var sb = new StringBuilder();
 
                         foreach (var b in resp.ReportBuffer)
@@ -145,6 +146,7 @@ namespace SokkaServer.Children
 
                         if (sb.Length > 0)
                             Log.Information(sb.ToString());
+#endif
                     }
                 }
             }
