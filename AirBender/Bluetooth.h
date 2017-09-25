@@ -70,9 +70,9 @@ typedef struct _BTH_DEVICE
 
     BTH_DEVICE_TYPE DeviceType;
 
-    BTH_DEVICE_HID_REPORT HidInputReport;
-
     BTH_DEVICE_HID_REPORT HidOutputReport;
+
+    WDFQUEUE HidInputReportQueue;
 
     struct _BTH_DEVICE *next;
 
@@ -127,11 +127,11 @@ VOID FORCEINLINE BTH_DEVICE_FREE(
     if (Device->RemoteName)
         free(Device->RemoteName);
 
-    if (Device->HidInputReport.Data)
-        free(Device->HidInputReport.Data);
-
     if (Device->HidOutputReport.Data)
         free(Device->HidOutputReport.Data);
+
+    WdfIoQueuePurgeSynchronously(Device->HidInputReportQueue);
+    WdfObjectDelete(Device->HidInputReportQueue);
 }
 
 /**
@@ -165,17 +165,27 @@ VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
  * \param   List    The device list.
  * \param   Address The client MAC address.
  *
- * \return  Nothing.
+ * \return  NTSTATUS value.
  */
-VOID FORCEINLINE BTH_DEVICE_LIST_ADD(
+NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     PBTH_DEVICE_LIST List,
-    PBD_ADDR Address
+    PBD_ADDR Address,
+    WDFDEVICE HostDevice
 )
 {
+    NTSTATUS status;
+    WDF_IO_QUEUE_CONFIG queueCfg;
     PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
     RtlZeroMemory(node, sizeof(BTH_DEVICE));
 
     node->ClientAddress = *Address;
+
+    WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
+    status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
+    if (!NT_SUCCESS(status)) {
+        free(node);
+        return status;
+    }
 
     if (List->logicalLength == 0) {
         List->head = List->tail = node;
@@ -186,6 +196,8 @@ VOID FORCEINLINE BTH_DEVICE_LIST_ADD(
     }
 
     List->logicalLength++;
+
+    return status;
 }
 
 /**

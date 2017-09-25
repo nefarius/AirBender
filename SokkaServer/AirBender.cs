@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 using PInvoke;
 using Serilog;
 using SokkaServer.Children;
@@ -110,7 +109,10 @@ namespace SokkaServer
             if (!ret)
             {
                 Marshal.FreeHGlobal(pData);
-                throw new AirbenderGetClientCountFailedException();
+                var w32 = new Win32Exception(Marshal.GetHRForLastWin32Error());
+                Log.Error(w32.Message);
+
+                //throw new AirbenderGetClientCountFailedException();
             }
 
             var count = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count;
@@ -139,7 +141,6 @@ namespace SokkaServer
                         break;
                     case BTH_DEVICE_TYPE.DualShock4:
                         throw new NotImplementedException();
-                        break;
                 }
             }
         }

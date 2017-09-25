@@ -247,8 +247,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
         {
         case DualShock3:
 
-            RtlCopyMemory(pClientDevice->HidInputReport.Data,
-                &buffer[9], pClientDevice->HidInputReport.Length);
+            status = Ds3ProcessHidInputReport(pClientDevice, buffer);
 
             break;
         default:

@@ -130,6 +130,8 @@ Return Value:
 
     switch (IoControlCode)
     {
+#pragma region IOCTL_AIRBENDER_GET_HOST_BD_ADDR
+
     case IOCTL_AIRBENDER_GET_HOST_BD_ADDR:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -155,6 +157,10 @@ Return Value:
 
         break;
 
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_HOST_RESET
+
     case IOCTL_AIRBENDER_HOST_RESET:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -167,6 +173,10 @@ Return Value:
         BTH_DEVICE_LIST_INIT(&pDeviceContext->ClientDeviceList);
 
         break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_GET_CLIENT_COUNT
 
     case IOCTL_AIRBENDER_GET_CLIENT_COUNT:
 
@@ -192,6 +202,10 @@ Return Value:
         }
 
         break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_GET_CLIENT_DETAILS
 
     case IOCTL_AIRBENDER_GET_CLIENT_DETAILS:
 
@@ -244,6 +258,8 @@ Return Value:
 
         break;
 
+#pragma endregion
+
     case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -257,9 +273,7 @@ Return Value:
 
         if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_GET_DS3_INPUT_REPORT))
         {
-            AIRBENDER_GET_DS3_INPUT_REPORT report = *pGetDs3Input;
-
-            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &report.ClientAddress);
+            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &pGetDs3Input->ClientAddress);
 
             if (pBthDevice == NULL)
             {
@@ -270,30 +284,25 @@ Return Value:
                 break;
             }
 
-            status = WdfRequestRetrieveOutputBuffer(
-                Request,
-                sizeof(AIRBENDER_GET_DS3_INPUT_REPORT),
-                (LPVOID)&pGetDs3Input,
-                &bufferLength);
-
-            if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_DS3_INPUT_REPORT))
+            status = WdfRequestForwardToIoQueue(Request, pBthDevice->HidInputReportQueue);
+            if (!NT_SUCCESS(status))
             {
-                pGetDs3Input->ClientAddress = report.ClientAddress;
-
-                transferred = sizeof(AIRBENDER_GET_DS3_INPUT_REPORT);
-
-                RtlCopyMemory(&pGetDs3Input->ReportBuffer,
-                    pBthDevice->HidInputReport.Data,
-                    pBthDevice->HidInputReport.Length);
+                TraceEvents(TRACE_LEVEL_ERROR,
+                    TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+                break;
             }
+
+            status = STATUS_PENDING;
         }
 
         break;
 
+#pragma region IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT
+
     case IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_DETAILS");
+            TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -336,6 +345,9 @@ Return Value:
         }
 
         break;
+
+#pragma endregion
+
     default:
         TraceEvents(TRACE_LEVEL_ERROR,
             TRACE_QUEUE, "Unknown IOCTL code");
@@ -343,7 +355,8 @@ Return Value:
         break;
     }
 
-    WdfRequestCompleteWithInformation(Request, status, transferred);
+    if (status != STATUS_PENDING)
+        WdfRequestCompleteWithInformation(Request, status, transferred);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }

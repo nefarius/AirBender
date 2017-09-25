@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
+using Serilog;
 using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 using SokkaServer.Util;
@@ -28,7 +31,7 @@ namespace SokkaServer.Children
             0x00, 0x00
         };
 
-        private readonly byte[] _ledOffsets = { 0x02, 0x04, 0x08, 0x10 };
+        private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
 
         public AirBenderDualShock3(AirBender host, PhysicalAddress client) : base(host, client)
         {
@@ -53,8 +56,9 @@ namespace SokkaServer.Children
             _ds4.Connect();
         }
 
-        protected override void OnInputReport(long l)
+        protected override void RequestInputReport(object cancellationToken)
         {
+            var token = (CancellationToken) cancellationToken;
             var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
@@ -67,83 +71,81 @@ namespace SokkaServer.Children
 
             try
             {
-                int bytesReturned;
-                var ret = Driver.OverlappedDeviceIoControl(
-                    HostDevice.DeviceHandle,
-                    AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT,
-                    requestBuffer, requestSize, requestBuffer, requestSize,
-                    out bytesReturned);
-
-                if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
-                    OnChildDeviceDisconnected(EventArgs.Empty);
-
-                if (ret)
+                while (!token.IsCancellationRequested)
                 {
-                    var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
+                    int bytesReturned;
 
                     //
-                    // TODO: demo-code, remove!
-                    // 
-                    var report = new DualShock3InputReport(resp.ReportBuffer);
-                    var ds4Report = new DualShock4Report();
+                    // This call blocks until the driver supplies new data.
+                    //  
+                    var ret = Driver.OverlappedDeviceIoControl(
+                        HostDevice.DeviceHandle,
+                        AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT,
+                        requestBuffer, requestSize, requestBuffer, requestSize,
+                        out bytesReturned);
 
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
-                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
+                    if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
+                        OnChildDeviceDisconnected(EventArgs.Empty);
 
-                    foreach (var engagedButton in report.EngagedButtons)
-                        ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value).ToArray());
-
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                        ds4Report.SetDPad(DualShock4DPadValues.North);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                        ds4Report.SetDPad(DualShock4DPadValues.East);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                        ds4Report.SetDPad(DualShock4DPadValues.South);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                        ds4Report.SetDPad(DualShock4DPadValues.West);
-
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                        ds4Report.SetDPad(DualShock4DPadValues.Northeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                        ds4Report.SetDPad(DualShock4DPadValues.Southeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                        ds4Report.SetDPad(DualShock4DPadValues.Southwest);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                        ds4Report.SetDPad(DualShock4DPadValues.Northwest);
-
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
-                        ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
-
-                    _ds4.SendReport(ds4Report);
-
-#if TEST
-                    var sb = new StringBuilder();
-
-                    foreach (var b in resp.ReportBuffer)
+                    if (ret)
                     {
-                        sb.Append($"{b:X2} ");
-                    }
+                        var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
 
-                    var report = new DualShock3InputReport(resp.ReportBuffer);
-                    
-                    foreach (var engagedButton in report.EngagedButtons)
-                    {
-                        Log.Information($"Button pressed: {engagedButton}");
-                    }
-                    
-                    Log.Information($"{report.Cross}");
+                        //
+                        // TODO: demo-code, remove!
+                        // 
+                        var report = new DualShock3InputReport(resp.ReportBuffer);
+                        var ds4Report = new DualShock4Report();
 
-                    if (sb.Length > 0)
-                        Log.Information(sb.ToString());
-#endif
+                        ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
+                        ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
+                        ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
+                        ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
+                        ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
+                        ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
+
+                        foreach (var engagedButton in report.EngagedButtons)
+                            ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
+                                .ToArray());
+
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                            ds4Report.SetDPad(DualShock4DPadValues.North);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                            ds4Report.SetDPad(DualShock4DPadValues.East);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                            ds4Report.SetDPad(DualShock4DPadValues.South);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                            ds4Report.SetDPad(DualShock4DPadValues.West);
+
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                            ds4Report.SetDPad(DualShock4DPadValues.Northeast);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                            ds4Report.SetDPad(DualShock4DPadValues.Southeast);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                            ds4Report.SetDPad(DualShock4DPadValues.Southwest);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                            ds4Report.SetDPad(DualShock4DPadValues.Northwest);
+
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
+                            ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
+
+                        _ds4.SendReport(ds4Report);
+
+                        var sb = new StringBuilder();
+
+                        foreach (var b in resp.ReportBuffer)
+                            sb.Append($"{b:X2} ");
+
+                        foreach (var engagedButton in report.EngagedButtons)
+                            Log.Information($"Button pressed: {engagedButton}");
+
+                        if (sb.Length > 0)
+                            Log.Information(sb.ToString());
+                    }
                 }
             }
             finally

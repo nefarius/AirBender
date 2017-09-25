@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SokkaServer
 {
@@ -8,12 +10,10 @@ namespace SokkaServer
 
     internal abstract class AirBenderChildDevice
     {
-        private readonly IObservable<long> _inputReportSchedule = Observable.Interval(TimeSpan.FromMilliseconds(4));
-        private readonly IDisposable _inputReportTask;
+        private readonly CancellationTokenSource _inputCancellationTokenSourcePrimary = new CancellationTokenSource();
+        private readonly CancellationTokenSource _inputCancellationTokenSourceSecondary = new CancellationTokenSource();
         private readonly IObservable<long> _outputReportSchedule = Observable.Interval(TimeSpan.FromMilliseconds(10));
         private readonly IDisposable _outputReportTask;
-
-        public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 
         protected AirBenderChildDevice(AirBender host, PhysicalAddress client)
         {
@@ -21,20 +21,34 @@ namespace SokkaServer
             ClientAddress = client;
 
             _outputReportTask = _outputReportSchedule.Subscribe(OnOutputReport);
-            _inputReportTask = _inputReportSchedule.Subscribe(OnInputReport);
-        }
 
-        ~AirBenderChildDevice()
-        {
-            _outputReportTask?.Dispose();
-            _inputReportTask?.Dispose();
+            //
+            // Start two tasks requesting input reports in parallel.
+            // 
+            // While on threads request gets completed, another request can be
+            // queued by the other thread. This way no input can get lost because
+            // there's always at least one pending request in the driver to get
+            // completed. Each thread uses inverted calls for maximum performance.
+            // 
+            Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourcePrimary.Token);
+            Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourceSecondary.Token);
         }
 
         public AirBender HostDevice { get; }
 
         public PhysicalAddress ClientAddress { get; }
 
-        protected virtual void OnInputReport(long l)
+        public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
+
+        ~AirBenderChildDevice()
+        {
+            _outputReportTask?.Dispose();
+
+            _inputCancellationTokenSourcePrimary.Cancel();
+            _inputCancellationTokenSourceSecondary.Cancel();
+        }
+
+        protected virtual void RequestInputReport(object cancellationToken)
         {
         }
 
@@ -45,7 +59,9 @@ namespace SokkaServer
         protected virtual void OnChildDeviceDisconnected(EventArgs e)
         {
             _outputReportTask?.Dispose();
-            _inputReportTask?.Dispose();
+
+            _inputCancellationTokenSourcePrimary.Cancel();
+            _inputCancellationTokenSourceSecondary.Cancel();
 
             ChildDeviceDisconnected?.Invoke(this, e);
         }

@@ -43,3 +43,8 @@ Ds3InitHidReportStage(
     PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device,
     PBYTE CID);
+
+NTSTATUS
+Ds3ProcessHidInputReport(
+    PBTH_DEVICE Device,
+    PUCHAR Buffer);

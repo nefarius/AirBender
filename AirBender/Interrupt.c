@@ -68,25 +68,20 @@ SendControlRequest(
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AirBenderConfigContReaderForInterruptEndPoint(
-    _In_ PDEVICE_CONTEXT DeviceContext
+    _In_ WDFDEVICE Device
 )
-/*++
-Routine Description:
-This routine configures a continuous reader on the
-interrupt endpoint. It's called from the PrepareHarware event.
-Arguments:
-Return Value:
-NT status value
---*/
 {
     WDF_USB_CONTINUOUS_READER_CONFIG contReaderConfig;
     NTSTATUS status;
+    PDEVICE_CONTEXT pDeviceContext;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "%!FUNC! Entry");
 
+    pDeviceContext = DeviceGetContext(Device);
+
     WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&contReaderConfig,
         AirBenderEvtUsbInterruptPipeReadComplete,
-        DeviceContext,    // Context
+        Device,    // Context
         INTERRUPT_IN_BUFFER_LENGTH);   // TransferLength
 
     contReaderConfig.EvtUsbTargetPipeReadersFailed = AirBenderEvtUsbInterruptReadersFailed;
@@ -98,7 +93,7 @@ NT status value
     // By defaut, framework queues two requests to the target
     // endpoint. Driver can configure up to 10 requests with CONFIG macro.
     //
-    status = WdfUsbTargetPipeConfigContinuousReader(DeviceContext->InterruptPipe,
+    status = WdfUsbTargetPipeConfigContinuousReader(pDeviceContext->InterruptPipe,
         &contReaderConfig);
 
     if (!NT_SUCCESS(status)) {
@@ -120,31 +115,17 @@ AirBenderEvtUsbInterruptPipeReadComplete(
     size_t      NumBytesTransferred,
     WDFCONTEXT  Context
 )
-/*++
-Routine Description:
-This the completion routine of the continour reader. This can
-called concurrently on multiprocessor system if there are
-more than one readers configured. So make sure to protect
-access to global resources.
-Arguments:
-Buffer - This buffer is freed when this call returns.
-If the driver wants to delay processing of the buffer, it
-can take an additional referrence.
-Context - Provided in the WDF_USB_CONTINUOUS_READER_CONFIG_INIT macro
-Return Value:
-NT status value
---*/
 {
-    NTSTATUS        status;
-    PDEVICE_CONTEXT pDeviceContext = Context;
-    PUCHAR          buffer;
-    HCI_EVENT       event;
-    HCI_COMMAND     command;
-    BD_ADDR         clientAddr;
-    BTH_HANDLE      clientHandle;
+    NTSTATUS                status;
+    WDFDEVICE               Device = Context;
+    PDEVICE_CONTEXT         pDeviceContext;
+    PUCHAR                  buffer;
+    HCI_EVENT               event;
+    HCI_COMMAND             command;
+    BD_ADDR                 clientAddr;
+    BTH_HANDLE              clientHandle;
 
     UNREFERENCED_PARAMETER(Pipe);
-    UNREFERENCED_PARAMETER(Buffer);
 
     if (NumBytesTransferred == 0) {
         TraceEvents(TRACE_LEVEL_WARNING, TRACE_INTERRUPT,
@@ -154,6 +135,7 @@ NT status value
         return;
     }
 
+    pDeviceContext = DeviceGetContext(Device);
     buffer = WdfMemoryGetBuffer(Buffer, NULL);
     event = (HCI_EVENT)buffer[0];
     command = HCI_Null;
@@ -513,7 +495,13 @@ NT status value
             "HCI_Connection_Request_EV %d", (ULONG)NumBytesTransferred);
 
         BD_ADDR_FROM_BUFFER(clientAddr, &buffer[2]);
-        BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr);
+        status = BTH_DEVICE_LIST_ADD(&pDeviceContext->ClientDeviceList, &clientAddr, Device);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_INTERRUPT,
+                "BTH_DEVICE_LIST_ADD failed with status 0x%X", status);
+            break;
+        }
 
         status = HCI_Command_Delete_Stored_Link_Key(pDeviceContext, clientAddr);
         status = HCI_Command_Accept_Connection_Request(pDeviceContext, clientAddr, 0x00);
@@ -616,9 +604,6 @@ NT status value
             switch (device->DeviceType)
             {
             case DualShock3:
-
-                device->HidInputReport.Length = DS3_HID_INPUT_REPORT_SIZE;
-                device->HidInputReport.Data = malloc(DS3_HID_INPUT_REPORT_SIZE);
 
                 device->HidOutputReport.Length = DS3_HID_OUTPUT_REPORT_SIZE;
                 device->HidOutputReport.Data = malloc(DS3_HID_OUTPUT_REPORT_SIZE);

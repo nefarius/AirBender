@@ -382,8 +382,8 @@ Ds3DisconnectionResponse(
 
 NTSTATUS
 Ds3InitHidReportStage(
-    PDEVICE_CONTEXT Context, 
-    PBTH_DEVICE Device, 
+    PDEVICE_CONTEXT Context,
+    PBTH_DEVICE Device,
     PBYTE CID)
 {
     NTSTATUS    status = STATUS_SUCCESS;
@@ -422,7 +422,7 @@ Ds3InitHidReportStage(
             "<< HID_Command Index: %d, Length: %d",
             Device->InitHidStage - 1, hidCmdLen);
     }
-    else if(Device->IsServiceStarted)
+    else if (Device->IsServiceStarted)
     {
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &scid);
         L2CAP_DEVICE_GET_DCID_FOR_TYPE(Device, L2CAP_PSM_HID_Service, &dcid);
@@ -442,6 +442,46 @@ Ds3InitHidReportStage(
         {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "L2CAP_Command_Disconnection_Request failed");
         }
+    }
+
+    return status;
+}
+
+NTSTATUS
+Ds3ProcessHidInputReport(
+    PBTH_DEVICE Device,
+    PUCHAR Buffer)
+{
+    NTSTATUS status;
+    WDFREQUEST Request;
+    PAIRBENDER_GET_DS3_INPUT_REPORT pGetDs3Input;
+    SIZE_T bufferLength;
+
+    status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
+
+    if (NT_SUCCESS(status))
+    {
+        status = WdfRequestRetrieveOutputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_DS3_INPUT_REPORT),
+            (LPVOID)&pGetDs3Input,
+            &bufferLength);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, 
+                "WdfRequestRetrieveOutputBuffer failed with status 0x%X", status);
+            WdfRequestComplete(Request, status);
+            return status;
+        }
+
+        pGetDs3Input->ClientAddress = Device->ClientAddress;
+
+        RtlCopyMemory(&pGetDs3Input->ReportBuffer,
+            &Buffer[9],
+            DS3_HID_INPUT_REPORT_SIZE);
+
+        WdfRequestCompleteWithInformation(Request, status, bufferLength);
     }
 
     return status;

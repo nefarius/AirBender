@@ -259,7 +259,7 @@ Return Value:
     //    return status;
 
     // TODO: check return values
-    AirBenderConfigContReaderForInterruptEndPoint(pDeviceContext);
+    AirBenderConfigContReaderForInterruptEndPoint(Device);
     AirBenderConfigContReaderForBulkReadEndPoint(pDeviceContext);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
