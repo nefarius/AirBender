@@ -14,6 +14,7 @@ namespace SokkaServer
         internal const uint IOCTL_AIRBENDER_HOST_SHUTDOWN = 0x8000201C;
 
         internal const int ERROR_DEV_NOT_EXIST = 0x37;
+        internal const int ERROR_BAD_COMMAND = 0x16;
 
         private const int DS3_HID_INPUT_REPORT_SIZE = 0x31;
         private const int DS3_HID_OUTPUT_REPORT_SIZE = 0x32;

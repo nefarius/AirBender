@@ -97,51 +97,63 @@ namespace SokkaServer
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
 
-            //
-            // Request client count
-            // 
-            var ret = Driver.OverlappedDeviceIoControl(
-                DeviceHandle,
-                IOCTL_AIRBENDER_GET_CLIENT_COUNT,
-                IntPtr.Zero, 0, pData, length,
-                out bytesReturned);
+            try
+            {
+                //
+                // Request client count
+                // 
+                var ret = Driver.OverlappedDeviceIoControl(
+                    DeviceHandle,
+                    IOCTL_AIRBENDER_GET_CLIENT_COUNT,
+                    IntPtr.Zero, 0, pData, length,
+                    out bytesReturned);
 
-            if (!ret)
+                if (!ret && Marshal.GetLastWin32Error() == ERROR_BAD_COMMAND)
+                {
+                    Log.Warning($"Connection to device {DevicePath} lost, possibly it got removed");
+
+                    Dispose();
+                    return;
+                }
+
+                if (!ret)
+                {
+                    Log.Error($"Unexpected error: {new Win32Exception(Marshal.GetLastWin32Error())}");
+                    return;
+                }
+
+                var count = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count;
+
+                //
+                // Return if no children or all children are already known
+                // 
+                if (count == 0 || count == Children.Count) return;
+
+                Log.Information($"Currently connected devices: {count}");
+
+                for (uint i = 0; i < count; i++)
+                {
+                    PhysicalAddress address;
+                    BTH_DEVICE_TYPE type;
+
+                    if (!GetDeviceStateByIndex(i, out address, out type))
+                        continue;
+
+                    switch (type)
+                    {
+                        case BTH_DEVICE_TYPE.DualShock3:
+                            var device = new AirBenderDualShock3(this, address);
+                            device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
+                            Children.Add(device);
+                            break;
+                        case BTH_DEVICE_TYPE.DualShock4:
+                            throw new NotImplementedException();
+                    }
+                }
+            }
+            finally
             {
                 Marshal.FreeHGlobal(pData);
-                var w32 = new Win32Exception(Marshal.GetHRForLastWin32Error());
-                Log.Error(w32.Message);
-
-                //throw new AirbenderGetClientCountFailedException();
-            }
-
-            var count = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count;
-
-            //
-            // Return if no children or all children are already known
-            // 
-            if (count == 0 || count == Children.Count) return;
-
-            Log.Information($"Currently connected devices: {count}");
-
-            for (uint i = 0; i < count; i++)
-            {
-                PhysicalAddress address;
-                BTH_DEVICE_TYPE type;
-
-                if (!GetDeviceStateByIndex(i, out address, out type))
-                    continue;
-
-                switch (type)
-                {
-                    case BTH_DEVICE_TYPE.DualShock3:
-                        var device = new AirBenderDualShock3(this, address);
-                        device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
-                        Children.Add(device);
-                        break;
-                    case BTH_DEVICE_TYPE.DualShock4:
-                        throw new NotImplementedException();
-                }
             }
         }
 
@@ -152,32 +164,30 @@ namespace SokkaServer
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BTH_DEVICE_TYPE type)
         {
-            int bytesReturned;
             var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_DETAILS>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
-            Marshal.StructureToPtr(
-                new AIRBENDER_GET_CLIENT_DETAILS
-                {
-                    ClientIndex = clientIndex
-                },
-                requestBuffer, false);
-
-            var ret = Driver.OverlappedDeviceIoControl(
-                DeviceHandle,
-                IOCTL_AIRBENDER_GET_CLIENT_STATE,
-                requestBuffer, requestSize, requestBuffer, requestSize,
-                out bytesReturned);
-
-            if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
-            {
-                Marshal.FreeHGlobal(requestBuffer);
-
-                throw new AirBenderDeviceNotFoundException();
-            }
-
             try
             {
+                Marshal.StructureToPtr(
+                    new AIRBENDER_GET_CLIENT_DETAILS
+                    {
+                        ClientIndex = clientIndex
+                    },
+                    requestBuffer, false);
+
+                int bytesReturned;
+                var ret = Driver.OverlappedDeviceIoControl(
+                    DeviceHandle,
+                    IOCTL_AIRBENDER_GET_CLIENT_STATE,
+                    requestBuffer, requestSize, requestBuffer, requestSize,
+                    out bytesReturned);
+
+                if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
+                {
+                    throw new AirBenderDeviceNotFoundException();
+                }
+
                 if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
                 {
                     var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
