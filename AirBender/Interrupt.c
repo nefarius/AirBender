@@ -597,21 +597,6 @@ AirBenderEvtUsbInterruptPipeReadComplete(
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                 "Remote name: %s, length: %d, device: %d",
                 device->RemoteName, length, device->DeviceType);
-
-            //
-            // Allocate memory for the HID reports
-            // 
-            switch (device->DeviceType)
-            {
-            case DualShock3:
-
-                device->HidOutputReport.Length = DS3_HID_OUTPUT_REPORT_SIZE;
-                device->HidOutputReport.Data = malloc(DS3_HID_OUTPUT_REPORT_SIZE);
-
-                break;
-            default:
-                break;
-            }
         }
 
         break;

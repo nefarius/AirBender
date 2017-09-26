@@ -33,6 +33,11 @@
                                                             METHOD_BUFFERED,    \
                                                             FILE_WRITE_ACCESS)
 
+#define IOCTL_AIRBENDER_PORT_RESET              CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x06, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_ANY_ACCESS)
+
 #include <pshpack1.h>
 
 #define DS3_HID_INPUT_REPORT_SIZE   0x31

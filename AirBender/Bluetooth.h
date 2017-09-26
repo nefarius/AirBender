@@ -70,8 +70,6 @@ typedef struct _BTH_DEVICE
 
     BTH_DEVICE_TYPE DeviceType;
 
-    BTH_DEVICE_HID_REPORT HidOutputReport;
-
     WDFQUEUE HidInputReportQueue;
 
     struct _BTH_DEVICE *next;
@@ -111,7 +109,7 @@ typedef struct _BTH_DEVICE_LIST
  /**
   * \fn  VOID FORCEINLINE BTH_DEVICE_FREE( PBTH_DEVICE Device )
   *
-  * \brief   Frees ressources allocated by provided BTH_DEVICE.
+  * \brief   Frees resources allocated by provided BTH_DEVICE.
   *
   * \author  Benjamin "Nefarius" Höglinger
   * \date    20.09.2017
@@ -126,9 +124,6 @@ VOID FORCEINLINE BTH_DEVICE_FREE(
 {
     if (Device->RemoteName)
         free(Device->RemoteName);
-
-    if (Device->HidOutputReport.Data)
-        free(Device->HidOutputReport.Data);
 
     WdfIoQueuePurgeSynchronously(Device->HidInputReportQueue);
     WdfObjectDelete(Device->HidInputReportQueue);

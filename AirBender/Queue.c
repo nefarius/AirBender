@@ -110,7 +110,7 @@ Return Value:
 
 --*/
 {
-    NTSTATUS                            status = STATUS_SUCCESS;
+    NTSTATUS                            status;
     PAIRBENDER_GET_HOST_BD_ADDR         pGetBdAddr;
     SIZE_T                              bufferLength;
     ULONG                               transferred = 0;
@@ -260,6 +260,8 @@ Return Value:
 
 #pragma endregion
 
+#pragma region IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT
+
     case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -296,6 +298,8 @@ Return Value:
         }
 
         break;
+
+#pragma endregion
 
 #pragma region IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT
 
@@ -342,6 +346,36 @@ Return Value:
                 TraceEvents(TRACE_LEVEL_ERROR,
                     TRACE_QUEUE, "HID_Command failed");
             }
+        }
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_PORT_RESET
+
+    case IOCTL_AIRBENDER_PORT_RESET:
+
+        pDeviceContext->Started = FALSE;
+        status = HCI_Command_Reset(pDeviceContext);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_WARNING,
+                TRACE_QUEUE,
+                "HCI_Command_Reset failed with status 0x%X", status);
+        }
+
+        BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
+        BTH_DEVICE_LIST_INIT(&pDeviceContext->ClientDeviceList);
+
+        status = WdfUsbTargetDeviceResetPortSynchronously(pDeviceContext->UsbDevice);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "WdfUsbTargetDeviceResetPortSynchronously failed with status 0x%X",
+                status);
         }
 
         break;
