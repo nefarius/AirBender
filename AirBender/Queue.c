@@ -354,12 +354,12 @@ Return Value:
 
 #pragma region IOCTL_AIRBENDER_PORT_RESET
 
-    case IOCTL_AIRBENDER_PORT_RESET:
+    case IOCTL_AIRBENDER_HOST_SHUTDOWN:
 
         TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_PORT_RESET");
+            TRACE_QUEUE, "IOCTL_AIRBENDER_HOST_SHUTDOWN");
 
-        pDeviceContext->Started = FALSE;
+        pDeviceContext->Started = TRUE; // suppresses boot-up after reset
         status = HCI_Command_Reset(pDeviceContext);
 
         if (!NT_SUCCESS(status))

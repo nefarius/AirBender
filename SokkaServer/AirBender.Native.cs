@@ -11,7 +11,7 @@ namespace SokkaServer
         private const uint IOCTL_AIRBENDER_GET_CLIENT_STATE = 0x8000E010;
         internal const uint IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT = 0x8000E014;
         internal const uint IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT = 0x8000A018;
-        internal const uint IOCTL_AIRBENDER_PORT_RESET = 0x8000201C;
+        internal const uint IOCTL_AIRBENDER_HOST_SHUTDOWN = 0x8000201C;
 
         internal const int ERROR_DEV_NOT_EXIST = 0x37;
 

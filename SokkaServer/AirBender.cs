@@ -215,7 +215,7 @@ namespace SokkaServer
                 int bytesReturned;
                 Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    IOCTL_AIRBENDER_PORT_RESET,
+                    IOCTL_AIRBENDER_HOST_SHUTDOWN,
                     IntPtr.Zero, 0, IntPtr.Zero, 0, out bytesReturned);
 
                 DeviceHandle?.Close();
