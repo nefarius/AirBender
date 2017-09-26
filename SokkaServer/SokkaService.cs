@@ -31,7 +31,7 @@ namespace SokkaServer
 
         public void Stop()
         {
-
+            BthHost.Dispose();
         }
     }
 }

@@ -356,6 +356,9 @@ Return Value:
 
     case IOCTL_AIRBENDER_PORT_RESET:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_PORT_RESET");
+
         pDeviceContext->Started = FALSE;
         status = HCI_Command_Reset(pDeviceContext);
 
