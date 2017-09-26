@@ -148,7 +148,7 @@ namespace SokkaServer
                     switch (type)
                     {
                         case BTH_DEVICE_TYPE.DualShock3:
-                            var device = new AirBenderDualShock3(this, address);
+                            var device = new AirBenderDualShock3(this, address, (int)i);
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
                             Children.Add(device);
                             break;
@@ -165,7 +165,8 @@ namespace SokkaServer
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
         {
-            throw new NotImplementedException();
+            Children.Remove(sender as AirBenderChildDevice);
+            //throw new NotImplementedException();
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BTH_DEVICE_TYPE type)

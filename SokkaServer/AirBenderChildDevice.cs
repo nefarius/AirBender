@@ -15,10 +15,11 @@ namespace SokkaServer
         private readonly IObservable<long> _outputReportSchedule = Observable.Interval(TimeSpan.FromMilliseconds(10));
         private readonly IDisposable _outputReportTask;
 
-        protected AirBenderChildDevice(AirBender host, PhysicalAddress client)
+        protected AirBenderChildDevice(AirBender host, PhysicalAddress client, int index)
         {
             HostDevice = host;
             ClientAddress = client;
+            DeviceIndex = index;
 
             _outputReportTask = _outputReportSchedule.Subscribe(OnOutputReport);
 
@@ -33,6 +34,8 @@ namespace SokkaServer
             Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourcePrimary.Token);
             Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourceSecondary.Token);
         }
+
+        public int DeviceIndex { get; }
 
         public AirBender HostDevice { get; }
 

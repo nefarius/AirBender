@@ -31,9 +31,9 @@ namespace SokkaServer.Children
             0x00, 0x00
         };
 
-        private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
+        private readonly byte[] _ledOffsets = { 0x02, 0x04, 0x08, 0x10 };
 
-        public AirBenderDualShock3(AirBender host, PhysicalAddress client) : base(host, client)
+        public AirBenderDualShock3(AirBender host, PhysicalAddress client, int index) : base(host, client, index)
         {
             _btnMap = new Dictionary<DualShock3Buttons, DualShock4Buttons>
             {
@@ -54,11 +54,14 @@ namespace SokkaServer.Children
             var vigem = new ViGEmClient();
             _ds4 = new DualShock4Controller(vigem);
             _ds4.Connect();
+
+            if (index >= 0 && index < 4)
+                _hidOutputReport[11] = _ledOffsets[index];
         }
 
         protected override void RequestInputReport(object cancellationToken)
         {
-            var token = (CancellationToken) cancellationToken;
+            var token = (CancellationToken)cancellationToken;
             var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
