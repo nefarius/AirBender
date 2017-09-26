@@ -95,19 +95,22 @@ namespace SokkaServer
         {
             var length = Marshal.SizeOf(typeof(AIRBENDER_GET_CLIENT_COUNT));
             var pData = Marshal.AllocHGlobal(length);
-            var bytesReturned = 0;
 
             try
             {
                 //
                 // Request client count
                 // 
+                var bytesReturned = 0;
                 var ret = Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
                     IOCTL_AIRBENDER_GET_CLIENT_COUNT,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
 
+                //
+                // This happens if the host device got "surprise-removed"
+                // 
                 if (!ret && Marshal.GetLastWin32Error() == ERROR_BAD_COMMAND)
                 {
                     Log.Warning($"Connection to device {DevicePath} lost, possibly it got removed");
@@ -116,6 +119,9 @@ namespace SokkaServer
                     return;
                 }
 
+                //
+                // Here something terrible happened
+                // 
                 if (!ret)
                 {
                     Log.Error($"Unexpected error: {new Win32Exception(Marshal.GetLastWin32Error())}");
