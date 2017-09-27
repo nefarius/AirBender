@@ -105,7 +105,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Host\AirBender.cs" />
+    <Compile Include="Host\AirBenderHost.cs" />
     <Compile Include="Children\AirBenderChildDevice.cs" />
     <Compile Include="Children\DualShock3\AirBenderDualShock3.cs" />
     <Compile Include="Children\DualShock3\DualShock3InputReport.cs" />
@@ -126,7 +126,7 @@
     <Compile Include="Util\Driver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Host\AirBender.Native.cs" />
+    <Compile Include="Host\AirBenderHost.Native.cs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

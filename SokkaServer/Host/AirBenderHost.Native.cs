@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace SokkaServer.Host
 {
-    partial class AirBender
+    partial class AirBenderHost
     {
         private const uint IoctlAirbenderGetHostBdAddr = 0x80006004;
         private const uint IoctlAirbenderHostReset = 0x80002008;

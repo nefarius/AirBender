@@ -16,7 +16,7 @@ namespace SokkaServer.Children
         private readonly IObservable<long> _outputReportSchedule = Observable.Interval(TimeSpan.FromMilliseconds(10));
         private readonly IDisposable _outputReportTask;
 
-        protected AirBenderChildDevice(AirBender host, PhysicalAddress client, int index)
+        protected AirBenderChildDevice(AirBenderHost host, PhysicalAddress client, int index)
         {
             HostDevice = host;
             ClientAddress = client;
@@ -38,7 +38,7 @@ namespace SokkaServer.Children
 
         public int DeviceIndex { get; }
 
-        public AirBender HostDevice { get; }
+        public AirBenderHost HostDevice { get; }
 
         public PhysicalAddress ClientAddress { get; }
 

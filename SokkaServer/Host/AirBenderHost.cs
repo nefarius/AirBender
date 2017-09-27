@@ -14,12 +14,12 @@ using SokkaServer.Util;
 
 namespace SokkaServer.Host
 {
-    internal partial class AirBender : IDisposable
+    internal partial class AirBenderHost : IDisposable
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
 
-        public AirBender(string devicePath)
+        public AirBenderHost(string devicePath)
         {
             Children = new List<AirBenderChildDevice>();
             DevicePath = devicePath;
@@ -243,7 +243,7 @@ namespace SokkaServer.Host
         }
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        ~AirBender()
+        ~AirBenderHost()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(false);

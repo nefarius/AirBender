@@ -7,7 +7,7 @@ namespace SokkaServer
 {
     class SokkaService
     {
-        private AirBender BthHost { get; set; }
+        private AirBenderHost BthHost { get; set; }
 
         public void Start()
         {
@@ -17,11 +17,11 @@ namespace SokkaServer
 
             try
             {
-                if (Devcon.Find(AirBender.ClassGuid, ref path, ref instance))
+                if (Devcon.Find(AirBenderHost.ClassGuid, ref path, ref instance))
                 {
                     Log.Information($"Found AirBender device {path} ({instance})");
 
-                    BthHost = new AirBender(path);
+                    BthHost = new AirBenderHost(path);
                 }
             }
             catch (Exception ex)

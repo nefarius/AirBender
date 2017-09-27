@@ -19,9 +19,9 @@ namespace SokkaServer.Util
             return $"{bytes[0]:X2}:{bytes[1]:X2}:{bytes[2]:X2}:{bytes[3]:X2}:{bytes[4]:X2}:{bytes[5]:X2}";
         }
 
-        internal static AirBender.BdAddr ToNativeBdAddr(this PhysicalAddress address)
+        internal static AirBenderHost.BdAddr ToNativeBdAddr(this PhysicalAddress address)
         {
-            return new AirBender.BdAddr()
+            return new AirBenderHost.BdAddr()
             {
                 Address = address.GetAddressBytes().Reverse().ToArray()
             };
