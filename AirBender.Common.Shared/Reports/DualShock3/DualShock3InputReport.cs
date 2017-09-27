@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SokkaServer.Children.DualShock3
+namespace AirBender.Common.Shared.Reports.DualShock3
 {
     public enum DualShock3Buttons
     {
