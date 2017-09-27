@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using System.Net.NetworkInformation;
+using SokkaServer.Host;
 
-namespace SokkaServer
+namespace SokkaServer.Util
 {
     public static class PhysicalAddressExtensions
     {

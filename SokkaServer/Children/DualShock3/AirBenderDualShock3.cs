@@ -9,11 +9,11 @@ using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
 using Serilog;
-using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
+using SokkaServer.Host;
 using SokkaServer.Util;
 
-namespace SokkaServer.Children
+namespace SokkaServer.Children.DualShock3
 {
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {

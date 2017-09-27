@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SokkaServer
+namespace SokkaServer.Host
 {
     partial class AirBender
     {

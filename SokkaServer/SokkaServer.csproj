@@ -105,16 +105,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AirBender.cs" />
-    <Compile Include="AirBenderChildDevice.cs" />
-    <Compile Include="Children\AirBenderDualShock3.cs" />
+    <Compile Include="Host\AirBender.cs" />
+    <Compile Include="Children\AirBenderChildDevice.cs" />
+    <Compile Include="Children\DualShock3\AirBenderDualShock3.cs" />
     <Compile Include="Children\DualShock3\DualShock3InputReport.cs" />
     <Compile Include="Exceptions\AirBenderDeviceNotFoundException.cs" />
     <Compile Include="Exceptions\AirbenderGetClientCountFailedException.cs" />
     <Compile Include="Exceptions\AirBenderGetClientStateFailedException.cs" />
     <Compile Include="Exceptions\AirBenderGetHostBdAddrFailedException.cs" />
     <Compile Include="Exceptions\AirBenderHostResetFailedException.cs" />
-    <Compile Include="PhysicalAddressExtensions.cs" />
+    <Compile Include="Util\PhysicalAddressExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
@@ -126,7 +126,7 @@
     <Compile Include="Util\Driver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AirBender.Native.cs" />
+    <Compile Include="Host\AirBender.Native.cs" />
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

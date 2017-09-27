@@ -3,8 +3,9 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using SokkaServer.Host;
 
-namespace SokkaServer
+namespace SokkaServer.Children
 {
     public delegate void ChildDeviceDisconnectedEventHandler(object sender, EventArgs e);
 

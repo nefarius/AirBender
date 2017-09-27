@@ -1,6 +1,7 @@
 ﻿using System;
 using Nefarius.Devcon;
 using Serilog;
+using SokkaServer.Host;
 
 namespace SokkaServer
 {

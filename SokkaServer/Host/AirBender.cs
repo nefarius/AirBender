@@ -7,11 +7,12 @@ using System.Runtime.InteropServices;
 using PInvoke;
 using Serilog;
 using SokkaServer.Children;
+using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 using SokkaServer.Properties;
 using SokkaServer.Util;
 
-namespace SokkaServer
+namespace SokkaServer.Host
 {
     internal partial class AirBender : IDisposable
     {
