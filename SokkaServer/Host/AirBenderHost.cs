@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
+using AirBender.Common.Shared.Messages;
+using AirBender.Common.Shared.Serialization;
 using PInvoke;
+using ProtoBuf;
 using Serilog;
 using SokkaServer.Children;
 using SokkaServer.Children.DualShock3;
@@ -19,7 +23,9 @@ namespace SokkaServer.Host
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
-        private readonly TinyMessageBus _messageBus = new TinyMessageBus("AirBenderMessageBus");
+        private readonly TinyMessageBus _deviceArrivalBus = new TinyMessageBus("AirBenderDeviceArrivalBus");
+        private readonly TinyMessageBus _deviceRemovalBus = new TinyMessageBus("AirBenderDeviceRemovalBus");
+        private readonly TinyMessageBus _inputReportBus = new TinyMessageBus("AirBenderInputReportBus");
 
         public AirBenderHost(string devicePath)
         {
@@ -157,6 +163,13 @@ namespace SokkaServer.Host
                             device.InputReportReceived += OnInputReportReceived;
 
                             Children.Add(device);
+
+                            _deviceArrivalBus.PublishAsync(new DeviceMetaMessage()
+                            {
+                                Index = (int)i,
+                                Address = address.GetAddressBytes()
+                            }.ToBytes());
+
                             break;
                         case BthDeviceType.DualShock4:
                             throw new NotImplementedException();
@@ -171,13 +184,21 @@ namespace SokkaServer.Host
 
         private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
         {
+            _inputReportBus.PublishAsync(new byte[] { 0x00, 0x01 });
             //throw new NotImplementedException();
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
         {
-            Children.Remove(sender as AirBenderChildDevice);
-            //throw new NotImplementedException();
+            var device = (AirBenderChildDevice)sender;
+
+            Children.Remove(device);
+
+            _deviceRemovalBus.PublishAsync(new DeviceMetaMessage()
+            {
+                Index = device.DeviceIndex,
+                Address = device.ClientAddress.GetAddressBytes()
+            }.ToBytes());
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)

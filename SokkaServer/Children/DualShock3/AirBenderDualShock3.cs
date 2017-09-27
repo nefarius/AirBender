@@ -97,7 +97,7 @@ namespace SokkaServer.Children.DualShock3
 
                         OnInputReport(new DualShock3InputReport(resp.ReportBuffer));
 
-                        return;
+                        continue;
 
                         //
                         // TODO: demo-code, remove!
