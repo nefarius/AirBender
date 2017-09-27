@@ -3,11 +3,24 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AirBender.Common.Shared.Reports;
 using SokkaServer.Host;
 
 namespace SokkaServer.Children
 {
+    public class InputReportEventArgs : EventArgs
+    {
+        public InputReportEventArgs(IInputReport report)
+        {
+            Report = report;
+        }
+
+        public IInputReport Report { get; }
+    }
+
     public delegate void ChildDeviceDisconnectedEventHandler(object sender, EventArgs e);
+
+    public delegate void InputReportReceivedEventHandler(object sender, InputReportEventArgs e);
 
     internal abstract class AirBenderChildDevice
     {
@@ -32,8 +45,8 @@ namespace SokkaServer.Children
             // there's always at least one pending request in the driver to get
             // completed. Each thread uses inverted calls for maximum performance.
             // 
-            Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourcePrimary.Token);
-            Task.Factory.StartNew(RequestInputReport, _inputCancellationTokenSourceSecondary.Token);
+            Task.Factory.StartNew(RequestInputReportWorker, _inputCancellationTokenSourcePrimary.Token);
+            Task.Factory.StartNew(RequestInputReportWorker, _inputCancellationTokenSourceSecondary.Token);
         }
 
         public int DeviceIndex { get; }
@@ -44,6 +57,8 @@ namespace SokkaServer.Children
 
         public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 
+        public event InputReportReceivedEventHandler InputReportReceived;
+
         ~AirBenderChildDevice()
         {
             _outputReportTask?.Dispose();
@@ -52,8 +67,13 @@ namespace SokkaServer.Children
             _inputCancellationTokenSourceSecondary.Cancel();
         }
 
-        protected virtual void RequestInputReport(object cancellationToken)
+        protected virtual void RequestInputReportWorker(object cancellationToken)
         {
+        }
+
+        protected void OnInputReport(IInputReport report)
+        {
+            InputReportReceived?.Invoke(this, new InputReportEventArgs(report));
         }
 
         protected virtual void OnOutputReport(long l)

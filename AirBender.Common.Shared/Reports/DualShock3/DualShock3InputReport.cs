@@ -25,7 +25,7 @@ namespace AirBender.Common.Shared.Reports.DualShock3
         Ps = 1 << 16
     }
 
-    public class DualShock3InputReport
+    public class DualShock3InputReport : IInputReport
     {
         public DualShock3InputReport(byte[] buffer)
         {

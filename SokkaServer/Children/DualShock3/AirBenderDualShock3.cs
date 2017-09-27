@@ -60,7 +60,7 @@ namespace SokkaServer.Children.DualShock3
                 _hidOutputReport[11] = _ledOffsets[index];
         }
 
-        protected override void RequestInputReport(object cancellationToken)
+        protected override void RequestInputReportWorker(object cancellationToken)
         {
             var token = (CancellationToken)cancellationToken;
             var requestSize = Marshal.SizeOf<AirBenderHost.AirbenderGetDs3InputReport>();
@@ -94,6 +94,10 @@ namespace SokkaServer.Children.DualShock3
                     if (ret)
                     {
                         var resp = Marshal.PtrToStructure<AirBenderHost.AirbenderGetDs3InputReport>(requestBuffer);
+
+                        OnInputReport(new DualShock3InputReport(resp.ReportBuffer));
+
+                        return;
 
                         //
                         // TODO: demo-code, remove!

@@ -11,6 +11,7 @@ using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 using SokkaServer.Properties;
 using SokkaServer.Util;
+using TinyIpc.Messaging;
 
 namespace SokkaServer.Host
 {
@@ -18,6 +19,7 @@ namespace SokkaServer.Host
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
+        private readonly TinyMessageBus _messageBus = new TinyMessageBus("AirBenderMessageBus");
 
         public AirBenderHost(string devicePath)
         {
@@ -150,7 +152,10 @@ namespace SokkaServer.Host
                     {
                         case BthDeviceType.DualShock3:
                             var device = new AirBenderDualShock3(this, address, (int)i);
+
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
+                            device.InputReportReceived += OnInputReportReceived;
+
                             Children.Add(device);
                             break;
                         case BthDeviceType.DualShock4:
@@ -162,6 +167,11 @@ namespace SokkaServer.Host
             {
                 Marshal.FreeHGlobal(pData);
             }
+        }
+
+        private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
+        {
+            //throw new NotImplementedException();
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
@@ -196,7 +206,7 @@ namespace SokkaServer.Host
                     throw new AirBenderDeviceNotFoundException();
                 }
 
-                if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
+                if (ret)
                 {
                     var resp = Marshal.PtrToStructure<AirbenderGetClientDetails>(requestBuffer);
 
