@@ -62,11 +62,11 @@ namespace SokkaServer.Children.DualShock3
         protected override void RequestInputReport(object cancellationToken)
         {
             var token = (CancellationToken)cancellationToken;
-            var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>();
+            var requestSize = Marshal.SizeOf<AirBender.AirbenderGetDs3InputReport>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             Marshal.StructureToPtr(
-                new AirBender.AIRBENDER_GET_DS3_INPUT_REPORT
+                new AirBender.AirbenderGetDs3InputReport
                 {
                     ClientAddress = ClientAddress.ToNativeBdAddr()
                 },
@@ -83,16 +83,16 @@ namespace SokkaServer.Children.DualShock3
                     //  
                     var ret = Driver.OverlappedDeviceIoControl(
                         HostDevice.DeviceHandle,
-                        AirBender.IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT,
+                        AirBender.IoctlAirbenderGetDs3InputReport,
                         requestBuffer, requestSize, requestBuffer, requestSize,
                         out bytesReturned);
 
-                    if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
+                    if (!ret && Marshal.GetLastWin32Error() == AirBender.ErrorDevNotExist)
                         OnChildDeviceDisconnected(EventArgs.Empty);
 
                     if (ret)
                     {
-                        var resp = Marshal.PtrToStructure<AirBender.AIRBENDER_GET_DS3_INPUT_REPORT>(requestBuffer);
+                        var resp = Marshal.PtrToStructure<AirBender.AirbenderGetDs3InputReport>(requestBuffer);
 
                         //
                         // TODO: demo-code, remove!
@@ -162,11 +162,11 @@ namespace SokkaServer.Children.DualShock3
         protected override void OnOutputReport(long l)
         {
             int bytesReturned;
-            var requestSize = Marshal.SizeOf<AirBender.AIRBENDER_SET_DS3_OUTPUT_REPORT>();
+            var requestSize = Marshal.SizeOf<AirBender.AirbenderSetDs3OutputReport>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             Marshal.StructureToPtr(
-                new AirBender.AIRBENDER_SET_DS3_OUTPUT_REPORT
+                new AirBender.AirbenderSetDs3OutputReport
                 {
                     ClientAddress = ClientAddress.ToNativeBdAddr(),
                     ReportBuffer = _hidOutputReport
@@ -175,11 +175,11 @@ namespace SokkaServer.Children.DualShock3
 
             var ret = Driver.OverlappedDeviceIoControl(
                 HostDevice.DeviceHandle,
-                AirBender.IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT,
+                AirBender.IoctlAirbenderSetDs3OutputReport,
                 requestBuffer, requestSize, IntPtr.Zero, 0,
                 out bytesReturned);
 
-            if (!ret && Marshal.GetLastWin32Error() == AirBender.ERROR_DEV_NOT_EXIST)
+            if (!ret && Marshal.GetLastWin32Error() == AirBender.ErrorDevNotExist)
             {
                 Marshal.FreeHGlobal(requestBuffer);
                 throw new AirBenderDeviceNotFoundException();

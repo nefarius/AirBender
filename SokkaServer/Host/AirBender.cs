@@ -38,7 +38,7 @@ namespace SokkaServer.Host
             if (DeviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
-            var length = Marshal.SizeOf(typeof(AIRBENDER_GET_HOST_BD_ADDR));
+            var length = Marshal.SizeOf(typeof(AirbenderGetHostBdAddr));
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
             bool ret;
@@ -50,7 +50,7 @@ namespace SokkaServer.Host
                 // 
                 ret = Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    IOCTL_AIRBENDER_GET_HOST_BD_ADDR,
+                    IoctlAirbenderGetHostBdAddr,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
 
@@ -58,7 +58,7 @@ namespace SokkaServer.Host
                     throw new AirBenderGetHostBdAddrFailedException();
 
                 HostAddress =
-                    new PhysicalAddress(Marshal.PtrToStructure<AIRBENDER_GET_HOST_BD_ADDR>(pData).Host.Address);
+                    new PhysicalAddress(Marshal.PtrToStructure<AirbenderGetHostBdAddr>(pData).Host.Address);
             }
             finally
             {
@@ -72,7 +72,7 @@ namespace SokkaServer.Host
             // 
             ret = Driver.OverlappedDeviceIoControl(
                 DeviceHandle,
-                IOCTL_AIRBENDER_HOST_RESET,
+                IoctlAirbenderHostReset,
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned);
 
@@ -94,7 +94,7 @@ namespace SokkaServer.Host
 
         private void OnLookup(long l)
         {
-            var length = Marshal.SizeOf(typeof(AIRBENDER_GET_CLIENT_COUNT));
+            var length = Marshal.SizeOf(typeof(AirbenderGetClientCount));
             var pData = Marshal.AllocHGlobal(length);
 
             try
@@ -105,14 +105,14 @@ namespace SokkaServer.Host
                 var bytesReturned = 0;
                 var ret = Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    IOCTL_AIRBENDER_GET_CLIENT_COUNT,
+                    IoctlAirbenderGetClientCount,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
 
                 //
                 // This happens if the host device got "surprise-removed"
                 // 
-                if (!ret && Marshal.GetLastWin32Error() == ERROR_BAD_COMMAND)
+                if (!ret && Marshal.GetLastWin32Error() == ErrorBadCommand)
                 {
                     Log.Warning($"Connection to device {DevicePath} lost, possibly it got removed");
 
@@ -129,7 +129,7 @@ namespace SokkaServer.Host
                     return;
                 }
 
-                var count = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_COUNT>(pData).Count;
+                var count = Marshal.PtrToStructure<AirbenderGetClientCount>(pData).Count;
 
                 //
                 // Return if no children or all children are already known
@@ -141,19 +141,19 @@ namespace SokkaServer.Host
                 for (uint i = 0; i < count; i++)
                 {
                     PhysicalAddress address;
-                    BTH_DEVICE_TYPE type;
+                    BthDeviceType type;
 
                     if (!GetDeviceStateByIndex(i, out address, out type))
                         continue;
 
                     switch (type)
                     {
-                        case BTH_DEVICE_TYPE.DualShock3:
+                        case BthDeviceType.DualShock3:
                             var device = new AirBenderDualShock3(this, address, (int)i);
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
                             Children.Add(device);
                             break;
-                        case BTH_DEVICE_TYPE.DualShock4:
+                        case BthDeviceType.DualShock4:
                             throw new NotImplementedException();
                     }
                 }
@@ -170,15 +170,15 @@ namespace SokkaServer.Host
             //throw new NotImplementedException();
         }
 
-        private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BTH_DEVICE_TYPE type)
+        private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
         {
-            var requestSize = Marshal.SizeOf<AIRBENDER_GET_CLIENT_DETAILS>();
+            var requestSize = Marshal.SizeOf<AirbenderGetClientDetails>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             try
             {
                 Marshal.StructureToPtr(
-                    new AIRBENDER_GET_CLIENT_DETAILS
+                    new AirbenderGetClientDetails
                     {
                         ClientIndex = clientIndex
                     },
@@ -187,18 +187,18 @@ namespace SokkaServer.Host
                 int bytesReturned;
                 var ret = Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    IOCTL_AIRBENDER_GET_CLIENT_STATE,
+                    IoctlAirbenderGetClientState,
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned);
 
-                if (!ret && Marshal.GetLastWin32Error() == ERROR_DEV_NOT_EXIST)
+                if (!ret && Marshal.GetLastWin32Error() == ErrorDevNotExist)
                 {
                     throw new AirBenderDeviceNotFoundException();
                 }
 
                 if (ret /*&& Marshal.GetLastWin32Error() == ERROR_INSUFFICIENT_BUFFER*/)
                 {
-                    var resp = Marshal.PtrToStructure<AIRBENDER_GET_CLIENT_DETAILS>(requestBuffer);
+                    var resp = Marshal.PtrToStructure<AirbenderGetClientDetails>(requestBuffer);
 
                     type = resp.DeviceType;
                     address = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
@@ -211,7 +211,7 @@ namespace SokkaServer.Host
                 Marshal.FreeHGlobal(requestBuffer);
             }
 
-            type = BTH_DEVICE_TYPE.Unknown;
+            type = BthDeviceType.Unknown;
             address = PhysicalAddress.None;
 
             return false;
@@ -233,7 +233,7 @@ namespace SokkaServer.Host
                 int bytesReturned;
                 Driver.OverlappedDeviceIoControl(
                     DeviceHandle,
-                    IOCTL_AIRBENDER_HOST_SHUTDOWN,
+                    IoctlAirbenderHostShutdown,
                     IntPtr.Zero, 0, IntPtr.Zero, 0, out bytesReturned);
 
                 DeviceHandle?.Close();
