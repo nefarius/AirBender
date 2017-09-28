@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports.DualShock3;
-using Nefarius.ViGEm.Client;
-using Nefarius.ViGEm.Client.Targets;
-using Nefarius.ViGEm.Client.Targets.DualShock4;
-using Serilog;
 using SokkaServer.Exceptions;
 using SokkaServer.Host;
 using SokkaServer.Util;
@@ -19,8 +12,6 @@ namespace SokkaServer.Children.DualShock3
 {
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {
-        private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
-
         private readonly byte[] _hidOutputReport =
         {
             0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
@@ -37,22 +28,6 @@ namespace SokkaServer.Children.DualShock3
         public AirBenderDualShock3(AirBenderHost host, PhysicalAddress client, int index) : base(host, client, index)
         {
             DeviceType = BthDeviceType.DualShock3;
-
-            _btnMap = new Dictionary<DualShock3Buttons, DualShock4Buttons>
-            {
-                {DualShock3Buttons.Select, DualShock4Buttons.Share},
-                {DualShock3Buttons.LeftThumb, DualShock4Buttons.ThumbLeft},
-                {DualShock3Buttons.RightThumb, DualShock4Buttons.ThumbRight},
-                {DualShock3Buttons.Start, DualShock4Buttons.Options},
-                {DualShock3Buttons.LeftTrigger, DualShock4Buttons.TriggerLeft},
-                {DualShock3Buttons.RightTrigger, DualShock4Buttons.TriggerRight},
-                {DualShock3Buttons.LeftShoulder, DualShock4Buttons.ShoulderLeft},
-                {DualShock3Buttons.RightShoulder, DualShock4Buttons.ShoulderRight},
-                {DualShock3Buttons.Triangle, DualShock4Buttons.Triangle},
-                {DualShock3Buttons.Circle, DualShock4Buttons.Circle},
-                {DualShock3Buttons.Cross, DualShock4Buttons.Cross},
-                {DualShock3Buttons.Square, DualShock4Buttons.Square}
-            };
 
             if (index >= 0 && index < 4)
                 _hidOutputReport[11] = _ledOffsets[index];
@@ -89,71 +64,11 @@ namespace SokkaServer.Children.DualShock3
                     if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
                         OnChildDeviceDisconnected(EventArgs.Empty);
 
-                    if (ret)
-                    {
-                        var resp = Marshal.PtrToStructure<AirBenderHost.AirbenderGetDs3InputReport>(requestBuffer);
+                    if (!ret) continue;
 
-                        OnInputReport(new DualShock3InputReport(resp.ReportBuffer));
+                    var resp = Marshal.PtrToStructure<AirBenderHost.AirbenderGetDs3InputReport>(requestBuffer);
 
-                        continue;
-
-                        //
-                        // TODO: demo-code, remove!
-                        // 
-                        var report = new DualShock3InputReport(resp.ReportBuffer);
-                        var ds4Report = new DualShock4Report();
-
-                        ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
-                        ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
-                        ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
-                        ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
-                        ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
-                        ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
-
-                        foreach (var engagedButton in report.EngagedButtons)
-                            ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
-                                .ToArray());
-
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                            ds4Report.SetDPad(DualShock4DPadValues.North);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                            ds4Report.SetDPad(DualShock4DPadValues.East);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                            ds4Report.SetDPad(DualShock4DPadValues.South);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                            ds4Report.SetDPad(DualShock4DPadValues.West);
-
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
-                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                            ds4Report.SetDPad(DualShock4DPadValues.Northeast);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
-                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                            ds4Report.SetDPad(DualShock4DPadValues.Southeast);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
-                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                            ds4Report.SetDPad(DualShock4DPadValues.Southwest);
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
-                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                            ds4Report.SetDPad(DualShock4DPadValues.Northwest);
-
-                        if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
-                            ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
-
-                        //_ds4.SendReport(ds4Report);
-
-#if DEBUG
-                        var sb = new StringBuilder();
-
-                        foreach (var b in resp.ReportBuffer)
-                            sb.Append($"{b:X2} ");
-
-                        foreach (var engagedButton in report.EngagedButtons)
-                            Log.Information($"Button pressed: {engagedButton}");
-
-                        if (sb.Length > 0)
-                            Log.Information(sb.ToString());
-#endif
-                    }
+                    OnInputReport(new DualShock3InputReport(resp.ReportBuffer));
                 }
             }
             finally
