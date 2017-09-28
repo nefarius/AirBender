@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Nefarius.ViGEmClient">
       <HintPath>..\..\ViGEm\NET\ViGEmClient\bin\Release\Nefarius.ViGEmClient.dll</HintPath>
@@ -71,6 +74,9 @@
       <Project>{B973105C-50CD-4B89-9416-4FC87C2E2DDF}</Project>
       <Name>AirBender.Common.Shared</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="favicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
