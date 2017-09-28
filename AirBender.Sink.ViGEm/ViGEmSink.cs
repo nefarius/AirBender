@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Messages;
 using AirBender.Common.Shared.Reports.DualShock3;
@@ -75,47 +76,61 @@ namespace AirBender.Sink.ViGEm
                 case BthDeviceType.DualShock3:
 
                     var target = _deviceMap[source];
-                    var report = new DualShock3InputReport(source.InputReport);
 
-                    var ds4Report = new DualShock4Report();
+                    if (!Monitor.TryEnter(target))
+                    {
+                        Log.Warning($"Couldn't lock feeder #{source.Index}");
+                        return;
+                    }
 
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
-                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
+                    try
+                    {
+                        var report = new DualShock3InputReport(source.InputReport);
 
-                    foreach (var engagedButton in report.EngagedButtons)
-                        ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
-                            .ToArray());
+                        var ds4Report = new DualShock4Report();
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                        ds4Report.SetDPad(DualShock4DPadValues.North);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                        ds4Report.SetDPad(DualShock4DPadValues.East);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                        ds4Report.SetDPad(DualShock4DPadValues.South);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                        ds4Report.SetDPad(DualShock4DPadValues.West);
+                        ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
+                        ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
+                        ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
+                        ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
+                        ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
+                        ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
-                        ds4Report.SetDPad(DualShock4DPadValues.Northeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
-                        ds4Report.SetDPad(DualShock4DPadValues.Southeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
-                        ds4Report.SetDPad(DualShock4DPadValues.Southwest);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
-                        ds4Report.SetDPad(DualShock4DPadValues.Northwest);
+                        foreach (var engagedButton in report.EngagedButtons)
+                            ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
+                                .ToArray());
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
-                        ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                            ds4Report.SetDPad(DualShock4DPadValues.North);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                            ds4Report.SetDPad(DualShock4DPadValues.East);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                            ds4Report.SetDPad(DualShock4DPadValues.South);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                            ds4Report.SetDPad(DualShock4DPadValues.West);
 
-                    target.SendReport(ds4Report);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                            ds4Report.SetDPad(DualShock4DPadValues.Northeast);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                            ds4Report.SetDPad(DualShock4DPadValues.Southeast);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                            ds4Report.SetDPad(DualShock4DPadValues.Southwest);
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
+                            && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                            ds4Report.SetDPad(DualShock4DPadValues.Northwest);
+
+                        if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
+                            ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
+
+                        target.SendReport(ds4Report);
+                    }
+                    finally
+                    {
+                        Monitor.Exit(target);
+                    }
 
                     break;
             }

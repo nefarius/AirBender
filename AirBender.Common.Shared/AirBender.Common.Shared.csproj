@@ -55,6 +55,7 @@
     <Compile Include="Reports\DualShock3\DualShock3InputReport.cs" />
     <Compile Include="Reports\IInputReport.cs" />
     <Compile Include="Serialization\MessageExtensions.cs" />
+    <Compile Include="Util\CircularBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
