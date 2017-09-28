@@ -1,4 +1,5 @@
-﻿using Topshelf;
+﻿using Serilog;
+using Topshelf;
 
 namespace AirBender.Sink.ViGEm
 {
@@ -6,6 +7,12 @@ namespace AirBender.Sink.ViGEm
     {
         static void Main(string[] args)
         {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.RollingFile("AirBenderViGEmSink-{Date}.log")
+                .CreateLogger();
+
             HostFactory.Run(x =>
             {
                 x.Service<ViGEmSink>(s =>

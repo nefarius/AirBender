@@ -1,5 +1,4 @@
-﻿using System;
-using Serilog;
+﻿using Serilog;
 using Topshelf;
 
 namespace SokkaServer
@@ -11,7 +10,7 @@ namespace SokkaServer
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
-                .WriteTo.RollingFile("log-{Date}.txt")
+                .WriteTo.RollingFile("SokkaServer-{Date}.log")
                 .CreateLogger();
 
             HostFactory.Run(x =>                                 

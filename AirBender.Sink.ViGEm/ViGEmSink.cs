@@ -7,6 +7,7 @@ using AirBender.Common.Shared.Serialization;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
+using Serilog;
 using TinyIpc.Messaging;
 
 namespace AirBender.Sink.ViGEm
@@ -41,11 +42,12 @@ namespace AirBender.Sink.ViGEm
 
             MessageHub.DeviceArrivalBus.MessageReceived += (sender, args) =>
             {
+                var source = MessageExtensions.ToObject<DeviceMetaMessage>(args.Message);
                 var target = new DualShock4Controller(_client);
 
-                _deviceMap.Add(
-                    MessageExtensions.ToObject<DeviceMetaMessage>(args.Message),
-                    target);
+                Log.Information($"New {source.DeviceType} device arrived (#{source.Index})");
+
+                _deviceMap.Add(source, target);
 
                 target.Connect();
             };
@@ -53,6 +55,8 @@ namespace AirBender.Sink.ViGEm
             MessageHub.DeviceRemovalBus.MessageReceived += (sender, args) =>
             {
                 var source = MessageExtensions.ToObject<DeviceMetaMessage>(args.Message);
+
+                Log.Information($"{source.DeviceType} device removed (#{source.Index})");
 
                 _deviceMap[source].Dispose();
                 _deviceMap.Remove(source);
