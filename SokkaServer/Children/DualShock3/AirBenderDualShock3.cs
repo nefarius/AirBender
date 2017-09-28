@@ -5,6 +5,7 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports.DualShock3;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
@@ -19,7 +20,6 @@ namespace SokkaServer.Children.DualShock3
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {
         private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
-        private readonly DualShock4Controller _ds4;
 
         private readonly byte[] _hidOutputReport =
         {
@@ -36,6 +36,8 @@ namespace SokkaServer.Children.DualShock3
 
         public AirBenderDualShock3(AirBenderHost host, PhysicalAddress client, int index) : base(host, client, index)
         {
+            DeviceType = BthDeviceType.DualShock3;
+
             _btnMap = new Dictionary<DualShock3Buttons, DualShock4Buttons>
             {
                 {DualShock3Buttons.Select, DualShock4Buttons.Share},
@@ -51,10 +53,6 @@ namespace SokkaServer.Children.DualShock3
                 {DualShock3Buttons.Cross, DualShock4Buttons.Cross},
                 {DualShock3Buttons.Square, DualShock4Buttons.Square}
             };
-
-            var vigem = new ViGEmClient();
-            _ds4 = new DualShock4Controller(vigem);
-            _ds4.Connect();
 
             if (index >= 0 && index < 4)
                 _hidOutputReport[11] = _ledOffsets[index];
@@ -141,7 +139,7 @@ namespace SokkaServer.Children.DualShock3
                         if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
                             ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
 
-                        _ds4.SendReport(ds4Report);
+                        //_ds4.SendReport(ds4Report);
 
 #if DEBUG
                         var sb = new StringBuilder();

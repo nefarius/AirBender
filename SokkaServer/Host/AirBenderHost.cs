@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
+using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Messages;
 using AirBender.Common.Shared.Serialization;
 using PInvoke;
-using ProtoBuf;
 using Serilog;
 using SokkaServer.Children;
 using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
 using SokkaServer.Properties;
 using SokkaServer.Util;
-using TinyIpc.Messaging;
 
 namespace SokkaServer.Host
 {
@@ -23,9 +21,6 @@ namespace SokkaServer.Host
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
-        private readonly TinyMessageBus _deviceArrivalBus = new TinyMessageBus("AirBenderDeviceArrivalBus");
-        private readonly TinyMessageBus _deviceRemovalBus = new TinyMessageBus("AirBenderDeviceRemovalBus");
-        private readonly TinyMessageBus _inputReportBus = new TinyMessageBus("AirBenderInputReportBus");
 
         public AirBenderHost(string devicePath)
         {
@@ -157,17 +152,18 @@ namespace SokkaServer.Host
                     switch (type)
                     {
                         case BthDeviceType.DualShock3:
-                            var device = new AirBenderDualShock3(this, address, (int)i);
+                            var device = new AirBenderDualShock3(this, address, (int) i);
 
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
                             device.InputReportReceived += OnInputReportReceived;
 
                             Children.Add(device);
 
-                            _deviceArrivalBus.PublishAsync(new DeviceMetaMessage()
+                            MessageHub.DeviceArrivalBus.PublishAsync(new DeviceMetaMessage
                             {
-                                Index = (int)i,
-                                Address = address.GetAddressBytes()
+                                Index = (int) i,
+                                Address = address.GetAddressBytes(),
+                                DeviceType = type
                             }.ToBytes());
 
                             break;
@@ -184,17 +180,24 @@ namespace SokkaServer.Host
 
         private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
         {
-            _inputReportBus.PublishAsync(new byte[] { 0x00, 0x01 });
-            //throw new NotImplementedException();
+            var device = (AirBenderChildDevice) sender;
+
+            MessageHub.InputReportBus.PublishAsync(new DeviceMetaMessage
+            {
+                Index = device.DeviceIndex,
+                Address = device.ClientAddress.GetAddressBytes(),
+                DeviceType = device.DeviceType,
+                InputReport = inputReportEventArgs.Report.Buffer
+            }.ToBytes());
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
         {
-            var device = (AirBenderChildDevice)sender;
+            var device = (AirBenderChildDevice) sender;
 
             Children.Remove(device);
 
-            _deviceRemovalBus.PublishAsync(new DeviceMetaMessage()
+            MessageHub.DeviceRemovalBus.PublishAsync(new DeviceMetaMessage
             {
                 Index = device.DeviceIndex,
                 Address = device.ClientAddress.GetAddressBytes()
@@ -223,9 +226,7 @@ namespace SokkaServer.Host
                     out bytesReturned);
 
                 if (!ret && Marshal.GetLastWin32Error() == ErrorDevNotExist)
-                {
                     throw new AirBenderDeviceNotFoundException();
-                }
 
                 if (ret)
                 {

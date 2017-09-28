@@ -2,6 +2,6 @@
 {
     public interface IInputReport
     {
-        
+        byte[] Buffer { get; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using AirBender.Common.Shared.Core;
 
 namespace SokkaServer.Host
 {
@@ -36,13 +37,6 @@ namespace SokkaServer.Host
         private struct AirbenderGetClientCount
         {
             public UInt32 Count;
-        }
-
-        private enum BthDeviceType : UInt32
-        {
-            DualShock3,
-            DualShock4,
-            Unknown
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

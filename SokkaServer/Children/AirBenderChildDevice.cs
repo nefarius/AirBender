@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports;
 using SokkaServer.Host;
 
@@ -54,6 +55,8 @@ namespace SokkaServer.Children
         public AirBenderHost HostDevice { get; }
 
         public PhysicalAddress ClientAddress { get; }
+
+        public BthDeviceType DeviceType { get; protected set; }
 
         public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 
