@@ -5,13 +5,12 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using AirBender.Common.Shared.Core;
-using AirBender.Common.Shared.Messages;
-using AirBender.Common.Shared.Serialization;
 using PInvoke;
 using Serilog;
 using SokkaServer.Children;
 using SokkaServer.Children.DualShock3;
 using SokkaServer.Exceptions;
+using SokkaServer.Plugins;
 using SokkaServer.Properties;
 using SokkaServer.Util;
 
@@ -21,6 +20,7 @@ namespace SokkaServer.Host
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
+        private readonly PluginHost _plugins = new PluginHost();
 
         public AirBenderHost(string devicePath)
         {
@@ -152,20 +152,20 @@ namespace SokkaServer.Host
                     switch (type)
                     {
                         case BthDeviceType.DualShock3:
-                            var device = new AirBenderDualShock3(this, address, (int) i);
+                            var device = new AirBenderDualShock3(this, address, (int)i);
 
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
                             device.InputReportReceived += OnInputReportReceived;
 
                             Children.Add(device);
 
-                            MessageHub.DeviceArrivalBus.PublishAsync(new DeviceMetaMessage
+                            _plugins.DeviceArrived(new ChildDeviceState()
                             {
-                                Index = (int) i,
-                                Address = address.GetAddressBytes(),
+                                Index = (int)i,
+                                Address = address,
                                 DeviceType = type
-                            }.ToBytes());
-
+                            });
+                            
                             break;
                         case BthDeviceType.DualShock4:
                             throw new NotImplementedException();
@@ -180,28 +180,29 @@ namespace SokkaServer.Host
 
         private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
         {
-            var device = (AirBenderChildDevice) sender;
+            var device = (AirBenderChildDevice)sender;
 
-            MessageHub.InputReportBus.PublishAsync(new DeviceMetaMessage
+            _plugins.InputReportReceived(new ChildDeviceState()
             {
                 Index = device.DeviceIndex,
-                Address = device.ClientAddress.GetAddressBytes(),
+                Address = device.ClientAddress,
                 DeviceType = device.DeviceType,
-                InputReport = inputReportEventArgs.Report.Buffer
-            }.ToBytes());
+                InputReport = inputReportEventArgs.Report
+            });
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
         {
-            var device = (AirBenderChildDevice) sender;
+            var device = (AirBenderChildDevice)sender;
 
             Children.Remove(device);
 
-            MessageHub.DeviceRemovalBus.PublishAsync(new DeviceMetaMessage
+            _plugins.DeviceArrived(new ChildDeviceState()
             {
                 Index = device.DeviceIndex,
-                Address = device.ClientAddress.GetAddressBytes()
-            }.ToBytes());
+                Address = device.ClientAddress,
+                DeviceType = device.DeviceType
+            });
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
