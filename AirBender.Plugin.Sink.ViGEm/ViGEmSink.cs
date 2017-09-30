@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Plugins;
+using AirBender.Common.Shared.Reports;
 using AirBender.Common.Shared.Reports.DualShock3;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
@@ -13,8 +15,8 @@ namespace AirBender.Plugin.Sink.ViGEm
     [Export(typeof(IAirBenderSink))]
     public class ViGEmSink : IAirBenderSink
     {
-        private readonly Dictionary<ChildDeviceState, DualShock4Controller> _deviceMap =
-            new Dictionary<ChildDeviceState, DualShock4Controller>();
+        private readonly Dictionary<IAirBenderChildDevice, DualShock4Controller> _deviceMap =
+            new Dictionary<IAirBenderChildDevice, DualShock4Controller>();
 
         private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
         private readonly ViGEmClient _client;
@@ -40,7 +42,7 @@ namespace AirBender.Plugin.Sink.ViGEm
             _client = new ViGEmClient();
         }
 
-        public void DeviceArrived(ChildDeviceState device)
+        public void DeviceArrived(IAirBenderChildDevice device)
         {
             var target = new DualShock4Controller(_client);
 
@@ -49,13 +51,13 @@ namespace AirBender.Plugin.Sink.ViGEm
             target.Connect();
         }
 
-        public void DeviceRemoved(ChildDeviceState device)
+        public void DeviceRemoved(IAirBenderChildDevice device)
         {
             _deviceMap[device].Dispose();
             _deviceMap.Remove(device);
         }
 
-        public void InputReportReceived(ChildDeviceState device)
+        public void InputReportReceived(IAirBenderChildDevice device, IInputReport report)
         {
             switch (device.DeviceType)
             {
@@ -63,44 +65,43 @@ namespace AirBender.Plugin.Sink.ViGEm
 
                     var target = _deviceMap[device];
 
-                    var report = new DualShock3InputReport(device.InputReport.Buffer);
-
+                    var ds3Report = (DualShock3InputReport) report;
                     var ds4Report = new DualShock4Report();
 
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, report.LeftThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, report.LeftThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, report.RightThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, report.RightThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, report.LeftTrigger);
-                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, report.RightTrigger);
+                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, ds3Report.LeftThumbX);
+                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, ds3Report.LeftThumbY);
+                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, ds3Report.RightThumbX);
+                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, ds3Report.RightThumbY);
+                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, ds3Report.LeftTrigger);
+                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, ds3Report.RightTrigger);
 
-                    foreach (var engagedButton in report.EngagedButtons)
+                    foreach (var engagedButton in ds3Report.EngagedButtons)
                         ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
                             .ToArray());
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
                         ds4Report.SetDPad(DualShock4DPadValues.North);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
                         ds4Report.SetDPad(DualShock4DPadValues.East);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
                         ds4Report.SetDPad(DualShock4DPadValues.South);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
                         ds4Report.SetDPad(DualShock4DPadValues.West);
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadUp)
+                        && ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadRight))
                         ds4Report.SetDPad(DualShock4DPadValues.Northeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadRight)
+                        && ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadDown))
                         ds4Report.SetDPad(DualShock4DPadValues.Southeast);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadDown)
+                        && ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft))
                         ds4Report.SetDPad(DualShock4DPadValues.Southwest);
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
-                        && report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadLeft)
+                        && ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
                         ds4Report.SetDPad(DualShock4DPadValues.Northwest);
 
-                    if (report.EngagedButtons.Contains(DualShock3Buttons.Ps))
+                    if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.Ps))
                         ds4Report.SetSpecialButtons(DualShock4SpecialButtons.Ps);
 
                     target.SendReport(ds4Report);

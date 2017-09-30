@@ -1,13 +1,14 @@
 ﻿using AirBender.Common.Shared.Core;
+using AirBender.Common.Shared.Reports;
 
 namespace AirBender.Common.Shared.Plugins
 {
     public interface IAirBenderSink
     {
-        void DeviceArrived(ChildDeviceState device);
+        void DeviceArrived(IAirBenderChildDevice device);
 
-        void DeviceRemoved(ChildDeviceState device);
+        void DeviceRemoved(IAirBenderChildDevice device);
 
-        void InputReportReceived(ChildDeviceState device);
+        void InputReportReceived(IAirBenderChildDevice device, IInputReport report);
     }
 }

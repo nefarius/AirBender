@@ -159,12 +159,7 @@ namespace SokkaServer.Host
 
                             Children.Add(device);
 
-                            _plugins.DeviceArrived(new ChildDeviceState()
-                            {
-                                Index = (int)i,
-                                Address = address,
-                                DeviceType = type
-                            });
+                            _plugins.DeviceArrived(device);
                             
                             break;
                         case BthDeviceType.DualShock4:
@@ -182,13 +177,7 @@ namespace SokkaServer.Host
         {
             var device = (AirBenderChildDevice)sender;
 
-            _plugins.InputReportReceived(new ChildDeviceState()
-            {
-                Index = device.DeviceIndex,
-                Address = device.ClientAddress,
-                DeviceType = device.DeviceType,
-                InputReport = inputReportEventArgs.Report
-            });
+            _plugins.InputReportReceived(device, inputReportEventArgs.Report);
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
@@ -197,12 +186,7 @@ namespace SokkaServer.Host
 
             Children.Remove(device);
 
-            _plugins.DeviceArrived(new ChildDeviceState()
-            {
-                Index = device.DeviceIndex,
-                Address = device.ClientAddress,
-                DeviceType = device.DeviceType
-            });
+            _plugins.DeviceArrived(device);
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)

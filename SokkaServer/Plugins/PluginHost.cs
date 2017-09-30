@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Plugins;
+using AirBender.Common.Shared.Reports;
 
 namespace SokkaServer.Plugins
 {
@@ -50,7 +51,7 @@ namespace SokkaServer.Plugins
             }
         }
 
-        public void DeviceArrived(ChildDeviceState device)
+        public void DeviceArrived(IAirBenderChildDevice device)
         {
             foreach (var plugin in SinkPlugins)
             {
@@ -58,7 +59,7 @@ namespace SokkaServer.Plugins
             }
         }
 
-        public void DeviceRemoved(ChildDeviceState device)
+        public void DeviceRemoved(IAirBenderChildDevice device)
         {
             foreach (var plugin in SinkPlugins)
             {
@@ -66,11 +67,11 @@ namespace SokkaServer.Plugins
             }
         }
 
-        public void InputReportReceived(ChildDeviceState device)
+        public void InputReportReceived(IAirBenderChildDevice device, IInputReport report)
         {
             foreach (var plugin in SinkPlugins)
             {
-                plugin.Value.InputReportReceived(device);
+                plugin.Value.InputReportReceived(device, report);
             }
         }
     }

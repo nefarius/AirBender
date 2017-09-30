@@ -23,7 +23,7 @@ namespace SokkaServer.Children
 
     public delegate void InputReportReceivedEventHandler(object sender, InputReportEventArgs e);
 
-    internal abstract class AirBenderChildDevice
+    internal abstract class AirBenderChildDevice : IAirBenderChildDevice
     {
         private readonly CancellationTokenSource _inputCancellationTokenSourcePrimary = new CancellationTokenSource();
         private readonly CancellationTokenSource _inputCancellationTokenSourceSecondary = new CancellationTokenSource();
