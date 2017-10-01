@@ -121,7 +121,7 @@ Return Value:
 {
     NTSTATUS                            status;
     PAIRBENDER_GET_HOST_BD_ADDR         pGetBdAddr;
-    SIZE_T                              bufferLength;
+    size_t                              bufferLength;
     ULONG                               transferred = 0;
     PDEVICE_CONTEXT                     pDeviceContext;
     PBTH_DEVICE                         pBthDevice;

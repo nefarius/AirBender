@@ -480,7 +480,7 @@ Ds3ProcessHidInputReport(
     NTSTATUS status;
     WDFREQUEST Request;
     PAIRBENDER_GET_DS3_INPUT_REPORT pGetDs3Input;
-    SIZE_T bufferLength;
+    size_t bufferLength;
 
     status = WdfIoQueueRetrieveNextRequest(Device->HidInputReportQueue, &Request);
 
