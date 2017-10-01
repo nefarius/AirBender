@@ -56,6 +56,7 @@
     <ClInclude Include="HCI.h" />
     <ClInclude Include="Interrupt.h" />
     <ClInclude Include="L2CAP.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Trace.h" />
     <ClInclude Include="Queue.h" />
   </ItemGroup>
@@ -147,46 +148,46 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
     <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
-    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)</IncludePath>
+    <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -252,6 +253,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AirBender.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
