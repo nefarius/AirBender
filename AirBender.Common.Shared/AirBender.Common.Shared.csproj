@@ -42,7 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\BthDeviceType.cs" />
-    <Compile Include="Core\ChildDeviceState.cs" />
     <Compile Include="Core\IAirBenderChildDevice.cs" />
     <Compile Include="Plugins\IAirBenderSink.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

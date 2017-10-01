@@ -52,7 +52,7 @@ namespace SokkaServer.Children
 
         public int DeviceIndex { get; }
 
-        public AirBenderHost HostDevice { get; }
+        protected AirBenderHost HostDevice { get; }
 
         public PhysicalAddress ClientAddress { get; }
 

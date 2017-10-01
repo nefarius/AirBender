@@ -78,30 +78,34 @@ namespace SokkaServer.Children.DualShock3
 
         protected override void OnOutputReport(long l)
         {
-            int bytesReturned;
             var requestSize = Marshal.SizeOf<AirBenderHost.AirbenderSetDs3OutputReport>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
-            Marshal.StructureToPtr(
-                new AirBenderHost.AirbenderSetDs3OutputReport
+            try
+            {
+                Marshal.StructureToPtr(
+                    new AirBenderHost.AirbenderSetDs3OutputReport
+                    {
+                        ClientAddress = ClientAddress.ToNativeBdAddr(),
+                        ReportBuffer = _hidOutputReport
+                    },
+                    requestBuffer, false);
+
+                int bytesReturned;
+                var ret = HostDevice.DeviceHandle.OverlappedDeviceIoControl(
+                    AirBenderHost.IoctlAirbenderSetDs3OutputReport,
+                    requestBuffer, requestSize, IntPtr.Zero, 0,
+                    out bytesReturned);
+
+                if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
                 {
-                    ClientAddress = ClientAddress.ToNativeBdAddr(),
-                    ReportBuffer = _hidOutputReport
-                },
-                requestBuffer, false);
-
-            var ret = HostDevice.DeviceHandle.OverlappedDeviceIoControl(
-                AirBenderHost.IoctlAirbenderSetDs3OutputReport,
-                requestBuffer, requestSize, IntPtr.Zero, 0,
-                out bytesReturned);
-
-            if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
+                    throw new AirBenderDeviceNotFoundException();
+                }
+            }
+            finally
             {
                 Marshal.FreeHGlobal(requestBuffer);
-                throw new AirBenderDeviceNotFoundException();
             }
-
-            Marshal.FreeHGlobal(requestBuffer);
         }
     }
 }
