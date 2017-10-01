@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using AirBender.Common.Shared.Core;
@@ -15,11 +14,11 @@ namespace AirBender.Plugin.Sink.ViGEm
     [Export(typeof(IAirBenderSink))]
     public class ViGEmSink : IAirBenderSink
     {
-        private readonly Dictionary<IAirBenderChildDevice, DualShock4Controller> _deviceMap =
-            new Dictionary<IAirBenderChildDevice, DualShock4Controller>();
-
         private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
         private readonly ViGEmClient _client;
+
+        private readonly Dictionary<IAirBenderChildDevice, DualShock4Controller> _deviceMap =
+            new Dictionary<IAirBenderChildDevice, DualShock4Controller>();
 
         public ViGEmSink()
         {
@@ -75,9 +74,8 @@ namespace AirBender.Plugin.Sink.ViGEm
                     ds4Report.SetAxis(DualShock4Axes.LeftTrigger, ds3Report.LeftTrigger);
                     ds4Report.SetAxis(DualShock4Axes.RightTrigger, ds3Report.RightTrigger);
 
-                    foreach (var engagedButton in ds3Report.EngagedButtons)
-                        ds4Report.SetButtons(_btnMap.Where(m => m.Key == engagedButton).Select(m => m.Value)
-                            .ToArray());
+                    ds4Report.SetButtons(_btnMap.Where(m => ds3Report.EngagedButtons.Contains(m.Key))
+                        .Select(m => m.Value).ToArray());
 
                     if (ds3Report.EngagedButtons.Contains(DualShock3Buttons.DPadUp))
                         ds4Report.SetDPad(DualShock4DPadValues.North);
