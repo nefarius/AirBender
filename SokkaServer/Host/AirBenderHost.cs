@@ -61,7 +61,8 @@ namespace SokkaServer.Host
                     throw new AirBenderGetHostBdAddrFailedException();
 
                 HostAddress =
-                    new PhysicalAddress(Marshal.PtrToStructure<AirbenderGetHostBdAddr>(pData).Host.Address);
+                    new PhysicalAddress(Marshal.PtrToStructure<AirbenderGetHostBdAddr>(pData).Host.Address.Reverse()
+                        .ToArray());
             }
             finally
             {
@@ -152,7 +153,7 @@ namespace SokkaServer.Host
                     switch (type)
                     {
                         case BthDeviceType.DualShock3:
-                            var device = new AirBenderDualShock3(this, address, (int)i);
+                            var device = new AirBenderDualShock3(this, address, (int) i);
 
                             device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
                             device.InputReportReceived += OnInputReportReceived;
@@ -160,7 +161,7 @@ namespace SokkaServer.Host
                             Children.Add(device);
 
                             _plugins.DeviceArrived(device);
-                            
+
                             break;
                         case BthDeviceType.DualShock4:
                             throw new NotImplementedException();
@@ -175,14 +176,14 @@ namespace SokkaServer.Host
 
         private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
         {
-            var device = (AirBenderChildDevice)sender;
+            var device = (AirBenderChildDevice) sender;
 
             _plugins.InputReportReceived(device, inputReportEventArgs.Report);
         }
 
         private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
         {
-            var device = (AirBenderChildDevice)sender;
+            var device = (AirBenderChildDevice) sender;
 
             Children.Remove(device);
 

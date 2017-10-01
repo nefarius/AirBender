@@ -227,16 +227,8 @@ AirBenderEvtUsbInterruptPipeReadComplete(
 
         if (command == HCI_Read_BD_ADDR && HCI_COMMAND_SUCCESS(buffer))
         {
-            //
-            // Reverse byte order to represent MAC address
-            // 
-            pDeviceContext->BluetoothHostAddress.Address[0] = buffer[11];
-            pDeviceContext->BluetoothHostAddress.Address[1] = buffer[10];
-            pDeviceContext->BluetoothHostAddress.Address[2] = buffer[9];
-            pDeviceContext->BluetoothHostAddress.Address[3] = buffer[8];
-            pDeviceContext->BluetoothHostAddress.Address[4] = buffer[7];
-            pDeviceContext->BluetoothHostAddress.Address[5] = buffer[6];
-
+            RtlCopyMemory(&pDeviceContext->BluetoothHostAddress, &buffer[6], sizeof(BD_ADDR));
+            
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                 "HCI_Read_BD_ADDR SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
                 pDeviceContext->BluetoothHostAddress.Address[0],
