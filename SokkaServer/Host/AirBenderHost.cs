@@ -51,8 +51,7 @@ namespace SokkaServer.Host
                 //
                 // Request host MAC address
                 // 
-                ret = Driver.OverlappedDeviceIoControl(
-                    DeviceHandle,
+                ret = DeviceHandle.OverlappedDeviceIoControl(
                     IoctlAirbenderGetHostBdAddr,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
@@ -74,8 +73,7 @@ namespace SokkaServer.Host
             //
             // Request host controller to reset and clean up resources
             // 
-            ret = Driver.OverlappedDeviceIoControl(
-                DeviceHandle,
+            ret = DeviceHandle.OverlappedDeviceIoControl(
                 IoctlAirbenderHostReset,
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned);
@@ -107,8 +105,7 @@ namespace SokkaServer.Host
                 // Request client count
                 // 
                 var bytesReturned = 0;
-                var ret = Driver.OverlappedDeviceIoControl(
-                    DeviceHandle,
+                var ret = DeviceHandle.OverlappedDeviceIoControl(
                     IoctlAirbenderGetClientCount,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
@@ -205,8 +202,7 @@ namespace SokkaServer.Host
                     requestBuffer, false);
 
                 int bytesReturned;
-                var ret = Driver.OverlappedDeviceIoControl(
-                    DeviceHandle,
+                var ret = DeviceHandle.OverlappedDeviceIoControl(
                     IoctlAirbenderGetClientState,
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned);
@@ -249,7 +245,7 @@ namespace SokkaServer.Host
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
                 int bytesReturned;
-                Driver.OverlappedDeviceIoControl(
+                SafeObjectHandleExtensions.OverlappedDeviceIoControl(
                     DeviceHandle,
                     IoctlAirbenderHostShutdown,
                     IntPtr.Zero, 0, IntPtr.Zero, 0, out bytesReturned);

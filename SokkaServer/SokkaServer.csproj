@@ -121,7 +121,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="SokkaService.cs" />
-    <Compile Include="Util\Driver.cs" />
+    <Compile Include="Util\SafeObjectHandleExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Host\AirBenderHost.Native.cs" />

@@ -55,8 +55,7 @@ namespace SokkaServer.Children.DualShock3
                     //
                     // This call blocks until the driver supplies new data.
                     //  
-                    var ret = Driver.OverlappedDeviceIoControl(
-                        HostDevice.DeviceHandle,
+                    var ret = HostDevice.DeviceHandle.OverlappedDeviceIoControl(
                         AirBenderHost.IoctlAirbenderGetDs3InputReport,
                         requestBuffer, requestSize, requestBuffer, requestSize,
                         out bytesReturned);
@@ -91,8 +90,7 @@ namespace SokkaServer.Children.DualShock3
                 },
                 requestBuffer, false);
 
-            var ret = Driver.OverlappedDeviceIoControl(
-                HostDevice.DeviceHandle,
+            var ret = HostDevice.DeviceHandle.OverlappedDeviceIoControl(
                 AirBenderHost.IoctlAirbenderSetDs3OutputReport,
                 requestBuffer, requestSize, IntPtr.Zero, 0,
                 out bytesReturned);

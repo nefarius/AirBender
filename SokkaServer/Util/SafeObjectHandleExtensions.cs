@@ -5,9 +5,9 @@ using PInvoke;
 
 namespace SokkaServer.Util
 {
-    internal class Driver
+    internal static class SafeObjectHandleExtensions
     {
-        public static bool OverlappedDeviceIoControl(Kernel32.SafeObjectHandle handle, uint ioControlCode,
+        public static bool OverlappedDeviceIoControl(this Kernel32.SafeObjectHandle handle, uint ioControlCode,
             IntPtr inBuffer, int inBufferSize, IntPtr outBuffer, int outBufferSize, out int bytesReturned)
         {
             var resetEvent = new ManualResetEvent(false);
