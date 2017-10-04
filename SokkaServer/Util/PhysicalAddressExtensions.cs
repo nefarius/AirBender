@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using System.Net.NetworkInformation;
-using SokkaServer.Host;
+using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
-namespace SokkaServer.Util
+namespace AirBender.Sokka.Server.Util
 {
     public static class PhysicalAddressExtensions
     {

@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports;
-using SokkaServer.Host;
+using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
-namespace SokkaServer.Children
+namespace AirBender.Sokka.Server.Children
 {
     public class InputReportEventArgs : EventArgs
     {

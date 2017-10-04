@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using PInvoke;
 
-namespace SokkaServer.Util
+namespace AirBender.Sokka.Server.Util
 {
     internal static class SafeObjectHandleExtensions
     {

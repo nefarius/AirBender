@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports.DualShock3;
-using SokkaServer.Exceptions;
-using SokkaServer.Host;
-using SokkaServer.Util;
+using AirBender.Sokka.Server.Exceptions;
+using AirBender.Sokka.Server.Util;
+using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
-namespace SokkaServer.Children.DualShock3
+namespace AirBender.Sokka.Server.Children.DualShock3
 {
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {

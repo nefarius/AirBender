@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using AirBender.Common.Shared.Core;
 
-namespace SokkaServer.Host
+namespace AirBender.Sokka.Server.Host
 {
     partial class AirBenderHost
     {

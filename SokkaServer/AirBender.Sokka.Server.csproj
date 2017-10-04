@@ -7,8 +7,8 @@
     <ProjectGuid>{66ED5B37-148B-414F-9456-8F55C5F9C1FC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SokkaServer</RootNamespace>
-    <AssemblyName>SokkaServer</AssemblyName>
+    <RootNamespace>AirBender.Sokka.Server</RootNamespace>
+    <AssemblyName>AirBender.Sokka.Server</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

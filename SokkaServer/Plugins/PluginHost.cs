@@ -8,12 +8,12 @@ using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Plugins;
 using AirBender.Common.Shared.Reports;
 
-namespace SokkaServer.Plugins
+namespace AirBender.Sokka.Server.Plugins
 {
-    class PluginHost : IAirBenderSink
+    internal class PluginHost : IAirBenderSink
     {
         [ImportMany]
-        public Lazy<IAirBenderSink, IDictionary<string, object>>[] SinkPlugins { get; set; }
+        private Lazy<IAirBenderSink, IDictionary<string, object>>[] SinkPlugins { get; set; }
 
         public PluginHost()
         {

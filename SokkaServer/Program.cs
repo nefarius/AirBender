@@ -1,7 +1,8 @@
 ﻿using Serilog;
+using SokkaServer;
 using Topshelf;
 
-namespace SokkaServer
+namespace AirBender.Sokka.Server
 {
     class Program
     {

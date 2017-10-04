@@ -1,7 +1,7 @@
 ﻿using System;
 using Nefarius.Devcon;
 using Serilog;
-using SokkaServer.Host;
+using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
 namespace SokkaServer
 {

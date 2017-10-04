@@ -6,16 +6,16 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using AirBender.Common.Shared.Core;
+using AirBender.Sokka.Server.Children;
+using AirBender.Sokka.Server.Children.DualShock3;
+using AirBender.Sokka.Server.Exceptions;
+using AirBender.Sokka.Server.Plugins;
+using AirBender.Sokka.Server.Properties;
+using AirBender.Sokka.Server.Util;
 using PInvoke;
 using Serilog;
-using SokkaServer.Children;
-using SokkaServer.Children.DualShock3;
-using SokkaServer.Exceptions;
-using SokkaServer.Plugins;
-using SokkaServer.Properties;
-using SokkaServer.Util;
 
-namespace SokkaServer.Host
+namespace AirBender.Sokka.Server.Host
 {
     internal partial class AirBenderHost : IDisposable
     {
@@ -63,7 +63,7 @@ namespace SokkaServer.Host
             if (DeviceHandle.IsInvalid)
                 throw new ArgumentException($"Couldn't open device {DevicePath}");
 
-            var length = Marshal.SizeOf(typeof(AirbenderGetHostBdAddr));
+            var length = Marshal.SizeOf(typeof(AirBenderHost.AirbenderGetHostBdAddr));
             var pData = Marshal.AllocHGlobal(length);
             var bytesReturned = 0;
             bool ret;
@@ -74,7 +74,7 @@ namespace SokkaServer.Host
                 // Request host MAC address
                 // 
                 ret = DeviceHandle.OverlappedDeviceIoControl(
-                    IoctlAirbenderGetHostBdAddr,
+                    AirBenderHost.IoctlAirbenderGetHostBdAddr,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
 
@@ -82,7 +82,7 @@ namespace SokkaServer.Host
                     throw new AirBenderGetHostBdAddrFailedException();
 
                 HostAddress =
-                    new PhysicalAddress(Marshal.PtrToStructure<AirbenderGetHostBdAddr>(pData).Host.Address.Reverse()
+                    new PhysicalAddress(Marshal.PtrToStructure<AirBenderHost.AirbenderGetHostBdAddr>(pData).Host.Address.Reverse()
                         .ToArray());
             }
             finally
@@ -96,7 +96,7 @@ namespace SokkaServer.Host
             // Request host controller to reset and clean up resources
             // 
             ret = DeviceHandle.OverlappedDeviceIoControl(
-                IoctlAirbenderHostReset,
+                AirBenderHost.IoctlAirbenderHostReset,
                 IntPtr.Zero, 0, IntPtr.Zero, 0,
                 out bytesReturned);
 
@@ -118,7 +118,7 @@ namespace SokkaServer.Host
 
         private void OnLookup(long l)
         {
-            var length = Marshal.SizeOf(typeof(AirbenderGetClientCount));
+            var length = Marshal.SizeOf(typeof(AirBenderHost.AirbenderGetClientCount));
             var pData = Marshal.AllocHGlobal(length);
 
             try
@@ -128,14 +128,14 @@ namespace SokkaServer.Host
                 // 
                 var bytesReturned = 0;
                 var ret = DeviceHandle.OverlappedDeviceIoControl(
-                    IoctlAirbenderGetClientCount,
+                    AirBenderHost.IoctlAirbenderGetClientCount,
                     IntPtr.Zero, 0, pData, length,
                     out bytesReturned);
 
                 //
                 // This happens if the host device got "surprise-removed"
                 // 
-                if (!ret && Marshal.GetLastWin32Error() == ErrorBadCommand)
+                if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorBadCommand)
                 {
                     Log.Warning($"Connection to device {DevicePath} lost, possibly it got removed");
 
@@ -152,7 +152,7 @@ namespace SokkaServer.Host
                     return;
                 }
 
-                var count = Marshal.PtrToStructure<AirbenderGetClientCount>(pData).Count;
+                var count = Marshal.PtrToStructure<AirBenderHost.AirbenderGetClientCount>(pData).Count;
 
                 //
                 // Return if no children or all children are already known
@@ -196,13 +196,13 @@ namespace SokkaServer.Host
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
         {
-            var requestSize = Marshal.SizeOf<AirbenderGetClientDetails>();
+            var requestSize = Marshal.SizeOf<AirBenderHost.AirbenderGetClientDetails>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
             try
             {
                 Marshal.StructureToPtr(
-                    new AirbenderGetClientDetails
+                    new AirBenderHost.AirbenderGetClientDetails
                     {
                         ClientIndex = clientIndex
                     },
@@ -210,16 +210,16 @@ namespace SokkaServer.Host
 
                 int bytesReturned;
                 var ret = DeviceHandle.OverlappedDeviceIoControl(
-                    IoctlAirbenderGetClientState,
+                    AirBenderHost.IoctlAirbenderGetClientState,
                     requestBuffer, requestSize, requestBuffer, requestSize,
                     out bytesReturned);
 
-                if (!ret && Marshal.GetLastWin32Error() == ErrorDevNotExist)
+                if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
                     throw new AirBenderDeviceNotFoundException();
 
                 if (ret)
                 {
-                    var resp = Marshal.PtrToStructure<AirbenderGetClientDetails>(requestBuffer);
+                    var resp = Marshal.PtrToStructure<AirBenderHost.AirbenderGetClientDetails>(requestBuffer);
 
                     type = resp.DeviceType;
                     address = new PhysicalAddress(resp.ClientAddress.Address.Reverse().ToArray());
@@ -256,7 +256,7 @@ namespace SokkaServer.Host
                 // TODO: set large fields to null.
                 int bytesReturned;
                 DeviceHandle.OverlappedDeviceIoControl(
-                    IoctlAirbenderHostShutdown,
+                    AirBenderHost.IoctlAirbenderHostShutdown,
                     IntPtr.Zero, 0, IntPtr.Zero, 0, out bytesReturned);
 
                 DeviceHandle?.Close();

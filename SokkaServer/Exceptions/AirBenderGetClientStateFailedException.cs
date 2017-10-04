@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace SokkaServer.Exceptions
+namespace AirBender.Sokka.Server.Exceptions
 {
     public class AirBenderGetClientStateFailedException : Exception
     {
