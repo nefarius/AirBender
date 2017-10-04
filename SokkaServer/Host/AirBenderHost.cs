@@ -245,8 +245,7 @@ namespace SokkaServer.Host
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
                 int bytesReturned;
-                SafeObjectHandleExtensions.OverlappedDeviceIoControl(
-                    DeviceHandle,
+                DeviceHandle.OverlappedDeviceIoControl(
                     IoctlAirbenderHostShutdown,
                     IntPtr.Zero, 0, IntPtr.Zero, 0, out bytesReturned);
 
