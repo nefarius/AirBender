@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports;
-using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
+using AirBender.Sokka.Server.Host;
 
 namespace AirBender.Sokka.Server.Children
 {
@@ -50,9 +50,9 @@ namespace AirBender.Sokka.Server.Children
             Task.Factory.StartNew(RequestInputReportWorker, _inputCancellationTokenSourceSecondary.Token);
         }
 
-        public int DeviceIndex { get; }
-
         protected AirBenderHost HostDevice { get; }
+
+        public int DeviceIndex { get; }
 
         public PhysicalAddress ClientAddress { get; }
 

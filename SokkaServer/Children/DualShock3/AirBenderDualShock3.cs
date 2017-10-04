@@ -5,8 +5,8 @@ using System.Threading;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Reports.DualShock3;
 using AirBender.Sokka.Server.Exceptions;
+using AirBender.Sokka.Server.Host;
 using AirBender.Sokka.Server.Util;
-using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
 namespace AirBender.Sokka.Server.Children.DualShock3
 {
@@ -23,7 +23,7 @@ namespace AirBender.Sokka.Server.Children.DualShock3
             0x00, 0x00
         };
 
-        private readonly byte[] _ledOffsets = { 0x02, 0x04, 0x08, 0x10 };
+        private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
 
         public AirBenderDualShock3(AirBenderHost host, PhysicalAddress client, int index) : base(host, client, index)
         {
@@ -35,7 +35,7 @@ namespace AirBender.Sokka.Server.Children.DualShock3
 
         protected override void RequestInputReportWorker(object cancellationToken)
         {
-            var token = (CancellationToken)cancellationToken;
+            var token = (CancellationToken) cancellationToken;
             var requestSize = Marshal.SizeOf<AirBenderHost.AirbenderGetDs3InputReport>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
 
@@ -98,9 +98,7 @@ namespace AirBender.Sokka.Server.Children.DualShock3
                     out bytesReturned);
 
                 if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
-                {
                     throw new AirBenderDeviceNotFoundException();
-                }
             }
             finally
             {
