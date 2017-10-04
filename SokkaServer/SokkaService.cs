@@ -11,7 +11,7 @@ namespace AirBender.Sokka.Server
 
         public void Start()
         {
-            Log.Information("SokkaService started");
+            Log.Information("AirBender Sokka Server started");
 
             string path = string.Empty, instance = string.Empty;
 
@@ -33,6 +33,8 @@ namespace AirBender.Sokka.Server
         public void Stop()
         {
             BthHost.Dispose();
+
+            Log.Information("AirBender Sokka Server stopped");
         }
     }
 }
