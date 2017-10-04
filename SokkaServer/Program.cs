@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using SokkaServer;
 using Topshelf;
 
 namespace AirBender.Sokka.Server
@@ -11,7 +10,7 @@ namespace AirBender.Sokka.Server
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .WriteTo.Console()
-                .WriteTo.RollingFile("SokkaServer-{Date}.log")
+                .WriteTo.RollingFile("AirBender.Sokka.Server-{Date}.log")
                 .CreateLogger();
 
             HostFactory.Run(x =>                                 
@@ -25,8 +24,8 @@ namespace AirBender.Sokka.Server
                 x.RunAsLocalSystem();                            
 
                 x.SetDescription("Communicates with AirBender Bluetooth Host Devices.");        
-                x.SetDisplayName("SokkaServer");                       
-                x.SetServiceName("SokkaServer");                                
+                x.SetDisplayName("AirBender Sokka Server");                       
+                x.SetServiceName("AirBender.Sokka.Server");                                
             });
         }
     }

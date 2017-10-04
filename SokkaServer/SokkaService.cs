@@ -1,11 +1,11 @@
 ﻿using System;
+using AirBender.Sokka.Server.Host;
 using Nefarius.Devcon;
 using Serilog;
-using AirBenderHost = AirBender.Sokka.Server.Host.AirBenderHost;
 
-namespace SokkaServer
+namespace AirBender.Sokka.Server
 {
-    class SokkaService
+    internal class SokkaService
     {
         private AirBenderHost BthHost { get; set; }
 
