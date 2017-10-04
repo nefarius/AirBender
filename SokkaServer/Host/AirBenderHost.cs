@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
@@ -24,8 +25,29 @@ namespace SokkaServer.Host
 
         public AirBenderHost(string devicePath)
         {
-            Children = new List<AirBenderChildDevice>();
             DevicePath = devicePath;
+            Children = new ObservableCollection<AirBenderChildDevice>();
+
+            Children.CollectionChanged += (sender, args) =>
+            {
+                switch (args.Action)
+                {
+                    case NotifyCollectionChangedAction.Add:
+
+                        foreach (IAirBenderChildDevice item in args.NewItems)
+                            _plugins.DeviceArrived(item);
+
+                        break;
+                    case NotifyCollectionChangedAction.Remove:
+
+                        foreach (IAirBenderChildDevice item in args.OldItems)
+                            _plugins.DeviceRemoved(item);
+
+                        break;
+                    default:
+                        break;
+                }
+            };
 
             //
             // Open device
@@ -86,7 +108,7 @@ namespace SokkaServer.Host
 
         public Kernel32.SafeObjectHandle DeviceHandle { get; }
 
-        private List<AirBenderChildDevice> Children { get; }
+        private ObservableCollection<AirBenderChildDevice> Children { get; }
 
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
 
@@ -152,12 +174,13 @@ namespace SokkaServer.Host
                         case BthDeviceType.DualShock3:
                             var device = new AirBenderDualShock3(this, address, (int) i);
 
-                            device.ChildDeviceDisconnected += OnChildDeviceDisconnected;
-                            device.InputReportReceived += OnInputReportReceived;
+                            device.ChildDeviceDisconnected +=
+                                (sender, args) => Children.Remove((AirBenderChildDevice) sender);
+                            device.InputReportReceived +=
+                                (sender, args) => _plugins.InputReportReceived((AirBenderChildDevice) sender,
+                                    args.Report);
 
                             Children.Add(device);
-
-                            _plugins.DeviceArrived(device);
 
                             break;
                         case BthDeviceType.DualShock4:
@@ -169,22 +192,6 @@ namespace SokkaServer.Host
             {
                 Marshal.FreeHGlobal(pData);
             }
-        }
-
-        private void OnInputReportReceived(object sender, InputReportEventArgs inputReportEventArgs)
-        {
-            var device = (AirBenderChildDevice) sender;
-
-            _plugins.InputReportReceived(device, inputReportEventArgs.Report);
-        }
-
-        private void OnChildDeviceDisconnected(object sender, EventArgs eventArgs)
-        {
-            var device = (AirBenderChildDevice) sender;
-
-            Children.Remove(device);
-
-            _plugins.DeviceRemoved(device);
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
@@ -240,7 +247,10 @@ namespace SokkaServer.Host
             if (!disposedValue)
             {
                 if (disposing)
+                {
                     _deviceLookupTask?.Dispose();
+                    Children.Clear();
+                }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
