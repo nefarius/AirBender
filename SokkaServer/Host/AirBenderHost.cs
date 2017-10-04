@@ -184,7 +184,7 @@ namespace SokkaServer.Host
 
             Children.Remove(device);
 
-            _plugins.DeviceArrived(device);
+            _plugins.DeviceRemoved(device);
         }
 
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
