@@ -17,6 +17,8 @@ using Serilog;
 
 namespace AirBender.Sokka.Server.Host
 {
+    public delegate void HostDeviceDisconnectedEventHandler(object sender, EventArgs e);
+
     internal partial class AirBenderHost : IDisposable
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
@@ -116,6 +118,8 @@ namespace AirBender.Sokka.Server.Host
 
         public PhysicalAddress HostAddress { get; }
 
+        public event HostDeviceDisconnectedEventHandler HostDeviceDisconnected;
+
         private void OnLookup(long l)
         {
             var length = Marshal.SizeOf(typeof(AirbenderGetClientCount));
@@ -139,7 +143,8 @@ namespace AirBender.Sokka.Server.Host
                 {
                     Log.Warning($"Connection to device {DevicePath} lost, possibly it got removed");
 
-                    Dispose();
+                    HostDeviceDisconnected?.Invoke(this, EventArgs.Empty);
+
                     return;
                 }
 
@@ -238,6 +243,34 @@ namespace AirBender.Sokka.Server.Host
             return false;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            var other = obj as AirBenderHost;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(AirBenderHost other)
+        {
+            return string.Equals(DevicePath, other.DevicePath, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return StringComparer.OrdinalIgnoreCase.GetHashCode(DevicePath);
+        }
+
+        public static bool operator ==(AirBenderHost left, AirBenderHost right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(AirBenderHost left, AirBenderHost right)
+        {
+            return !Equals(left, right);
+        }
+
         #region IDisposable Support
 
         private bool disposedValue; // To detect redundant calls
@@ -249,6 +282,10 @@ namespace AirBender.Sokka.Server.Host
                 if (disposing)
                 {
                     _deviceLookupTask?.Dispose();
+
+                    foreach (var child in Children)
+                        child.Dispose();
+
                     Children.Clear();
                 }
 

@@ -23,7 +23,7 @@ namespace AirBender.Sokka.Server.Children
 
     public delegate void InputReportReceivedEventHandler(object sender, InputReportEventArgs e);
 
-    internal abstract class AirBenderChildDevice : IAirBenderChildDevice
+    internal abstract class AirBenderChildDevice : IAirBenderChildDevice, IDisposable
     {
         private readonly CancellationTokenSource _inputCancellationTokenSourcePrimary = new CancellationTokenSource();
         private readonly CancellationTokenSource _inputCancellationTokenSourceSecondary = new CancellationTokenSource();
@@ -62,14 +62,6 @@ namespace AirBender.Sokka.Server.Children
 
         public event InputReportReceivedEventHandler InputReportReceived;
 
-        ~AirBenderChildDevice()
-        {
-            _outputReportTask?.Dispose();
-
-            _inputCancellationTokenSourcePrimary.Cancel();
-            _inputCancellationTokenSourceSecondary.Cancel();
-        }
-
         protected virtual void RequestInputReportWorker(object cancellationToken)
         {
         }
@@ -92,5 +84,46 @@ namespace AirBender.Sokka.Server.Children
 
             ChildDeviceDisconnected?.Invoke(this, e);
         }
+
+        #region IDisposable Support
+
+        private bool disposedValue; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _outputReportTask?.Dispose();
+
+                    _inputCancellationTokenSourcePrimary.Cancel();
+                    _inputCancellationTokenSourceSecondary.Cancel();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
+                // TODO: set large fields to null.
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        ~AirBenderChildDevice()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }
