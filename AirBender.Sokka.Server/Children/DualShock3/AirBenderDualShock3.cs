@@ -60,6 +60,9 @@ namespace AirBender.Sokka.Server.Children.DualShock3
                         requestBuffer, requestSize, requestBuffer, requestSize,
                         out bytesReturned);
 
+                    //
+                    // On ERROR_DEV_NOT_EXIST the child device was removed
+                    //
                     if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
                         OnChildDeviceDisconnected(EventArgs.Empty);
 
