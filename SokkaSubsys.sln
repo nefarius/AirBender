@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Common.Shared", "AirBender.Common.Shared\AirBender.Common.Shared.csproj", "{B973105C-50CD-4B89-9416-4FC87C2E2DDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Sokka.Server", "SokkaServer\AirBender.Sokka.Server.csproj", "{66ED5B37-148B-414F-9456-8F55C5F9C1FC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Sokka.Server", "AirBender.Sokka.Server\AirBender.Sokka.Server.csproj", "{66ED5B37-148B-414F-9456-8F55C5F9C1FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Plugin.Sink.ViGEm", "AirBender.Plugin.Sink.ViGEm\AirBender.Plugin.Sink.ViGEm.csproj", "{379F20B9-2E3A-436E-ABE3-E7DA86534A4B}"
 EndProject
