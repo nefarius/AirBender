@@ -172,7 +172,11 @@ namespace AirBender.Sokka.Server.Host
                     BthDeviceType type;
 
                     if (!GetDeviceStateByIndex(i, out address, out type))
+                    {
+                        Log.Warning(
+                            $"Failed to request details for client #{i}: {new Win32Exception(Marshal.GetLastWin32Error())}");
                         continue;
+                    }
 
                     switch (type)
                     {
