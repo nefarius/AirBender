@@ -4,8 +4,10 @@ using AirBender.Common.Shared.Core;
 
 namespace AirBender.Sokka.Server.Host
 {
-    partial class AirBenderHost
+    internal partial class AirBenderHost
     {
+        #region I/O control codes
+
         private const uint IoctlAirbenderGetHostBdAddr = 0x80006004;
         private const uint IoctlAirbenderHostReset = 0x80002008;
         private const uint IoctlAirbenderGetClientCount = 0x8000600C;
@@ -14,11 +16,23 @@ namespace AirBender.Sokka.Server.Host
         internal const uint IoctlAirbenderSetDs3OutputReport = 0x8000A018;
         private const uint IoctlAirbenderHostShutdown = 0x8000201C;
 
+        #endregion
+
+        #region Error constants
+
         internal const int ErrorDevNotExist = 0x37;
         private const int ErrorBadCommand = 0x16;
 
+        #endregion
+
+        #region Buffer size constants
+
         private const int Ds3HidInputReportSize = 0x31;
         private const int Ds3HidOutputReportSize = 0x32;
+
+        #endregion
+
+        #region Managed to unmanaged structs
 
         [StructLayout(LayoutKind.Sequential)]
         internal struct BdAddr
@@ -62,5 +76,7 @@ namespace AirBender.Sokka.Server.Host
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = Ds3HidOutputReportSize)]
             public byte[] ReportBuffer;
         }
+
+        #endregion
     }
 }

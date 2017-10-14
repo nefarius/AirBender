@@ -23,6 +23,9 @@ namespace AirBender.Sokka.Server.Children
 
     public delegate void InputReportReceivedEventHandler(object sender, InputReportEventArgs e);
 
+    /// <summary>
+    ///     Represents a managed wrapper for a Bluetooth host child device.
+    /// </summary>
     internal abstract class AirBenderChildDevice : IAirBenderChildDevice, IDisposable
     {
         private readonly CancellationTokenSource _inputCancellationTokenSourcePrimary = new CancellationTokenSource();
@@ -30,6 +33,12 @@ namespace AirBender.Sokka.Server.Children
         private readonly IObservable<long> _outputReportSchedule = Observable.Interval(TimeSpan.FromMilliseconds(10));
         private readonly IDisposable _outputReportTask;
 
+        /// <summary>
+        ///     Creates a new child device.
+        /// </summary>
+        /// <param name="host">The host this child is connected to.</param>
+        /// <param name="client">The client MAC address identifying this child.</param>
+        /// <param name="index">The index this child is registered on the host device under.</param>
         protected AirBenderChildDevice(AirBenderHost host, PhysicalAddress client, int index)
         {
             HostDevice = host;

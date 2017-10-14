@@ -19,12 +19,19 @@ namespace AirBender.Sokka.Server.Host
 {
     public delegate void HostDeviceDisconnectedEventHandler(object sender, EventArgs e);
 
+    /// <summary>
+    ///     Represents a managed wrapper around an USB device loaded with the AirBender driver.
+    /// </summary>
     internal partial class AirBenderHost : IDisposable
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
         private readonly PluginHost _plugins = new PluginHost();
 
+        /// <summary>
+        ///     Opens an AirBender device by its device path.
+        /// </summary>
+        /// <param name="devicePath">The device path to open.</param>
         public AirBenderHost(string devicePath)
         {
             DevicePath = devicePath;
@@ -108,18 +115,40 @@ namespace AirBender.Sokka.Server.Host
             _deviceLookupTask = _deviceLookupSchedule.Subscribe(OnLookup);
         }
 
+        /// <summary>
+        ///     Native handle to device.
+        /// </summary>
         public Kernel32.SafeObjectHandle DeviceHandle { get; }
 
+        /// <summary>
+        ///     Child devices attached to this AirBender device.
+        /// </summary>
         private ObservableCollection<AirBenderChildDevice> Children { get; }
 
+        /// <summary>
+        ///     Class GUID identifying an AirBender device.
+        /// </summary>
         public static Guid ClassGuid => Guid.Parse(Settings.Default.ClassGuid);
 
+        /// <summary>
+        ///     The device path.
+        /// </summary>
         public string DevicePath { get; }
 
+        /// <summary>
+        ///     MAC address of this Bluetooth host.
+        /// </summary>
         public PhysicalAddress HostAddress { get; }
 
+        /// <summary>
+        ///     Gets fired when the host device gets disconnected or become inaccessible due to an error.
+        /// </summary>
         public event HostDeviceDisconnectedEventHandler HostDeviceDisconnected;
 
+        /// <summary>
+        ///     Gets called periodically to determine new child devices.  
+        /// </summary>
+        /// <param name="l">Lookup interval.</param>
         private void OnLookup(long l)
         {
             var length = Marshal.SizeOf(typeof(AirbenderGetClientCount));
@@ -168,6 +197,8 @@ namespace AirBender.Sokka.Server.Host
 
                 for (uint i = 0; i < count; i++)
                 {
+                    // TODO: implement more checks, this could accidentally register the same devices again
+
                     PhysicalAddress address;
                     BthDeviceType type;
 
@@ -203,6 +234,13 @@ namespace AirBender.Sokka.Server.Host
             }
         }
 
+        /// <summary>
+        ///     Requests the type and unique address of the device from the host based on the devices index.
+        /// </summary>
+        /// <param name="clientIndex">The child device index (zero-based).</param>
+        /// <param name="address">The child device MAC address.</param>
+        /// <param name="type">The type of the child device.</param>
+        /// <returns>True on success, false otherwise.</returns>
         private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
         {
             var requestSize = Marshal.SizeOf<AirbenderGetClientDetails>();
@@ -210,6 +248,9 @@ namespace AirBender.Sokka.Server.Host
 
             try
             {
+                //
+                // Identifier is the index
+                // 
                 Marshal.StructureToPtr(
                     new AirbenderGetClientDetails
                     {
@@ -247,6 +288,8 @@ namespace AirBender.Sokka.Server.Host
             return false;
         }
 
+        #region Equals Support
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -255,7 +298,7 @@ namespace AirBender.Sokka.Server.Host
             return other != null && Equals(other);
         }
 
-        protected bool Equals(AirBenderHost other)
+        private bool Equals(AirBenderHost other)
         {
             return string.Equals(DevicePath, other.DevicePath, StringComparison.OrdinalIgnoreCase);
         }
@@ -274,6 +317,8 @@ namespace AirBender.Sokka.Server.Host
         {
             return !Equals(left, right);
         }
+
+        #endregion
 
         #region IDisposable Support
 

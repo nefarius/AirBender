@@ -66,6 +66,7 @@ namespace AirBender.Sokka.Server.Children.DualShock3
                     if (!ret && Marshal.GetLastWin32Error() == AirBenderHost.ErrorDevNotExist)
                         OnChildDeviceDisconnected(EventArgs.Empty);
 
+                    // TODO: refactor, might lead to high CPU usage on failure
                     if (!ret) continue;
 
                     var resp = Marshal.PtrToStructure<AirBenderHost.AirbenderGetDs3InputReport>(requestBuffer);
