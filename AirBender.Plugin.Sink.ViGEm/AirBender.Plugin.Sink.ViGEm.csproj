@@ -37,7 +37,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Nefarius.Sub.Kinbaku">
-      <HintPath>..\Kinbaku\bin\Nefarius.Sub.Kinbaku.dll</HintPath>
+      <HintPath>..\..\..\C#\Kinbaku\bin\Nefarius.Sub.Kinbaku.dll</HintPath>
     </Reference>
     <Reference Include="Nefarius.ViGEmClient, Version=1.13.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Nefarius.ViGEmClient.1.13.0\lib\net452\Nefarius.ViGEmClient.dll</HintPath>

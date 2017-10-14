@@ -30,8 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Nefarius.Sub.Kinbaku">
-      <HintPath>..\Kinbaku\bin\Nefarius.Sub.Kinbaku.dll</HintPath>
+    <Reference Include="Nefarius.Sub.Kinbaku, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\C#\Kinbaku\bin\Nefarius.Sub.Kinbaku.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
