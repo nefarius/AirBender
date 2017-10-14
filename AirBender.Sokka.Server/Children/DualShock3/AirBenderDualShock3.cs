@@ -7,6 +7,7 @@ using AirBender.Common.Shared.Reports.DualShock3;
 using AirBender.Sokka.Server.Exceptions;
 using AirBender.Sokka.Server.Host;
 using AirBender.Sokka.Server.Util;
+using Nefarius.Sub.Kinbaku.Util;
 
 namespace AirBender.Sokka.Server.Children.DualShock3
 {

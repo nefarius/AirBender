@@ -11,7 +11,7 @@ using AirBender.Sokka.Server.Children.DualShock3;
 using AirBender.Sokka.Server.Exceptions;
 using AirBender.Sokka.Server.Plugins;
 using AirBender.Sokka.Server.Properties;
-using AirBender.Sokka.Server.Util;
+using Nefarius.Sub.Kinbaku.Util;
 using PInvoke;
 using Serilog;
 
