@@ -10,8 +10,14 @@ using AirBender.Sokka.Server.Util;
 
 namespace AirBender.Sokka.Server.Children.DualShock3
 {
+    /// <summary>
+    ///     Represents a wireless DualShock 3 Controller.
+    /// </summary>
     internal class AirBenderDualShock3 : AirBenderChildDevice
     {
+        //
+        // Output report containing LED & rumble states
+        // 
         private readonly byte[] _hidOutputReport =
         {
             0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
@@ -23,6 +29,9 @@ namespace AirBender.Sokka.Server.Children.DualShock3
             0x00, 0x00
         };
 
+        //
+        // Values indicating which of the four LEDs to toggle
+        // 
         private readonly byte[] _ledOffsets = {0x02, 0x04, 0x08, 0x10};
 
         public AirBenderDualShock3(AirBenderHost host, PhysicalAddress client, int index) : base(host, client, index)
@@ -80,6 +89,10 @@ namespace AirBender.Sokka.Server.Children.DualShock3
             }
         }
 
+        /// <summary>
+        ///     Periodically submits output report state changes of this child to the host controller.
+        /// </summary>
+        /// <param name="l">The interval.</param>
         protected override void OnOutputReport(long l)
         {
             var requestSize = Marshal.SizeOf<AirBenderHost.AirbenderSetDs3OutputReport>();
@@ -87,6 +100,9 @@ namespace AirBender.Sokka.Server.Children.DualShock3
 
             try
             {
+                //
+                // Child is identified by its unique address
+                // 
                 Marshal.StructureToPtr(
                     new AirBenderHost.AirbenderSetDs3OutputReport
                     {
