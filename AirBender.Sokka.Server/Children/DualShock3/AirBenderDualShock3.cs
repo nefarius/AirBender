@@ -3,10 +3,10 @@ using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
 using AirBender.Common.Shared.Core;
-using AirBender.Common.Shared.Reports.DualShock3;
 using AirBender.Sokka.Server.Exceptions;
 using AirBender.Sokka.Server.Host;
 using AirBender.Sokka.Server.Util;
+using Nefarius.Sub.Kinbaku.Core.Reports.DualShock3;
 using Nefarius.Sub.Kinbaku.Util;
 
 namespace AirBender.Sokka.Server.Children.DualShock3

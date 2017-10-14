@@ -3,8 +3,8 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Plugins;
-using AirBender.Common.Shared.Reports;
-using AirBender.Common.Shared.Reports.DualShock3;
+using Nefarius.Sub.Kinbaku.Core.Reports.Common;
+using Nefarius.Sub.Kinbaku.Core.Reports.DualShock3;
 using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.DualShock4;
@@ -67,12 +67,12 @@ namespace AirBender.Plugin.Sink.ViGEm
                     var ds3Report = (DualShock3InputReport) report;
                     var ds4Report = new DualShock4Report();
 
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, ds3Report.LeftThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, ds3Report.LeftThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, ds3Report.RightThumbX);
-                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, ds3Report.RightThumbY);
-                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, ds3Report.LeftTrigger);
-                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, ds3Report.RightTrigger);
+                    ds4Report.SetAxis(DualShock4Axes.LeftThumbX, ds3Report[DualShock3Axes.LeftThumbX]);
+                    ds4Report.SetAxis(DualShock4Axes.LeftThumbY, ds3Report[DualShock3Axes.LeftThumbY]);
+                    ds4Report.SetAxis(DualShock4Axes.RightThumbX, ds3Report[DualShock3Axes.RightThumbX]);
+                    ds4Report.SetAxis(DualShock4Axes.RightThumbY, ds3Report[DualShock3Axes.RightThumbY]);
+                    ds4Report.SetAxis(DualShock4Axes.LeftTrigger, ds3Report[DualShock3Axes.LeftTrigger]);
+                    ds4Report.SetAxis(DualShock4Axes.RightTrigger, ds3Report[DualShock3Axes.RightTrigger]);
 
                     ds4Report.SetButtons(_btnMap.Where(m => ds3Report.EngagedButtons.Contains(m.Key))
                         .Select(m => m.Value).ToArray());

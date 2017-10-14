@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Nefarius.Sub.Kinbaku">
+      <HintPath>..\Kinbaku\bin\Nefarius.Sub.Kinbaku.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
@@ -45,12 +48,13 @@
     <Compile Include="Core\IAirBenderChildDevice.cs" />
     <Compile Include="Plugins\IAirBenderSink.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Reports\DualShock3\DualShock3InputReport.cs" />
-    <Compile Include="Reports\IInputReport.cs" />
     <Compile Include="Util\CircularBuffer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Reports\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,7 +6,7 @@ using System.IO;
 using System.Reflection;
 using AirBender.Common.Shared.Core;
 using AirBender.Common.Shared.Plugins;
-using AirBender.Common.Shared.Reports;
+using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 
 namespace AirBender.Sokka.Server.Plugins
 {

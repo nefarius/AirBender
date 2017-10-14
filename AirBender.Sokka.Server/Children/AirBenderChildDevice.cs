@@ -4,8 +4,8 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AirBender.Common.Shared.Core;
-using AirBender.Common.Shared.Reports;
 using AirBender.Sokka.Server.Host;
+using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 
 namespace AirBender.Sokka.Server.Children
 {
