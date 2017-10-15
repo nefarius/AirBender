@@ -86,6 +86,16 @@ namespace AirBender.Sokka.Server.Children
             ChildDeviceDisconnected?.Invoke(this, e);
         }
 
+        public virtual void Rumble(byte largeMotor, byte smallMotor)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void PairTo(PhysicalAddress host)
+        {
+            throw new NotSupportedException("You can not change the host address while connected via Bluetooth.");
+        }
+
         #region IDisposable Support
 
         private bool disposedValue; // To detect redundant calls

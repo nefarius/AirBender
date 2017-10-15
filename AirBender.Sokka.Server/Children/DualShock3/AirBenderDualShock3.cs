@@ -126,5 +126,18 @@ namespace AirBender.Sokka.Server.Children.DualShock3
                 Marshal.FreeHGlobal(requestBuffer);
             }
         }
+
+        /// <summary>
+        ///     Send Rumble request to the controller.
+        /// </summary>
+        /// <param name="largeMotor">Large motor intensity (0 = off, 255 = max).</param>
+        /// <param name="smallMotor">Small motor intensity (0 = off, >0 = on).</param>
+        public override void Rumble(byte largeMotor, byte smallMotor)
+        {
+            _hidOutputReport[4] = (byte)(smallMotor > 0 ? 0x01 : 0x00);
+            _hidOutputReport[6] = largeMotor;
+
+            OnOutputReport(0);
+        }
     }
 }
