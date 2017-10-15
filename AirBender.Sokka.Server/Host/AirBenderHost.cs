@@ -40,6 +40,11 @@ namespace AirBender.Sokka.Server.Host
             DevicePath = devicePath;
             Children = new ObservableCollection<AirBenderChildDevice>();
 
+            foreach (var plugin in _sinkPluginHost.SinkPlugins)
+            {
+                Log.Information($"Loaded plugin {plugin.Metadata["PluginName"]}");
+            }
+
             Children.CollectionChanged += (sender, args) =>
             {
                 switch (args.Action)
