@@ -67,6 +67,8 @@ namespace AirBender.Sokka.Server.Children
 
         public DualShockDeviceType DeviceType { get; protected set; }
 
+        public PhysicalAddress HostAddress => HostDevice.HostAddress;
+
         public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 
         public event InputReportReceivedEventHandler InputReportReceived;
