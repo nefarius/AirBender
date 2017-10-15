@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Common.Shared", "AirBender.Common.Shared\AirBender.Common.Shared.csproj", "{B973105C-50CD-4B89-9416-4FC87C2E2DDF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Sokka.Server", "AirBender.Sokka.Server\AirBender.Sokka.Server.csproj", "{66ED5B37-148B-414F-9456-8F55C5F9C1FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AirBender.Plugin.Sink.ViGEm", "AirBender.Plugin.Sink.ViGEm\AirBender.Plugin.Sink.ViGEm.csproj", "{379F20B9-2E3A-436E-ABE3-E7DA86534A4B}"
@@ -15,10 +13,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B973105C-50CD-4B89-9416-4FC87C2E2DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B973105C-50CD-4B89-9416-4FC87C2E2DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B973105C-50CD-4B89-9416-4FC87C2E2DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B973105C-50CD-4B89-9416-4FC87C2E2DDF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{66ED5B37-148B-414F-9456-8F55C5F9C1FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{66ED5B37-148B-414F-9456-8F55C5F9C1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66ED5B37-148B-414F-9456-8F55C5F9C1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU

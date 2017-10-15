@@ -58,12 +58,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\AirBender.Common.Shared\AirBender.Common.Shared.csproj">
-      <Project>{b973105c-50cd-4b89-9416-4fc87c2e2ddf}</Project>
-      <Name>AirBender.Common.Shared</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>

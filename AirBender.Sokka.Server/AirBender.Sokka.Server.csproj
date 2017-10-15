@@ -114,7 +114,6 @@
     <Compile Include="Exceptions\AirBenderGetClientStateFailedException.cs" />
     <Compile Include="Exceptions\AirBenderGetHostBdAddrFailedException.cs" />
     <Compile Include="Exceptions\AirBenderHostResetFailedException.cs" />
-    <Compile Include="Plugins\PluginHost.cs" />
     <Compile Include="Util\PhysicalAddressExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -140,12 +139,6 @@
   <ItemGroup>
     <Content Include="favicon.ico" />
     <None Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\AirBender.Common.Shared\AirBender.Common.Shared.csproj">
-      <Project>{b973105c-50cd-4b89-9416-4fc87c2e2ddf}</Project>
-      <Name>AirBender.Common.Shared</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

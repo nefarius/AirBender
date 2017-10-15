@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using AirBender.Common.Shared.Core;
+using Nefarius.Sub.Kinbaku.Core.Plugins;
 
 namespace AirBender.Sokka.Server.Host
 {
@@ -57,7 +57,7 @@ namespace AirBender.Sokka.Server.Host
         private struct AirbenderGetClientDetails
         {
             public UInt32 ClientIndex;
-            public BthDeviceType DeviceType;
+            public DualShockDeviceType DeviceType;
             public BdAddr ClientAddress;
         }
 

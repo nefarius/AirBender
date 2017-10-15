@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using AirBender.Common.Shared.Core;
 using AirBender.Sokka.Server.Children;
 using AirBender.Sokka.Server.Children.DualShock3;
 using AirBender.Sokka.Server.Exceptions;
-using AirBender.Sokka.Server.Plugins;
 using AirBender.Sokka.Server.Properties;
+using Nefarius.Sub.Kinbaku.Core.Plugins;
 using Nefarius.Sub.Kinbaku.Util;
 using PInvoke;
 using Serilog;
@@ -26,7 +27,9 @@ namespace AirBender.Sokka.Server.Host
     {
         private readonly IObservable<long> _deviceLookupSchedule = Observable.Interval(TimeSpan.FromSeconds(2));
         private readonly IDisposable _deviceLookupTask;
-        private readonly PluginHost _plugins = new PluginHost();
+
+        private readonly SinkPluginHost _sinkPluginHost = new SinkPluginHost(Path.Combine(Path.GetDirectoryName
+            (Assembly.GetExecutingAssembly().Location), "Plugins"));
 
         /// <summary>
         ///     Opens an AirBender device by its device path.
@@ -43,14 +46,14 @@ namespace AirBender.Sokka.Server.Host
                 {
                     case NotifyCollectionChangedAction.Add:
 
-                        foreach (IAirBenderChildDevice item in args.NewItems)
-                            _plugins.DeviceArrived(item);
+                        foreach (IDualShockDevice item in args.NewItems)
+                            _sinkPluginHost.DeviceArrived(item);
 
                         break;
                     case NotifyCollectionChangedAction.Remove:
 
-                        foreach (IAirBenderChildDevice item in args.OldItems)
-                            _plugins.DeviceRemoved(item);
+                        foreach (IDualShockDevice item in args.OldItems)
+                            _sinkPluginHost.DeviceRemoved(item);
 
                         break;
                     default:
@@ -200,7 +203,7 @@ namespace AirBender.Sokka.Server.Host
                     // TODO: implement more checks, this could accidentally register the same devices again
 
                     PhysicalAddress address;
-                    BthDeviceType type;
+                    DualShockDeviceType type;
 
                     if (!GetDeviceStateByIndex(i, out address, out type))
                     {
@@ -211,19 +214,19 @@ namespace AirBender.Sokka.Server.Host
 
                     switch (type)
                     {
-                        case BthDeviceType.DualShock3:
+                        case DualShockDeviceType.DualShock3:
                             var device = new AirBenderDualShock3(this, address, (int) i);
 
                             device.ChildDeviceDisconnected +=
                                 (sender, args) => Children.Remove((AirBenderChildDevice) sender);
                             device.InputReportReceived +=
-                                (sender, args) => _plugins.InputReportReceived((AirBenderChildDevice) sender,
+                                (sender, args) => _sinkPluginHost.InputReportReceived((AirBenderChildDevice) sender,
                                     args.Report);
 
                             Children.Add(device);
 
                             break;
-                        case BthDeviceType.DualShock4:
+                        case DualShockDeviceType.DualShock4:
                             throw new NotImplementedException();
                     }
                 }
@@ -241,7 +244,7 @@ namespace AirBender.Sokka.Server.Host
         /// <param name="address">The child device MAC address.</param>
         /// <param name="type">The type of the child device.</param>
         /// <returns>True on success, false otherwise.</returns>
-        private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out BthDeviceType type)
+        private bool GetDeviceStateByIndex(uint clientIndex, out PhysicalAddress address, out DualShockDeviceType type)
         {
             var requestSize = Marshal.SizeOf<AirbenderGetClientDetails>();
             var requestBuffer = Marshal.AllocHGlobal(requestSize);
@@ -282,7 +285,7 @@ namespace AirBender.Sokka.Server.Host
                 Marshal.FreeHGlobal(requestBuffer);
             }
 
-            type = BthDeviceType.Unknown;
+            type = DualShockDeviceType.Unknown;
             address = PhysicalAddress.None;
 
             return false;

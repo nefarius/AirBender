@@ -3,8 +3,8 @@ using System.Net.NetworkInformation;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AirBender.Common.Shared.Core;
 using AirBender.Sokka.Server.Host;
+using Nefarius.Sub.Kinbaku.Core.Plugins;
 using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 
 namespace AirBender.Sokka.Server.Children
@@ -26,7 +26,7 @@ namespace AirBender.Sokka.Server.Children
     /// <summary>
     ///     Represents a managed wrapper for a Bluetooth host child device.
     /// </summary>
-    internal abstract class AirBenderChildDevice : IAirBenderChildDevice, IDisposable
+    internal abstract class AirBenderChildDevice : IDualShockDevice, IDisposable
     {
         private readonly CancellationTokenSource _inputCancellationTokenSourcePrimary = new CancellationTokenSource();
         private readonly CancellationTokenSource _inputCancellationTokenSourceSecondary = new CancellationTokenSource();
@@ -65,7 +65,7 @@ namespace AirBender.Sokka.Server.Children
 
         public PhysicalAddress ClientAddress { get; }
 
-        public BthDeviceType DeviceType { get; protected set; }
+        public DualShockDeviceType DeviceType { get; protected set; }
 
         public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
-using AirBender.Common.Shared.Core;
-using AirBender.Common.Shared.Plugins;
+using Nefarius.Sub.Kinbaku.Core.Plugins;
 using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 using Nefarius.Sub.Kinbaku.Core.Reports.DualShock3;
 using Nefarius.ViGEm.Client;
@@ -11,14 +10,14 @@ using Nefarius.ViGEm.Client.Targets.DualShock4;
 
 namespace AirBender.Plugin.Sink.ViGEm
 {
-    [Export(typeof(IAirBenderSink))]
-    public class ViGEmSink : IAirBenderSink
+    [Export(typeof(ISinkPlugin))]
+    public class ViGEmSink : ISinkPlugin
     {
         private readonly Dictionary<DualShock3Buttons, DualShock4Buttons> _btnMap;
         private readonly ViGEmClient _client;
 
-        private readonly Dictionary<IAirBenderChildDevice, DualShock4Controller> _deviceMap =
-            new Dictionary<IAirBenderChildDevice, DualShock4Controller>();
+        private readonly Dictionary<IDualShockDevice, DualShock4Controller> _deviceMap =
+            new Dictionary<IDualShockDevice, DualShock4Controller>();
 
         public ViGEmSink()
         {
@@ -41,7 +40,7 @@ namespace AirBender.Plugin.Sink.ViGEm
             _client = new ViGEmClient();
         }
 
-        public void DeviceArrived(IAirBenderChildDevice device)
+        public void DeviceArrived(IDualShockDevice device)
         {
             var target = new DualShock4Controller(_client);
 
@@ -50,17 +49,17 @@ namespace AirBender.Plugin.Sink.ViGEm
             target.Connect();
         }
 
-        public void DeviceRemoved(IAirBenderChildDevice device)
+        public void DeviceRemoved(IDualShockDevice device)
         {
             _deviceMap[device].Dispose();
             _deviceMap.Remove(device);
         }
 
-        public void InputReportReceived(IAirBenderChildDevice device, IInputReport report)
+        public void InputReportReceived(IDualShockDevice device, IInputReport report)
         {
             switch (device.DeviceType)
             {
-                case BthDeviceType.DualShock3:
+                case DualShockDeviceType.DualShock3:
 
                     var target = _deviceMap[device];
 
