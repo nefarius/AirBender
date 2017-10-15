@@ -9,16 +9,6 @@ using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 
 namespace AirBender.Sokka.Server.Children
 {
-    public class InputReportEventArgs : EventArgs
-    {
-        public InputReportEventArgs(IInputReport report)
-        {
-            Report = report;
-        }
-
-        public IInputReport Report { get; }
-    }
-
     public delegate void ChildDeviceDisconnectedEventHandler(object sender, EventArgs e);
 
     public delegate void InputReportReceivedEventHandler(object sender, InputReportEventArgs e);
