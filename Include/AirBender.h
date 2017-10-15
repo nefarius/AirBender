@@ -86,6 +86,7 @@ typedef struct _BD_ADDR
 */
 typedef enum _BTH_DEVICE_TYPE
 {
+    DsTypeUnknown,
     DualShock3,
     DualShock4
 
