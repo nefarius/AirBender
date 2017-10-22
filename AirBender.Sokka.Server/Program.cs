@@ -25,7 +25,8 @@ namespace AirBender.Sokka.Server
 
                 x.SetDescription("Communicates with AirBender Bluetooth Host Devices.");        
                 x.SetDisplayName("AirBender Sokka Server");                       
-                x.SetServiceName("AirBender.Sokka.Server");                                
+                x.SetServiceName("AirBender.Sokka.Server");
+                x.DependsOn("Kinbaku.Hub.Server");
             });
         }
     }
