@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AirBender.Sokka.Server.Host;
+using Nefarius.Sub.Kinbaku.Core.Hub.Client;
 using Nefarius.Sub.Kinbaku.Core.Plugins;
 using Nefarius.Sub.Kinbaku.Core.Reports.Common;
 
@@ -62,6 +63,7 @@ namespace AirBender.Sokka.Server.Children
         public event ChildDeviceDisconnectedEventHandler ChildDeviceDisconnected;
 
         public event InputReportReceivedEventHandler InputReportReceived;
+        public event RumbleRequestReceivedEventHandler RumbleRequestReceived;
 
         protected virtual void RequestInputReportWorker(object cancellationToken)
         {
