@@ -69,7 +69,6 @@ Return Value:
 
     queueConfig.EvtIoDeviceControl = AirBenderEvtIoDeviceControl;
     queueConfig.EvtIoStop = AirBenderEvtIoStop;
-    queueConfig.EvtIoRead = AirBenderEvtIoRead;
 
     status = WdfIoQueueCreate(
         Device,
@@ -468,42 +467,3 @@ Return Value:
     return;
 }
 
-_Use_decl_annotations_
-VOID
-AirBenderEvtIoRead(
-    WDFQUEUE  Queue,
-    WDFREQUEST  Request,
-    size_t  Length
-)
-{
-    NTSTATUS status;
-    WDFMEMORY mem;
-    PVOID buffer;
-    size_t length;
-    PDEVICE_CONTEXT pDeviceContext;
-
-    UNREFERENCED_PARAMETER(Length);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
-
-    //
-    // TODO: PoC hack, re-implement!
-
-
-    pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
-
-    status = WdfRequestRetrieveOutputMemory(Request, &mem);
-    if (!NT_SUCCESS(status))
-    {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
-            "WdfRequestRetrieveOutputMemory failed with status 0x%X", status);
-    }
-
-    buffer = WdfMemoryGetBuffer(mem, &length);
-
-    RtlCopyMemory(buffer, pDeviceContext->HidInputReport, 96);
-
-    WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, length);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
-}

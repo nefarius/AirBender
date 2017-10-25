@@ -47,6 +47,5 @@ AirBenderQueueInitialize(
 //
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL AirBenderEvtIoDeviceControl;
 EVT_WDF_IO_QUEUE_IO_STOP AirBenderEvtIoStop;
-EVT_WDF_IO_QUEUE_IO_READ AirBenderEvtIoRead;
 
 EXTERN_C_END

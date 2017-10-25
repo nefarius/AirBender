@@ -61,4 +61,4 @@ VOID AppendElementsByteArray(IN PBYTE_ARRAY Array, IN PVOID Elements, IN ULONG N
 
 VOID GetElementsByteArray(IN PBYTE_ARRAY Array, IN ULONG Index, OUT PVOID *Elements, OUT PULONG NumElements);
 
-NTSTATUS FreeByteArray(IN PBYTE_ARRAY Array);
+VOID FreeByteArray(IN PBYTE_ARRAY Array);

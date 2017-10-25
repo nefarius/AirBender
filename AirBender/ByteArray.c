@@ -39,7 +39,7 @@ VOID InitByteArray(IN OUT PBYTE_ARRAY Array)
 VOID AppendElementsByteArray(IN PBYTE_ARRAY Array, IN PVOID Elements, IN ULONG NumElements)
 {
     PBYTE_ARRAY_ELEMENT node = malloc(sizeof(BYTE_ARRAY_ELEMENT));
-    
+
     node->Length = NumElements;
     node->Data = malloc(NumElements);
 
@@ -69,9 +69,15 @@ VOID GetElementsByteArray(IN PBYTE_ARRAY Array, IN ULONG Index, OUT PVOID *Eleme
     *NumElements = node->Length;
 }
 
-NTSTATUS FreeByteArray(IN PBYTE_ARRAY Array)
+VOID FreeByteArray(IN PBYTE_ARRAY Array)
 {
-    UNREFERENCED_PARAMETER(Array);
+    PBYTE_ARRAY_ELEMENT node = Array->head;
 
-    return STATUS_SUCCESS;
+    while (node != NULL)
+    {
+        free(node->Data);
+        node = node->next;
+    }
+
+    ZeroMemory(Array, sizeof(BYTE_ARRAY));
 }
