@@ -1,9 +1,0 @@
-﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SokkaServer.Properties" GeneratedClassName="Settings">
-  <Profiles />
-  <Settings>
-    <Setting Name="ClassGuid" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">a775e97e-a41b-4bfc-868e-25be84643b62</Value>
-    </Setting>
-  </Settings>
-</SettingsFile>
