@@ -79,5 +79,5 @@ VOID FreeByteArray(IN PBYTE_ARRAY Array)
         node = node->next;
     }
 
-    ZeroMemory(Array, sizeof(BYTE_ARRAY));
+    RtlZeroMemory(Array, sizeof(BYTE_ARRAY));
 }
