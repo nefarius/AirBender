@@ -175,15 +175,16 @@ VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
 }
 
 /**
- * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_ADD( PBTH_DEVICE_LIST List, PBD_ADDR Address )
+ * \fn  NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD( PBTH_DEVICE_LIST List, PBD_ADDR Address, WDFDEVICE HostDevice )
  *
  * \brief   Adds a new device to the list identified by the clients MAC address.
  *
  * \author  Benjamin "Nefarius" Höglinger
  * \date    15.09.2017
  *
- * \param   List    The device list.
- * \param   Address The client MAC address.
+ * \param   List        The device list.
+ * \param   Address     The client MAC address.
+ * \param   HostDevice  The host device.
  *
  * \return  NTSTATUS value.
  */
