@@ -228,7 +228,7 @@ AirBenderEvtUsbInterruptPipeReadComplete(
         if (command == HCI_Read_BD_ADDR && HCI_COMMAND_SUCCESS(buffer))
         {
             RtlCopyMemory(&pDeviceContext->BluetoothHostAddress, &buffer[6], sizeof(BD_ADDR));
-            
+
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                 "HCI_Read_BD_ADDR SUCCESS: %02X:%02X:%02X:%02X:%02X:%02X",
                 pDeviceContext->BluetoothHostAddress.Address[0],
@@ -558,6 +558,22 @@ AirBenderEvtUsbInterruptPipeReadComplete(
 #pragma region HCI_Disconnection_Complete_EV
 
     case HCI_Disconnection_Complete_EV:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Disconnection_Complete_EV");
+
+        if (buffer[2] == 0x00)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Disconnection_Complete_EV SUCCESS");
+
+            clientHandle.Lsb = buffer[3];
+            clientHandle.Msb = buffer[4] | 0x20;
+
+            if (BTH_DEVICE_LIST_REMOVE(&pDeviceContext->ClientDeviceList, &clientHandle))
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
+                    "Removed device with handle %04X", *(PUSHORT)&clientHandle);
+            }
+        }
 
         break;
 

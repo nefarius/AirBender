@@ -334,6 +334,7 @@ Ds3DisconnectionRequest(
     NTSTATUS    status;
     L2CAP_CID   dcid;
     L2CAP_CID   scid;
+    L2CAP_CID   intDcid, comDcid;
 
     PL2CAP_SIGNALLING_DISCONNECTION_REQUEST data = (PL2CAP_SIGNALLING_DISCONNECTION_REQUEST)&Buffer[8];
 
@@ -343,6 +344,30 @@ Ds3DisconnectionRequest(
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
         ">> L2CAP_Disconnection_Request SCID: %04X DCID: %04X",
         *(PUSHORT)&scid, *(PUSHORT)&dcid);
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(
+        Device,
+        L2CAP_PSM_HID_Interrupt,
+        &intDcid);
+
+    L2CAP_DEVICE_GET_DCID_FOR_TYPE(
+        Device,
+        L2CAP_PSM_HID_Command,
+        &comDcid);
+
+    if (*(PUSHORT)&intDcid == *(PUSHORT)&data->DCID
+        || *(PUSHORT)&comDcid == *(PUSHORT)&data->DCID)
+    {
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
+            "Invoking HCI_Command_Disconnect");
+
+        status = HCI_Command_Disconnect(Context, Device->HCI_ConnectionHandle);
+        
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, "HCI_Command_Disconnect failed");
+        }
+    }
 
     status = L2CAP_Command_Disconnection_Response(
         Context,
@@ -494,7 +519,7 @@ Ds3ProcessHidInputReport(
 
         if (!NT_SUCCESS(status))
         {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3, 
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DS3,
                 "WdfRequestRetrieveOutputBuffer failed with status 0x%X", status);
             WdfRequestComplete(Request, status);
             return status;

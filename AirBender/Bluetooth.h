@@ -281,9 +281,9 @@ NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     return status;
 }
 
-VOID FORCEINLINE BTH_DEVICE_LIST_REMOVE(
+BOOLEAN FORCEINLINE BTH_DEVICE_LIST_REMOVE(
     PBTH_DEVICE_LIST List,
-    PBD_ADDR Address
+    PBTH_HANDLE Handle
 )
 {
     BTH_DEVICE *currP, *prevP;
@@ -295,16 +295,18 @@ VOID FORCEINLINE BTH_DEVICE_LIST_REMOVE(
     * Visit each node, maintaining a pointer to
     * the previous node we just visited.
     */
-    for (currP = List->head;
-        currP != NULL;
-        prevP = currP, currP = currP->next) {
-
-        if (currP->ClientAddress.Address == Address->Address) {  /* Found it. */
-            if (prevP == NULL) {
+    for (currP = List->head; currP != NULL; prevP = currP, currP = currP->next) 
+    {
+        if (*(PUSHORT)&currP->HCI_ConnectionHandle == *(PUSHORT)Handle) 
+        {  
+            /* Found it. */
+            if (prevP == NULL) 
+            {
                 /* Fix beginning pointer. */
                 List->head = currP->next;
             }
-            else {
+            else 
+            {
                 /*
                 * Fix previous node's next to
                 * skip over the removed node.
@@ -315,10 +317,14 @@ VOID FORCEINLINE BTH_DEVICE_LIST_REMOVE(
             /* Deallocate the node. */
             free(currP);
 
+            List->logicalLength--;
+
             /* Done searching. */
-            return;
+            return TRUE;
         }
     }
+
+    return FALSE;
 }
 
 /**
@@ -338,32 +344,6 @@ ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT(
 )
 {
     return List->logicalLength;
-}
-
-/**
-* \fn  VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE( PBTH_DEVICE_LIST List, PBD_ADDR Address, PBTH_HANDLE Handle )
-*
-* \brief   Sets the device handle value for a list element identified by the provided client MAC
-*          address.
-*
-* \author  Benjamin "Nefarius" Höglinger
-* \date    15.09.2017
-*
-* \param   List    The device list.
-* \param   Address The client MAC address.
-* \param   Handle  The client device handle.
-*
-* \return  Nothing.
-*/
-VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
-    PBTH_DEVICE_LIST List,
-    PBD_ADDR Address,
-    PBTH_HANDLE Handle
-)
-{
-    PBTH_DEVICE node = BTH_DEVICE_LIST_GET_BY_BD_ADDR(List, Address);
-
-    node->HCI_ConnectionHandle = *Handle;
 }
 
 /**
@@ -400,6 +380,32 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR(
     }
 
     return NULL;
+}
+
+/**
+* \fn  VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE( PBTH_DEVICE_LIST List, PBD_ADDR Address, PBTH_HANDLE Handle )
+*
+* \brief   Sets the device handle value for a list element identified by the provided client MAC
+*          address.
+*
+* \author  Benjamin "Nefarius" Höglinger
+* \date    15.09.2017
+*
+* \param   List    The device list.
+* \param   Address The client MAC address.
+* \param   Handle  The client device handle.
+*
+* \return  Nothing.
+*/
+VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
+    PBTH_DEVICE_LIST List,
+    PBD_ADDR Address,
+    PBTH_HANDLE Handle
+)
+{
+    PBTH_DEVICE node = BTH_DEVICE_LIST_GET_BY_BD_ADDR(List, Address);
+
+    node->HCI_ConnectionHandle = *Handle;
 }
 
 /**
