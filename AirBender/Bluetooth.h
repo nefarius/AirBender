@@ -207,6 +207,34 @@ VOID FORCEINLINE BTH_DEVICE_LIST_INIT(
 }
 
 /**
+* \fn  VOID FORCEINLINE BTH_DEVICE_LIST_FREE( PBTH_DEVICE_LIST List )
+*
+* \brief   Cleans the device list and disposes resources allocated by all children.
+*
+* \author  Benjamin "Nefarius" Höglinger
+* \date    22.09.2017
+*
+* \param   List    The device list.
+*
+* \return  Nothing.
+*/
+VOID FORCEINLINE BTH_DEVICE_LIST_FREE(
+    PBTH_DEVICE_LIST List
+)
+{
+    PBTH_DEVICE node = List->head;
+
+    while (node != NULL)
+    {
+        BTH_DEVICE_FREE(node);
+
+        node = node->next;
+    }
+
+    RtlZeroMemory(List, sizeof(BTH_DEVICE_LIST));
+}
+
+/**
  * \fn  NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD( PBTH_DEVICE_LIST List, PBD_ADDR Address, WDFDEVICE HostDevice )
  *
  * \brief   Adds a new device to the list identified by the clients MAC address.
@@ -253,6 +281,46 @@ NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     return status;
 }
 
+VOID FORCEINLINE BTH_DEVICE_LIST_REMOVE(
+    PBTH_DEVICE_LIST List,
+    PBD_ADDR Address
+)
+{
+    BTH_DEVICE *currP, *prevP;
+
+    /* For 1st node, indicate there is no previous. */
+    prevP = NULL;
+
+    /*
+    * Visit each node, maintaining a pointer to
+    * the previous node we just visited.
+    */
+    for (currP = List->head;
+        currP != NULL;
+        prevP = currP, currP = currP->next) {
+
+        if (currP->ClientAddress.Address == Address->Address) {  /* Found it. */
+            if (prevP == NULL) {
+                /* Fix beginning pointer. */
+                List->head = currP->next;
+            }
+            else {
+                /*
+                * Fix previous node's next to
+                * skip over the removed node.
+                */
+                prevP->next = currP->next;
+            }
+
+            /* Deallocate the node. */
+            free(currP);
+
+            /* Done searching. */
+            return;
+        }
+    }
+}
+
 /**
  * \fn  ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT( PBTH_DEVICE_LIST List )
  *
@@ -270,6 +338,32 @@ ULONG FORCEINLINE BTH_DEVICE_LIST_GET_COUNT(
 )
 {
     return List->logicalLength;
+}
+
+/**
+* \fn  VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE( PBTH_DEVICE_LIST List, PBD_ADDR Address, PBTH_HANDLE Handle )
+*
+* \brief   Sets the device handle value for a list element identified by the provided client MAC
+*          address.
+*
+* \author  Benjamin "Nefarius" Höglinger
+* \date    15.09.2017
+*
+* \param   List    The device list.
+* \param   Address The client MAC address.
+* \param   Handle  The client device handle.
+*
+* \return  Nothing.
+*/
+VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
+    PBTH_DEVICE_LIST List,
+    PBD_ADDR Address,
+    PBTH_HANDLE Handle
+)
+{
+    PBTH_DEVICE node = BTH_DEVICE_LIST_GET_BY_BD_ADDR(List, Address);
+
+    node->HCI_ConnectionHandle = *Handle;
 }
 
 /**
@@ -309,32 +403,6 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_BD_ADDR(
 }
 
 /**
- * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE( PBTH_DEVICE_LIST List, PBD_ADDR Address, PBTH_HANDLE Handle )
- *
- * \brief   Sets the device handle value for a list element identified by the provided client MAC
- *          address.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    15.09.2017
- *
- * \param   List    The device list.
- * \param   Address The client MAC address.
- * \param   Handle  The client device handle.
- *
- * \return  Nothing.
- */
-VOID FORCEINLINE BTH_DEVICE_LIST_SET_HANDLE(
-    PBTH_DEVICE_LIST List,
-    PBD_ADDR Address,
-    PBTH_HANDLE Handle
-)
-{
-    PBTH_DEVICE node = BTH_DEVICE_LIST_GET_BY_BD_ADDR(List, Address);
-
-    node->HCI_ConnectionHandle = *Handle;
-}
-
-/**
  * \fn  PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE( PBTH_DEVICE_LIST List, PBTH_HANDLE Handle )
  *
  * \brief   Returns a list element identified by the provided client handle.
@@ -368,34 +436,6 @@ PBTH_DEVICE FORCEINLINE BTH_DEVICE_LIST_GET_BY_HANDLE(
     }
 
     return NULL;
-}
-
-/**
- * \fn  VOID FORCEINLINE BTH_DEVICE_LIST_FREE( PBTH_DEVICE_LIST List )
- *
- * \brief   Cleans the device list and disposes resources allocated by all children.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    22.09.2017
- *
- * \param   List    The device list.
- *
- * \return  Nothing.
- */
-VOID FORCEINLINE BTH_DEVICE_LIST_FREE(
-    PBTH_DEVICE_LIST List
-)
-{
-    PBTH_DEVICE node = List->head;
-
-    while (node != NULL)
-    {
-        BTH_DEVICE_FREE(node);
-
-        node = node->next;
-    }
-
-    RtlZeroMemory(List, sizeof(BTH_DEVICE_LIST));
 }
 
 /**
