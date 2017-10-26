@@ -75,6 +75,7 @@ typedef enum _L2CAP_SIGNALLING_COMMAND_CODE
     L2CAP_Echo_Response = 0x09,
     L2CAP_Information_Request = 0x0A,
     L2CAP_Information_Response = 0x0B
+
 } L2CAP_SIGNALLING_COMMAND_CODE;
 
 /**
@@ -103,6 +104,7 @@ typedef enum _L2CAP_CONFIGURATION_RESPONSE_RESULT
     ///     Failure – unknown options
     /// </summary>
     L2CAP_ConfigurationResponseResult_FailureUnknownOptions = 0x0003
+
 } L2CAP_CONFIGURATION_RESPONSE_RESULT;
 
 /**
@@ -136,6 +138,7 @@ typedef enum _L2CAP_CONNECTION_RESPONSE_RESULT
     ///     Connection refused – no resources available.
     /// </summary>
     L2CAP_ConnectionResponseResult_ConnectionRefusedNoResourcesAvailable = 0x0004
+
 } L2CAP_CONNECTION_RESPONSE_RESULT;
 
 /**
@@ -157,6 +160,7 @@ typedef enum _L2CAP_CONNECTION_RESPONSE_STATUS
     ///     Authorisation pending.
     /// </summary>
     L2CAP_ConnectionResponseStatus_AuthorisationPending = 0x0002
+
 } L2CAP_CONNECTION_RESPONSE_STATUS;
 
 /**
@@ -169,6 +173,7 @@ typedef enum _L2CAP_PSM
     L2CAP_PSM_HID_Service = 0x01,
     L2CAP_PSM_HID_Command = 0x11,
     L2CAP_PSM_HID_Interrupt = 0x13
+
 } L2CAP_PSM;
 
 /**
@@ -180,6 +185,7 @@ typedef struct _L2CAP_CID
 {
     BYTE Lsb;
     BYTE Msb;
+
 } L2CAP_CID, *PL2CAP_CID;
 
 /**
