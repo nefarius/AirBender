@@ -59,13 +59,6 @@ typedef struct _BTH_HANDLE_PAIR
 
 } BTH_HANDLE_PAIR;
 
-typedef struct _BTH_DEVICE_HID_REPORT
-{
-    LPVOID Data;
-    ULONG Length;
-
-} BTH_DEVICE_HID_REPORT, *PBTH_DEVICE_HID_REPORT;
-
 /**
  * \typedef struct _BTH_DEVICE
  *
