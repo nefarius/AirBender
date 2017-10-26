@@ -66,30 +66,69 @@ typedef struct _BTH_HANDLE_PAIR
  */
 typedef struct _BTH_DEVICE
 {
+    //
+    // MAC address identifying this device
+    // 
     BD_ADDR ClientAddress;
 
+    //
+    // Handle identifying the parent host controller of this device
+    // 
     BTH_HANDLE HCI_ConnectionHandle;
 
+    //
+    // Handle identifying the L2CAP command channel
+    // 
     BTH_HANDLE_PAIR L2CAP_CommandHandle;
 
+    //
+    // Handle identifying the L2CAP interrupt channel
+    // 
     BTH_HANDLE_PAIR L2CAP_InterruptHandle;
 
+    //
+    // Handle identifying the L2CAP service channel
+    // 
     BTH_HANDLE_PAIR L2CAP_ServiceHandle;
 
+    //
+    // Indicates if the service channel can start
+    // 
     BOOLEAN CanStartService;
 
+    //
+    // Indicates if the service channel is ready
+    // 
     BOOLEAN IsServiceStarted;
 
+    //
+    // Indicates if the HID channel can start
+    // 
     BOOLEAN CanStartHid;
 
+    //
+    // Index of the current HID initialization packet
+    // 
     BYTE InitHidStage;
 
+    //
+    // Name reported by this device
+    // 
     LPSTR RemoteName;
 
+    //
+    // Controller type
+    // 
     BTH_DEVICE_TYPE DeviceType;
 
+    //
+    // Framework queue storing HID input requests
+    // 
     WDFQUEUE HidInputReportQueue;
 
+    //
+    // Pointer to next device in the list
+    // 
     struct _BTH_DEVICE *next;
 
 } BTH_DEVICE, *PBTH_DEVICE;
