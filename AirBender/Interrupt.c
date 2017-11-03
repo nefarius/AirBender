@@ -141,14 +141,18 @@ AirBenderEvtUsbInterruptPipeReadComplete(
     WDFCONTEXT  Context
 )
 {
-    NTSTATUS                status;
-    WDFDEVICE               Device = Context;
-    PDEVICE_CONTEXT         pDeviceContext;
-    PUCHAR                  buffer;
-    HCI_EVENT               event;
-    HCI_COMMAND             command;
-    BD_ADDR                 clientAddr;
-    BTH_HANDLE              clientHandle;
+    NTSTATUS                        status;
+    WDFDEVICE                       Device = Context;
+    PDEVICE_CONTEXT                 pDeviceContext;
+    PUCHAR                          buffer;
+    HCI_EVENT                       event;
+    HCI_COMMAND                     command;
+    BD_ADDR                         clientAddr;
+    BTH_HANDLE                      clientHandle;
+    WDFREQUEST                      removalRequest;
+    PAIRBENDER_GET_CLIENT_REMOVAL   pRemoval;
+    size_t                          buflen;
+    PBTH_DEVICE                     pClientDevice;
 
     UNREFERENCED_PARAMETER(Pipe);
 
@@ -568,10 +572,35 @@ AirBenderEvtUsbInterruptPipeReadComplete(
             clientHandle.Lsb = buffer[3];
             clientHandle.Msb = buffer[4] | 0x20;
 
+            pClientDevice = BTH_DEVICE_LIST_GET_BY_HANDLE(&pDeviceContext->ClientDeviceList, &clientHandle);
+
             if (BTH_DEVICE_LIST_REMOVE(&pDeviceContext->ClientDeviceList, &clientHandle))
             {
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                     "Removed device with handle %04X", *(PUSHORT)&clientHandle);
+
+                status = WdfIoQueueRetrieveNextRequest(
+                    pDeviceContext->ChildDeviceRemovalQueue,
+                    &removalRequest);
+
+                if (NT_SUCCESS(status))
+                {
+                    status = WdfRequestRetrieveOutputBuffer(
+                        removalRequest,
+                        sizeof(AIRBENDER_GET_CLIENT_REMOVAL),
+                        &pRemoval,
+                        &buflen);
+
+                    if (NT_SUCCESS(status))
+                    {
+                        if (NT_SUCCESS(status) && sizeof(AIRBENDER_GET_CLIENT_REMOVAL) == buflen)
+                        {
+                            RtlCopyMemory(&pRemoval->ClientAddress, &pClientDevice->ClientAddress, sizeof(BD_ADDR));
+                        }
+                    }
+
+                    WdfRequestCompleteWithInformation(removalRequest, status, buflen);
+                }
             }
         }
 

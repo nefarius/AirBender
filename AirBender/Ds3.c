@@ -394,10 +394,15 @@ Ds3DisconnectionResponse(
     PDEVICE_CONTEXT Context,
     PBTH_DEVICE Device)
 {
-    NTSTATUS    status = STATUS_SUCCESS;
-    L2CAP_CID   scid;
-    BYTE        hidCommandEnable[] = { 0x53, 0xF4, 0x42, 0x03, 0x00, 0x00 };
-    BYTE        hidOutputReport[] = {
+    NTSTATUS                        status = STATUS_SUCCESS;
+    WDFREQUEST                      arrivalRequest;
+    PAIRBENDER_GET_CLIENT_ARRIVAL   pArrival;
+    size_t                          buflen;
+    L2CAP_CID                       scid;
+    BYTE                            hidCommandEnable[] = { 
+        0x53, 0xF4, 0x42, 0x03, 0x00, 0x00 
+    };
+    BYTE                            hidOutputReport[] = {
         0x52, 0x01, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x1E, 0xFF, 0x27, 0x10, 0x00,
         0x32, 0xFF, 0x27, 0x10, 0x00, 0x32, 0xFF, 0x27,
@@ -450,6 +455,27 @@ Ds3DisconnectionResponse(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< HID_Command OUTPUT REPORT sent");
+
+        status = WdfIoQueueRetrieveNextRequest(
+            Context->ChildDeviceArrivalQueue,
+            &arrivalRequest);
+
+        if (NT_SUCCESS(status))
+        {
+            status = WdfRequestRetrieveOutputBuffer(
+                arrivalRequest,
+                sizeof(AIRBENDER_GET_CLIENT_ARRIVAL),
+                &pArrival,
+                &buflen);
+
+            if (NT_SUCCESS(status) && sizeof(AIRBENDER_GET_CLIENT_ARRIVAL) == buflen)
+            {
+                RtlCopyMemory(&pArrival->ClientAddress, &Device->ClientAddress, sizeof(BD_ADDR));
+                pArrival->DeviceType = Device->DeviceType;
+            }
+
+            WdfRequestCompleteWithInformation(arrivalRequest, status, buflen);
+        }
     }
 
     return status;

@@ -281,6 +281,19 @@ NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     return status;
 }
 
+/**
+ * \fn  BOOLEAN FORCEINLINE BTH_DEVICE_LIST_REMOVE( PBTH_DEVICE_LIST List, PBTH_HANDLE Handle )
+ *
+ * \brief   Removes a new device from the list identified by its handle.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    03.11.2017
+ *
+ * \param   List    The device list.
+ * \param   Handle  The client handle.
+ *
+ * \return  TRUE if the provided device got removed from the list, FALSE otherwise.
+ */
 BOOLEAN FORCEINLINE BTH_DEVICE_LIST_REMOVE(
     PBTH_DEVICE_LIST List,
     PBTH_HANDLE Handle
