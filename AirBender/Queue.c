@@ -441,6 +441,9 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_CLIENT_ARRIVAL:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_ARRIVAL");
+
         status = WdfRequestForwardToIoQueue(Request, pDeviceContext->ChildDeviceArrivalQueue);
         if (!NT_SUCCESS(status))
         {
@@ -448,6 +451,9 @@ Return Value:
                 TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
             break;
         }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "Request queued");
 
         status = STATUS_PENDING;
 
@@ -459,6 +465,9 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_CLIENT_REMOVAL:
 
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_REMOVAL");
+
         status = WdfRequestForwardToIoQueue(Request, pDeviceContext->ChildDeviceRemovalQueue);
         if (!NT_SUCCESS(status))
         {
@@ -466,6 +475,9 @@ Return Value:
                 TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
             break;
         }
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "Request queued");
 
         status = STATUS_PENDING;
 

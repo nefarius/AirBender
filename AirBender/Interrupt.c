@@ -593,10 +593,7 @@ AirBenderEvtUsbInterruptPipeReadComplete(
 
                     if (NT_SUCCESS(status))
                     {
-                        if (NT_SUCCESS(status) && sizeof(AIRBENDER_GET_CLIENT_REMOVAL) == buflen)
-                        {
-                            RtlCopyMemory(&pRemoval->ClientAddress, &pClientDevice->ClientAddress, sizeof(BD_ADDR));
-                        }
+                        pRemoval->ClientAddress = pClientDevice->ClientAddress;
                     }
 
                     WdfRequestCompleteWithInformation(removalRequest, status, buflen);
