@@ -63,6 +63,16 @@ SOFTWARE.
                                                             METHOD_BUFFERED,    \
                                                             FILE_ANY_ACCESS)
 
+#define IOCTL_AIRBENDER_GET_CLIENT_ARRIVAL      CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x07, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_READ_ACCESS)
+
+#define IOCTL_AIRBENDER_GET_CLIENT_REMOVAL      CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x08, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_READ_ACCESS)
+
 #include <pshpack1.h>
 
 #define DS3_HID_INPUT_REPORT_SIZE   0x31
@@ -130,5 +140,19 @@ typedef struct _AIRBENDER_SET_DS3_OUTPUT_REPORT
     UCHAR ReportBuffer[DS3_HID_OUTPUT_REPORT_SIZE];
 
 } AIRBENDER_SET_DS3_OUTPUT_REPORT, *PAIRBENDER_SET_DS3_OUTPUT_REPORT;
+
+typedef struct _AIRBENDER_GET_CLIENT_ARRIVAL
+{
+    BD_ADDR ClientAddress;
+
+    BTH_DEVICE_TYPE DeviceType;
+
+} AIRBENDER_GET_CLIENT_ARRIVAL, *PAIRBENDER_GET_CLIENT_ARRIVAL;
+
+typedef struct _AIRBENDER_GET_CLIENT_REMOVAL
+{
+    BD_ADDR ClientAddress;
+
+} AIRBENDER_GET_CLIENT_REMOVAL, *PAIRBENDER_GET_CLIENT_REMOVAL;
 
 #include <poppack.h>
