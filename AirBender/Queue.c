@@ -129,10 +129,10 @@ Return Value:
     PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
     PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
 
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_QUEUE,
-        "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode 0x%X",
-        Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
+    // TraceEvents(TRACE_LEVEL_INFORMATION,
+    //     TRACE_QUEUE,
+    //     "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode 0x%X",
+    //     Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
 
     pDeviceContext = DeviceGetContext(WdfIoQueueGetDevice(Queue));
 
@@ -188,8 +188,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_CLIENT_COUNT:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_COUNT");
+        // TraceEvents(TRACE_LEVEL_INFORMATION,
+        //     TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_COUNT");
 
         status = WdfRequestRetrieveOutputBuffer(
             Request,
@@ -217,8 +217,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_CLIENT_DETAILS:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_DETAILS");
+        // TraceEvents(TRACE_LEVEL_INFORMATION,
+        //     TRACE_QUEUE, "IOCTL_AIRBENDER_GET_CLIENT_DETAILS");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -272,8 +272,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
+        // TraceEvents(TRACE_LEVEL_INFORMATION,
+        //     TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -313,8 +313,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
-            TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
+        // TraceEvents(TRACE_LEVEL_INFORMATION,
+        //     TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -403,7 +403,7 @@ Return Value:
     if (status != STATUS_PENDING)
         WdfRequestCompleteWithInformation(Request, status, transferred);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
+    // TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
 VOID
