@@ -42,6 +42,11 @@ AirBenderQueueInitialize(
     _In_ WDFDEVICE Device
     );
 
+NTSTATUS
+AirBenderChildQueuesInitialize(
+    _In_ WDFDEVICE Device
+);
+
 //
 // Events from the IoQueue object
 //

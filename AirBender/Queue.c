@@ -85,6 +85,50 @@ Return Value:
     return status;
 }
 
+NTSTATUS AirBenderChildQueuesInitialize(WDFDEVICE Device)
+{
+    NTSTATUS                status;
+    WDF_IO_QUEUE_CONFIG     queueConfig;
+    WDF_OBJECT_ATTRIBUTES   attributes;
+    PDEVICE_CONTEXT         pDeviceContext;
+
+    WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchManual);
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = Device;
+
+    pDeviceContext = DeviceGetContext(Device);
+
+    status = WdfIoQueueCreate(
+        Device,
+        &queueConfig,
+        &attributes,
+        &pDeviceContext->ChildDeviceArrivalQueue
+    );
+
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
+            "WdfIoQueueCreate for ChildDeviceArrivalQueue failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    status = WdfIoQueueCreate(
+        Device,
+        &queueConfig,
+        &attributes,
+        &pDeviceContext->ChildDeviceRemovalQueue
+    );
+
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
+            "WdfIoQueueCreate for ChildDeviceRemovalQueue failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    return status;
+}
+
 VOID
 AirBenderEvtIoDeviceControl(
     _In_ WDFQUEUE Queue,
@@ -388,6 +432,42 @@ Return Value:
                 "WdfUsbTargetDeviceResetPortSynchronously failed with status 0x%X",
                 status);
         }
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_GET_CLIENT_ARRIVAL
+
+    case IOCTL_AIRBENDER_GET_CLIENT_ARRIVAL:
+
+        status = WdfRequestForwardToIoQueue(Request, pDeviceContext->ChildDeviceArrivalQueue);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+            break;
+        }
+
+        status = STATUS_PENDING;
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_GET_CLIENT_REMOVAL
+
+    case IOCTL_AIRBENDER_GET_CLIENT_REMOVAL:
+
+        status = WdfRequestForwardToIoQueue(Request, pDeviceContext->ChildDeviceRemovalQueue);
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+            break;
+        }
+
+        status = STATUS_PENDING;
 
         break;
 

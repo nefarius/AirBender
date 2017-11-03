@@ -55,6 +55,10 @@ typedef struct _DEVICE_CONTEXT
 
     BYTE_ARRAY HidInitReports;
 
+    WDFQUEUE ChildDeviceArrivalQueue;
+
+    WDFQUEUE ChildDeviceRemovalQueue;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //
