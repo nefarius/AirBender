@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#define DS3_INIT_HID_STAGE_MAX      0x07
+
 NTSTATUS
 Ds3ConnectionRequest(
     PDEVICE_CONTEXT Context,

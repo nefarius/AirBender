@@ -240,7 +240,7 @@ NTSTATUS Ds3ConfigurationRequest(
     {
         Device->CanStartHid = TRUE;
 
-        if (Device->InitHidStage < 0x07)
+        if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
         {
             L2CAP_DEVICE_GET_SCID_FOR_TYPE(
                 Device,
@@ -467,7 +467,7 @@ Ds3InitHidReportStage(
     PVOID       pHidCmd;
     ULONG       hidCmdLen;
 
-    if (Device->InitHidStage < 0x07)
+    if (Device->InitHidStage < DS3_INIT_HID_STAGE_MAX)
     {
         L2CAP_DEVICE_GET_SCID_FOR_TYPE(
             Device,
