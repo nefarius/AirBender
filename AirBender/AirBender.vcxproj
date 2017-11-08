@@ -152,7 +152,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
@@ -163,7 +162,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
@@ -174,7 +172,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
@@ -185,7 +182,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <DebuggerFlavor>DbgengRemoteDebugger</DebuggerFlavor>
-    <TimeStampServer>http://timestamp.globalsign.com/scripts/timstamp.dll</TimeStampServer>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <IncludePath>$(SolutionDir)Include;$(IncludePath);$(ProjectDir)\</IncludePath>
   </PropertyGroup>
@@ -219,9 +215,7 @@
       <WppRecorderEnabled>true</WppRecorderEnabled>
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
     </ClCompile>
-    <DriverSign>
-      <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
-    </DriverSign>
+    <DriverSign />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
