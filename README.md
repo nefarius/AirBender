@@ -6,8 +6,6 @@ Windows Bluetooth Host Driver for Sony DualShock Controllers
 ## Summary
 `AirBender` consists of a custom Windows Bluetooth Stack containing a user-mode driver and a user-mode dispatch service handling wireless communication with Sony DualShock 3 and 4 controllers. It allows 3rd party developers to handle controller inputs and ouputs via a simple plug-in system.
 
-![](https://lh3.googleusercontent.com/-OS_OhoqaZbY/WeJXJqplbnI/AAAAAAAAAZs/q_1xdsoQeZcAcPEtvUG-ZitBVlw7prqtgCHMYCw/s0/Alpha-Disclaimer.png)
-
 ## Architecture
 Since the Sony DualShock 3 utilizes a butchered non-standard Bluetooth protocol incompatible with standard HID profiles a custom Bluetooth stack is required to establish a connection on the Windows platform. The [AirBender user-mode driver](../../tree/master/AirBender) implements a compatible Bluetooth stack and also acts as a bus emulator allowing for multiple devices to connect and transmit. It's designed to work with most USB Bluetooth host devices obeying at least [Core Version 2.1 + EDR](https://www.bluetooth.com/specifications/bluetooth-core-specification/legacy-specifications) standards.
 
