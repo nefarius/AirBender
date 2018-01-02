@@ -172,6 +172,7 @@ Return Value:
     PAIRBENDER_GET_CLIENT_DETAILS       pGetStateReq;
     PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
     PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
+    PAIRBENDER_GET_HOST_VERSION         pGetHostVersion;
 
     // TraceEvents(TRACE_LEVEL_INFORMATION,
     //     TRACE_QUEUE,
@@ -480,6 +481,36 @@ Return Value:
             TRACE_QUEUE, "Request queued");
 
         status = STATUS_PENDING;
+
+        break;
+
+#pragma endregion
+
+#pragma region IOCTL_AIRBENDER_GET_HOST_VERSION
+
+    case IOCTL_AIRBENDER_GET_HOST_VERSION:
+
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_HOST_VERSION");
+
+        status = WdfRequestRetrieveOutputBuffer(
+            Request,
+            sizeof(AIRBENDER_GET_HOST_VERSION),
+            (LPVOID)&pGetHostVersion,
+            &bufferLength);
+
+        if (NT_SUCCESS(status) && OutputBufferLength == sizeof(AIRBENDER_GET_HOST_VERSION))
+        {
+            transferred = sizeof(AIRBENDER_GET_HOST_VERSION);
+            pGetHostVersion->HciVersionMajor = pDeviceContext->HciVersionMajor;
+            pGetHostVersion->LmpVersionMajor = pDeviceContext->LmpVersionMajor;
+        }
+        else
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "Buffer size mismatch: %d != %d",
+                (ULONG)OutputBufferLength, sizeof(AIRBENDER_GET_HOST_VERSION));
+        }
 
         break;
 

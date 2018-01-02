@@ -73,6 +73,11 @@ SOFTWARE.
                                                             METHOD_BUFFERED,    \
                                                             FILE_READ_ACCESS)
 
+#define IOCTL_AIRBENDER_GET_HOST_VERSION        CTL_CODE(FILE_DEVICE_AIRBENDER, \
+                                                            IOCTL_INDEX + 0x09, \
+                                                            METHOD_BUFFERED,    \
+                                                            FILE_READ_ACCESS)
+
 #include <pshpack1.h>
 
 #define DS3_HID_INPUT_REPORT_SIZE   0x31
@@ -154,5 +159,13 @@ typedef struct _AIRBENDER_GET_CLIENT_REMOVAL
     BD_ADDR ClientAddress;
 
 } AIRBENDER_GET_CLIENT_REMOVAL, *PAIRBENDER_GET_CLIENT_REMOVAL;
+
+typedef struct _AIRBENDER_GET_HOST_VERSION
+{
+    BYTE HciVersionMajor;
+
+    BYTE LmpVersionMajor;
+
+} AIRBENDER_GET_HOST_VERSION, *PAIRBENDER_GET_HOST_VERSION;
 
 #include <poppack.h>
