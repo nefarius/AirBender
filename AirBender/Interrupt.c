@@ -256,13 +256,13 @@ AirBenderEvtUsbInterruptPipeReadComplete(
         {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Read_Local_Version_Info SUCCESS");
 
-            BYTE hciMajor = buffer[6];
-            BYTE lmpMajor = buffer[9];
+            pDeviceContext->HciVersionMajor = buffer[6];
+            pDeviceContext->LmpVersionMajor = buffer[9];
 
             /* analyzes Host Controller Interface (HCI) major version
             * see https://www.bluetooth.org/en-us/specification/assigned-numbers/host-controller-interface
             * */
-            switch (hciMajor)
+            switch (pDeviceContext->HciVersionMajor)
             {
             case 0:
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "HCI_Version: Bluetooth® Core Specification 1.0b");
@@ -298,7 +298,7 @@ AirBenderEvtUsbInterruptPipeReadComplete(
             /* analyzes Link Manager Protocol (LMP) major version
             * see https://www.bluetooth.org/en-us/specification/assigned-numbers/link-manager
             * */
-            switch (lmpMajor)
+            switch (pDeviceContext->LmpVersionMajor)
             {
             case 0:
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT, "LMP_Version: Bluetooth® Core Specification 1.0b");
@@ -332,21 +332,21 @@ AirBenderEvtUsbInterruptPipeReadComplete(
             }
 
             // Bluetooth v2.0 + EDR
-            if (hciMajor >= 3 && lmpMajor >= 3)
+            if (pDeviceContext->HciVersionMajor >= 3 && pDeviceContext->LmpVersionMajor >= 3)
             {
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                     "Bluetooth host supports communication with DualShock 3 controllers");
             }
 
             // Bluetooth v2.1 + EDR
-            if (hciMajor >= 4 && lmpMajor >= 4)
+            if (pDeviceContext->HciVersionMajor >= 4 && pDeviceContext->LmpVersionMajor >= 4)
             {
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                     "Bluetooth host supports communication with DualShock 4 controllers");
             }
 
             // dongle effectively too old/unsupported 
-            if (hciMajor < 3 || lmpMajor < 3)
+            if (pDeviceContext->HciVersionMajor < 3 || pDeviceContext->LmpVersionMajor < 3)
             {
                 TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_INTERRUPT,
                     "Unsupported Bluetooth Specification, aborting communication");

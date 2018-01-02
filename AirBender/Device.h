@@ -59,6 +59,10 @@ typedef struct _DEVICE_CONTEXT
 
     WDFQUEUE ChildDeviceRemovalQueue;
 
+    BYTE HciVersionMajor;
+
+    BYTE LmpVersionMajor;
+
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //
