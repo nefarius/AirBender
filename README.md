@@ -11,6 +11,9 @@ Since the Sony DualShock 3 utilizes a butchered non-standard Bluetooth protocol 
 
 The actual input and output reports flow between the driver and a [user-mode service](https://github.com/nefarius/Shibari) running in the background. This service handles detection of "AirBender Dongle Devices", reacts to child device arrival/removal and forwards input/output data to or from a plugin sub-system where arbitrary code can process it. In the default implementation, input data is exposed to the system via [ViGEm](https://github.com/nefarius/ViGEm).
 
+## Supported systems
+The driver is built for and tested with Windows 8.1 up to Windows 10 (x86 and amd64).
+
 ## Sources
  * https://cloud.nefarius.at/s/BKMWItpNLHKC5zA
  * https://nadavrub.wordpress.com/2015/07/17/simulate-hid-device-with-windows-desktop/
