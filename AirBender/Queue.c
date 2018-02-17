@@ -382,6 +382,14 @@ Return Value:
                 break;
             }
 
+            if (!pBthDevice->IsReady) {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "Device not ready yet");
+
+                status = STATUS_DEVICE_BUSY;
+                break;
+            }
+
             L2CAP_DEVICE_GET_SCID_FOR_TYPE(
                 pBthDevice,
                 L2CAP_PSM_HID_Command,

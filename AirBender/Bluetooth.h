@@ -107,6 +107,11 @@ typedef struct _BTH_DEVICE
     BOOLEAN CanStartHid;
 
     //
+    // Indicates if the device is ready to respond to requests
+    // 
+    BOOLEAN IsReady;
+
+    //
     // Index of the current HID initialization packet
     // 
     BYTE InitHidStage;
