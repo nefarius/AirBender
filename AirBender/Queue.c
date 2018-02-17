@@ -343,7 +343,7 @@ Return Value:
             if (!NT_SUCCESS(status))
             {
                 TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+                    TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status %!STATUS!", status);
                 break;
             }
 
@@ -397,7 +397,7 @@ Return Value:
             if (!NT_SUCCESS(status))
             {
                 TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE, "HID_Command failed");
+                    TRACE_QUEUE, "HID_Command failed with status %!STATUS!", status);
             }
         }
 
@@ -419,7 +419,7 @@ Return Value:
         {
             TraceEvents(TRACE_LEVEL_WARNING,
                 TRACE_QUEUE,
-                "HCI_Command_Reset failed with status 0x%X", status);
+                "HCI_Command_Reset failed with status %!STATUS!", status);
         }
 
         BTH_DEVICE_LIST_FREE(&pDeviceContext->ClientDeviceList);
@@ -430,7 +430,7 @@ Return Value:
         {
             TraceEvents(TRACE_LEVEL_ERROR,
                 TRACE_QUEUE,
-                "WdfUsbTargetDeviceResetPortSynchronously failed with status 0x%X",
+                "WdfUsbTargetDeviceResetPortSynchronously failed with status %!STATUS!",
                 status);
         }
 
@@ -449,7 +449,7 @@ Return Value:
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status %!STATUS!", status);
             break;
         }
 
@@ -473,7 +473,7 @@ Return Value:
         if (!NT_SUCCESS(status))
         {
             TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status 0x%X", status);
+                TRACE_QUEUE, "WdfRequestForwardToIoQueue failed with status %!STATUS!", status);
             break;
         }
 
