@@ -317,7 +317,7 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
+        TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
@@ -358,7 +358,7 @@ Return Value:
 
     case IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT:
 
-        TraceEvents(TRACE_LEVEL_INFORMATION,
+        TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
