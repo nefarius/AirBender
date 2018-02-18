@@ -452,8 +452,6 @@ Ds3DisconnectionResponse(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< HID_Command OUTPUT REPORT sent");
-
-        Device->IsReady = TRUE;
     }
 
     return status;

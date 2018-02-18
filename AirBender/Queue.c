@@ -317,8 +317,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT:
 
-        // TraceEvents(TRACE_LEVEL_INFORMATION,
-        //     TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_GET_DS3_INPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -358,8 +358,8 @@ Return Value:
 
     case IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT:
 
-        // TraceEvents(TRACE_LEVEL_INFORMATION,
-        //     TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
+        TraceEvents(TRACE_LEVEL_INFORMATION,
+            TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
         status = WdfRequestRetrieveInputBuffer(
             Request,
@@ -379,14 +379,6 @@ Return Value:
                     TRACE_QUEUE, "Device not found");
 
                 status = STATUS_DEVICE_DOES_NOT_EXIST;
-                break;
-            }
-
-            if (!pBthDevice->IsReady) {
-                TraceEvents(TRACE_LEVEL_INFORMATION,
-                    TRACE_QUEUE, "Device not ready yet");
-
-                status = STATUS_DEVICE_BUSY;
                 break;
             }
 
