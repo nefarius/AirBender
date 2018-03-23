@@ -58,5 +58,6 @@ AirBenderWriteBulkPipeQueueInitialize(
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL AirBenderEvtIoDeviceControl;
 EVT_WDF_IO_QUEUE_IO_STOP AirBenderEvtIoStop;
 EVT_WDF_IO_QUEUE_IO_DEFAULT AirBenderWriteBulkPipeEvtIoDefault;
+EVT_WDF_REQUEST_COMPLETION_ROUTINE AirBenderWriteBulkCompletionRoutine;
 
 EXTERN_C_END

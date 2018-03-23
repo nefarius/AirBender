@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "bulkrwr.tmh"
 
+
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS
 AirBenderConfigContReaderForBulkReadEndPoint(
@@ -76,9 +77,13 @@ NTSTATUS WriteBulkPipe(
     NTSTATUS                        status;
     WDFREQUEST                      writeRequest;
     WDFMEMORY                       requestMemory;
-    PVOID                           requestMemoryBuffer;
     WDF_OBJECT_ATTRIBUTES           attributes;
     WDFIOTARGET                     ioTarget;
+
+
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_BULKRWR,
+        "%!FUNC! Entry");
 
     ioTarget = WdfUsbTargetPipeGetIoTarget(Context->BulkWritePipe);
 
@@ -106,7 +111,7 @@ NTSTATUS WriteBulkPipe(
         BULK_RW_POOL_TAG,
         BufferLength,
         &requestMemory,
-        &requestMemoryBuffer
+        NULL
     );
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR,
@@ -115,10 +120,13 @@ NTSTATUS WriteBulkPipe(
         return status;
     }
 
-    //
-    // Duplicate supplied buffer into request buffer
-    // 
-    RtlCopyMemory(requestMemoryBuffer, Buffer, BufferLength);
+    status = WdfMemoryCopyFromBuffer(requestMemory, 0, Buffer, BufferLength);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "%!FUNC!: WdfMemoryCopyFromBuffer failed with status %!STATUS!", status);
+        return status;
+    }
 
     //
     // Prepare request

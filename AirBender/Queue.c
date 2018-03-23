@@ -27,6 +27,7 @@ SOFTWARE.
 #include "queue.tmh"
 #include "L2CAP.h"
 
+
 NTSTATUS
 AirBenderQueueInitialize(
     _In_ WDFDEVICE Device
@@ -140,6 +141,8 @@ NTSTATUS AirBenderWriteBulkPipeQueueInitialize(_In_ WDFDEVICE Device)
     queueConfig.EvtIoDefault = AirBenderWriteBulkPipeEvtIoDefault;
 
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    //attributes.ExecutionLevel = WdfExecutionLevelPassive;
+    attributes.SynchronizationScope = WdfSynchronizationScopeQueue;
     attributes.ParentObject = Device;
 
     pDeviceContext = DeviceGetContext(Device);
@@ -629,6 +632,57 @@ AirBenderWriteBulkPipeEvtIoDefault(
     WDFREQUEST  Request
 )
 {
+    NTSTATUS            status;
+    BOOLEAN             ret;
+    WDFDEVICE           device;
+    WDFIOTARGET         ioTarget;
+    PDEVICE_CONTEXT     pDeviceCtx;
 
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
+
+
+    if (TRUE)return;
+
+    device = WdfIoQueueGetDevice(Queue);
+    pDeviceCtx = DeviceGetContext(device);
+    ioTarget = WdfUsbTargetPipeGetIoTarget(pDeviceCtx->BulkWritePipe);
+
+    WdfRequestSetCompletionRoutine(Request, AirBenderWriteBulkCompletionRoutine, NULL);
+
+    ret = WdfRequestSend(Request, ioTarget, WDF_NO_SEND_OPTIONS);
+
+    if (ret == FALSE) {
+        status = WdfRequestGetStatus(Request);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_QUEUE,
+            "WdfRequestSend failed with status %!STATUS!", status);
+        WdfRequestComplete(Request, status);
+    }
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
+}
+
+_IRQL_requires_same_ VOID AirBenderWriteBulkCompletionRoutine(
+    WDFREQUEST Request,
+    WDFIOTARGET Target,
+    PWDF_REQUEST_COMPLETION_PARAMS Params,
+    WDFCONTEXT Context
+)
+{
+    NTSTATUS    status;
+
+    UNREFERENCED_PARAMETER(Target);
+    UNREFERENCED_PARAMETER(Params);
+    UNREFERENCED_PARAMETER(Context);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
+
+    status = WdfRequestGetStatus(Request);
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+        TRACE_QUEUE,
+        "Request completed with status %!STATUS!", status);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
 }
 
