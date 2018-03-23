@@ -47,10 +47,16 @@ AirBenderChildQueuesInitialize(
     _In_ WDFDEVICE Device
 );
 
+NTSTATUS
+AirBenderWriteBulkPipeQueueInitialize(
+    _In_ WDFDEVICE Device
+);
+
 //
 // Events from the IoQueue object
 //
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL AirBenderEvtIoDeviceControl;
 EVT_WDF_IO_QUEUE_IO_STOP AirBenderEvtIoStop;
+EVT_WDF_IO_QUEUE_IO_DEFAULT AirBenderWriteBulkPipeEvtIoDefault;
 
 EXTERN_C_END

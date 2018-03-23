@@ -129,6 +129,38 @@ NTSTATUS AirBenderChildQueuesInitialize(WDFDEVICE Device)
     return status;
 }
 
+NTSTATUS AirBenderWriteBulkPipeQueueInitialize(_In_ WDFDEVICE Device)
+{
+    NTSTATUS                status;
+    WDF_IO_QUEUE_CONFIG     queueConfig;
+    WDF_OBJECT_ATTRIBUTES   attributes;
+    PDEVICE_CONTEXT         pDeviceContext;
+
+    WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchSequential);
+    queueConfig.EvtIoDefault = AirBenderWriteBulkPipeEvtIoDefault;
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = Device;
+
+    pDeviceContext = DeviceGetContext(Device);
+
+    status = WdfIoQueueCreate(
+        Device,
+        &queueConfig,
+        &attributes,
+        &pDeviceContext->BulkWritePipeQueue
+    );
+
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
+            "WdfIoQueueCreate for BulkWritePipeQueue failed with status %!STATUS!",
+            status);
+        return status;
+    }
+
+    return status;
+}
+
 VOID
 AirBenderEvtIoDeviceControl(
     _In_ WDFQUEUE Queue,
@@ -588,5 +620,15 @@ Return Value:
     //
 
     return;
+}
+
+_Use_decl_annotations_
+VOID
+AirBenderWriteBulkPipeEvtIoDefault(
+    WDFQUEUE  Queue,
+    WDFREQUEST  Request
+)
+{
+
 }
 
