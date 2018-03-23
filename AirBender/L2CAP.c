@@ -46,7 +46,7 @@ L2CAP_Command(
 
     RtlCopyMemory(&buffer[8], Buffer, BufferLength);
 
-    return WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
+    return WriteBulkPipe(Context, buffer, BufferLength + 8);
 }
 
 NTSTATUS

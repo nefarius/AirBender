@@ -71,25 +71,83 @@ AirBenderConfigContReaderForBulkReadEndPoint(
 NTSTATUS WriteBulkPipe(
     PDEVICE_CONTEXT Context,
     PVOID Buffer,
-    ULONG BufferLength,
-    PULONG BytesWritten)
+    ULONG BufferLength)
 {
     NTSTATUS                        status;
-    WDF_MEMORY_DESCRIPTOR           memDesc;
+    WDFREQUEST                      writeRequest;
+    WDFMEMORY                       requestMemory;
+    PVOID                           requestMemoryBuffer;
+    WDF_OBJECT_ATTRIBUTES           attributes;
+    WDFIOTARGET                     ioTarget;
 
-    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
-        &memDesc,
-        Buffer,
-        BufferLength
+    ioTarget = WdfUsbTargetPipeGetIoTarget(Context->BulkWritePipe);
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = ioTarget;
+
+    status = WdfRequestCreate(
+        &attributes,
+        ioTarget,
+        &writeRequest
     );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "%!FUNC!: WdfRequestCreate failed with status %!STATUS!", status);
+        return status;
+    }
 
-    status = WdfUsbTargetPipeWriteSynchronously(
+    //
+    // Allocate request buffer memory
+    // 
+    status = WdfMemoryCreate(
+        &attributes,
+        NonPagedPool,
+        BULK_RW_POOL_TAG,
+        BufferLength,
+        &requestMemory,
+        &requestMemoryBuffer
+    );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "%!FUNC!: WdfMemoryCreate failed with status %!STATUS!", status);
+        return status;
+    }
+
+    //
+    // Duplicate supplied buffer into request buffer
+    // 
+    RtlCopyMemory(requestMemoryBuffer, Buffer, BufferLength);
+
+    //
+    // Prepare request
+    // 
+    status = WdfUsbTargetPipeFormatRequestForWrite(
         Context->BulkWritePipe,
-        NULL,
-        NULL,
-        &memDesc,
-        BytesWritten
+        writeRequest,
+        requestMemory,
+        NULL
     );
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "%!FUNC!: WdfUsbTargetPipeFormatRequestForWrite failed with status %!STATUS!", status);
+        WdfObjectDelete(requestMemory);
+        return status;
+    }
+
+    //
+    // Insert request in serialised queue
+    // 
+    status = WdfRequestForwardToIoQueue(writeRequest, Context->BulkWritePipeQueue);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_BULKRWR,
+            "%!FUNC!: WdfRequestForwardToIoQueue failed with status %!STATUS!", status);
+        WdfObjectDelete(requestMemory);
+        return status;
+    }
 
     return status;
 }
@@ -104,7 +162,13 @@ HID_Command(
 )
 {
     NTSTATUS status;
-    PUCHAR buffer = malloc(BufferLength + 8);
+    PUCHAR buffer;
+
+#ifndef _KERNEL_MODE
+    buffer = malloc(BufferLength + 8);
+#else
+    // TODO: implement
+#endif
 
     buffer[0] = Handle.Lsb;
     buffer[1] = Handle.Msb;
@@ -117,9 +181,13 @@ HID_Command(
 
     RtlCopyMemory(&buffer[8], Buffer, BufferLength);
 
-    status = WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
+    status = WriteBulkPipe(Context, buffer, BufferLength + 8);
 
+#ifndef _KERNEL_MODE
     free(buffer);
+#else
+    // TODO: implement
+#endif
 
     return status;
 }

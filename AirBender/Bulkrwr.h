@@ -25,6 +25,8 @@ SOFTWARE.
 
 #pragma once
 
+#define BULK_RW_POOL_TAG    'WBBA'
+
 NTSTATUS
 AirBenderConfigContReaderForBulkReadEndPoint(
     _In_ PDEVICE_CONTEXT DeviceContext
@@ -39,7 +41,6 @@ NTSTATUS
 WriteBulkPipe(
     _In_ PDEVICE_CONTEXT Context,
     _In_ PVOID Buffer,
-    _In_ ULONG BufferLength,
-    _Out_opt_ PULONG BytesWritten
+    _In_ ULONG BufferLength
 );
 
