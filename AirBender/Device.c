@@ -96,12 +96,31 @@ Return Value:
             &GUID_DEVINTERFACE_AIRBENDER,
             NULL // ReferenceString
         );
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+                "WdfDeviceCreateDeviceInterface failed with status %!STATUS!", status);
+            return status;
+        }
 
-        if (NT_SUCCESS(status)) {
-            //
-            // Initialize the I/O Package and any Queues
-            //
-            status = AirBenderQueueInitialize(device);
+
+        //
+        // Initialize the I/O Package and any Queues
+        //
+        status = AirBenderQueueInitialize(device);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+                "AirBenderQueueInitialize failed with status %!STATUS!", status);
+            return status;
+        }
+
+        //
+        // Initialize I/O queue for bulk pipe write requests
+        // 
+        status = AirBenderWriteBulkPipeQueueInitialize(device);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+                "AirBenderWriteBulkPipeQueueInitialize failed with status %!STATUS!", status);
+            return status;
         }
     }
 
@@ -168,7 +187,7 @@ Return Value:
 
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-                "WdfUsbTargetDeviceCreateWithParameters failed 0x%x", status);
+                "WdfUsbTargetDeviceCreateWithParameters failed with status %!STATUS!", status);
             return status;
         }
     }
@@ -188,7 +207,7 @@ Return Value:
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-            "WdfUsbTargetDeviceSelectConfig failed 0x%x", status);
+            "WdfUsbTargetDeviceSelectConfig failed with status %!STATUS!", status);
         return status;
     }
 
@@ -198,7 +217,7 @@ Return Value:
     if (NULL == pDeviceContext->UsbInterface) {
         status = STATUS_UNSUCCESSFUL;
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-            "WdfUsbTargetDeviceGetInterface 0 failed %!STATUS! \n",
+            "WdfUsbTargetDeviceGetInterface 0 failed with status %!STATUS!",
             status);
         return status;
     }
@@ -291,19 +310,25 @@ AirBenderEvtDeviceD0Entry(
     //
     status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->InterruptPipe));
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start interrupt pipe %!STATUS!\n", status);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DEVICE,
+            "Failed to start interrupt pipe %!STATUS!", status);
         goto End;
     }
 
     status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkReadPipe));
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk read pipe %!STATUS!\n", status);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DEVICE,
+            "Failed to start bulk read pipe %!STATUS!\n", status);
         goto End;
     }
 
     status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(pDeviceContext->BulkWritePipe));
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "Failed to start bulk write pipe %!STATUS!\n", status);
+        TraceEvents(TRACE_LEVEL_ERROR,
+            TRACE_DEVICE,
+            "Failed to start bulk write pipe %!STATUS!\n", status);
         goto End;
     }
 
@@ -354,42 +379,42 @@ VOID InitHidInitReports(IN PDEVICE_CONTEXT Context)
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x02, 0x00, 0x0F, 0x00, 0x08, 0x35, 0x03, 0x19,
         0x12, 0x00, 0x00, 0x03, 0x00
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x04, 0x00, 0x10, 0x00, 0x0F, 0x00, 0x01, 0x00,
         0x01, 0x00, 0x10, 0x35, 0x06, 0x09, 0x02, 0x01,
         0x09, 0x02, 0x02, 0x00
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x06, 0x00, 0x11, 0x00, 0x0D, 0x35, 0x03, 0x19,
         0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
         0x06, 0x00
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x06, 0x00, 0x12, 0x00, 0x0F, 0x35, 0x03, 0x19,
         0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
         0x06, 0x02, 0x00, 0x7F
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x06, 0x00, 0x13, 0x00, 0x0F, 0x35, 0x03, 0x19,
         0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
         0x06, 0x02, 0x00, 0x59
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x06, 0x00, 0x14, 0x00, 0x0F, 0x35, 0x03, 0x19,
         0x11, 0x24, 0x01, 0x80, 0x35, 0x03, 0x09, 0x02,
         0x06, 0x02, 0x00, 0x33
-    }));
+        }));
 
     APPEND_BYTE_ARRAY(Context->HidInitReports, P99_PROTECT({
         0x06, 0x00, 0x15, 0x00, 0x0F, 0x35, 0x03, 0x19,
         0x11, 0x24, 0x01, 0x90, 0x35, 0x03, 0x09, 0x02,
         0x06, 0x02, 0x00, 0x0D
-    }));
+        }));
 }
 
