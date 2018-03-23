@@ -148,6 +148,8 @@ NTSTATUS WriteBulkPipe(
     //
     // Insert request in serialised queue
     // 
+    // TODO: crashes here, y tho?
+    // 
     status = WdfRequestForwardToIoQueue(writeRequest, Context->BulkWritePipeQueue);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR,
