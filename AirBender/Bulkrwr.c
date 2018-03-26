@@ -72,92 +72,25 @@ AirBenderConfigContReaderForBulkReadEndPoint(
 NTSTATUS WriteBulkPipe(
     PDEVICE_CONTEXT Context,
     PVOID Buffer,
-    ULONG BufferLength)
+    ULONG BufferLength,
+    PULONG BytesWritten)
 {
     NTSTATUS                        status;
-    WDFREQUEST                      writeRequest;
-    WDFMEMORY                       requestMemory;
-    WDF_OBJECT_ATTRIBUTES           attributes;
-    WDFIOTARGET                     ioTarget;
+    WDF_MEMORY_DESCRIPTOR           memDesc;
 
-
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_BULKRWR,
-        "%!FUNC! Entry");
-
-    ioTarget = WdfUsbTargetPipeGetIoTarget(Context->BulkWritePipe);
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.ParentObject = ioTarget;
-
-    status = WdfRequestCreate(
-        &attributes,
-        ioTarget,
-        &writeRequest
+    WDF_MEMORY_DESCRIPTOR_INIT_BUFFER(
+        &memDesc,
+        Buffer,
+        BufferLength
     );
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_BULKRWR,
-            "%!FUNC!: WdfRequestCreate failed with status %!STATUS!", status);
-        return status;
-    }
 
-    //
-    // Allocate request buffer memory
-    // 
-    status = WdfMemoryCreate(
-        &attributes,
-        NonPagedPool,
-        BULK_RW_POOL_TAG,
-        BufferLength,
-        &requestMemory,
-        NULL
-    );
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_BULKRWR,
-            "%!FUNC!: WdfMemoryCreate failed with status %!STATUS!", status);
-        return status;
-    }
-
-    status = WdfMemoryCopyFromBuffer(requestMemory, 0, Buffer, BufferLength);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_BULKRWR,
-            "%!FUNC!: WdfMemoryCopyFromBuffer failed with status %!STATUS!", status);
-        return status;
-    }
-
-    //
-    // Prepare request
-    // 
-    status = WdfUsbTargetPipeFormatRequestForWrite(
+    status = WdfUsbTargetPipeWriteSynchronously(
         Context->BulkWritePipe,
-        writeRequest,
-        requestMemory,
-        NULL
+        NULL,
+        NULL,
+        &memDesc,
+        BytesWritten
     );
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_BULKRWR,
-            "%!FUNC!: WdfUsbTargetPipeFormatRequestForWrite failed with status %!STATUS!", status);
-        WdfObjectDelete(requestMemory);
-        return status;
-    }
-
-    //
-    // Insert request in serialised queue
-    // 
-    // TODO: crashes here, y tho?
-    // 
-    status = WdfRequestForwardToIoQueue(writeRequest, Context->BulkWritePipeQueue);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_BULKRWR,
-            "%!FUNC!: WdfRequestForwardToIoQueue failed with status %!STATUS!", status);
-        WdfObjectDelete(requestMemory);
-        return status;
-    }
 
     return status;
 }
@@ -191,7 +124,9 @@ HID_Command(
 
     RtlCopyMemory(&buffer[8], Buffer, BufferLength);
 
-    status = WriteBulkPipe(Context, buffer, BufferLength + 8);
+    WdfObjectAcquireLock(Context->BulkWritePipeQueue);
+    status = WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
+    WdfObjectReleaseLock(Context->BulkWritePipeQueue);
 
 #ifndef _KERNEL_MODE
     free(buffer);
@@ -237,7 +172,7 @@ AirBenderEvtUsbBulkReadPipeReadComplete(
 
     if (pClientDevice == NULL)
     {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_BULKRWR, "PBTH_DEVICE not found");
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_BULKRWR, "PBTH_DEVICE not found");
         return;
     }
 

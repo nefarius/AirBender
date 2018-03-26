@@ -141,8 +141,6 @@ NTSTATUS AirBenderWriteBulkPipeQueueInitialize(_In_ WDFDEVICE Device)
     queueConfig.EvtIoDefault = AirBenderWriteBulkPipeEvtIoDefault;
 
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    //attributes.ExecutionLevel = WdfExecutionLevelPassive;
-    attributes.SynchronizationScope = WdfSynchronizationScopeQueue;
     attributes.ParentObject = Device;
 
     pDeviceContext = DeviceGetContext(Device);
@@ -206,7 +204,6 @@ Return Value:
     PAIRBENDER_GET_CLIENT_COUNT         pGetClientCount;
     PAIRBENDER_GET_CLIENT_DETAILS       pGetStateReq;
     PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
-    PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
     PAIRBENDER_GET_HOST_VERSION         pGetHostVersion;
 
     // TraceEvents(TRACE_LEVEL_INFORMATION,
@@ -396,45 +393,16 @@ Return Value:
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
-        status = WdfRequestRetrieveInputBuffer(
-            Request,
-            sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT),
-            (LPVOID)&pSetDs3Output,
-            &bufferLength);
-
-        if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT))
+        status = WdfRequestForwardToIoQueue(Request, pDeviceContext->BulkWritePipeQueue);
+        if (!NT_SUCCESS(status))
         {
-            L2CAP_CID scid;
-
-            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &pSetDs3Output->ClientAddress);
-
-            if (pBthDevice == NULL)
-            {
-                TraceEvents(TRACE_LEVEL_INFORMATION,
-                    TRACE_QUEUE, "Device not found");
-
-                status = STATUS_DEVICE_DOES_NOT_EXIST;
-                break;
-            }
-
-            L2CAP_DEVICE_GET_SCID_FOR_TYPE(
-                pBthDevice,
-                L2CAP_PSM_HID_Command,
-                &scid);
-
-            status = HID_Command(
-                pDeviceContext,
-                pBthDevice->HCI_ConnectionHandle,
-                scid,
-                pSetDs3Output->ReportBuffer,
-                DS3_HID_OUTPUT_REPORT_SIZE);
-
-            if (!NT_SUCCESS(status))
-            {
-                TraceEvents(TRACE_LEVEL_ERROR,
-                    TRACE_QUEUE, "HID_Command failed with status %!STATUS!", status);
-            }
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE,
+                "Failed to forward request: %!STATUS!", status);
+            break;
         }
+
+        status = STATUS_PENDING;
 
         break;
 
@@ -632,57 +600,60 @@ AirBenderWriteBulkPipeEvtIoDefault(
     WDFREQUEST  Request
 )
 {
-    NTSTATUS            status;
-    BOOLEAN             ret;
-    WDFDEVICE           device;
-    WDFIOTARGET         ioTarget;
-    PDEVICE_CONTEXT     pDeviceCtx;
+    NTSTATUS                            status;
+    PDEVICE_CONTEXT                     pDeviceCtx;
+    size_t                              bufferLength;
+    PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
+    PBTH_DEVICE                         pBthDevice;
 
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry");
 
+    pDeviceCtx = DeviceGetContext(WdfIoQueueGetDevice(Queue));
 
-    if (TRUE)return;
+    status = WdfRequestRetrieveInputBuffer(
+        Request,
+        sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT),
+        (LPVOID)&pSetDs3Output,
+        &bufferLength);
 
-    device = WdfIoQueueGetDevice(Queue);
-    pDeviceCtx = DeviceGetContext(device);
-    ioTarget = WdfUsbTargetPipeGetIoTarget(pDeviceCtx->BulkWritePipe);
+    if (NT_SUCCESS(status) && bufferLength == sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT))
+    {
+        L2CAP_CID scid;
 
-    WdfRequestSetCompletionRoutine(Request, AirBenderWriteBulkCompletionRoutine, NULL);
+        pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceCtx->ClientDeviceList, &pSetDs3Output->ClientAddress);
 
-    ret = WdfRequestSend(Request, ioTarget, WDF_NO_SEND_OPTIONS);
+        if (pBthDevice == NULL)
+        {
+            TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE, "Device not found");
 
-    if (ret == FALSE) {
-        status = WdfRequestGetStatus(Request);
-        TraceEvents(TRACE_LEVEL_ERROR,
-            TRACE_QUEUE,
-            "WdfRequestSend failed with status %!STATUS!", status);
-        WdfRequestComplete(Request, status);
+            status = STATUS_DEVICE_DOES_NOT_EXIST;
+            WdfRequestComplete(Request, status);
+            return;
+        }
+
+        L2CAP_DEVICE_GET_SCID_FOR_TYPE(
+            pBthDevice,
+            L2CAP_PSM_HID_Command,
+            &scid);
+
+        status = HID_Command(
+            pDeviceCtx,
+            pBthDevice->HCI_ConnectionHandle,
+            scid,
+            pSetDs3Output->ReportBuffer,
+            DS3_HID_OUTPUT_REPORT_SIZE);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_QUEUE, "HID_Command failed with status %!STATUS!", status);
+        }
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
-}
+    WdfRequestComplete(Request, status);
 
-_IRQL_requires_same_ VOID AirBenderWriteBulkCompletionRoutine(
-    WDFREQUEST Request,
-    WDFIOTARGET Target,
-    PWDF_REQUEST_COMPLETION_PARAMS Params,
-    WDFCONTEXT Context
-)
-{
-    NTSTATUS    status;
-
-    UNREFERENCED_PARAMETER(Target);
-    UNREFERENCED_PARAMETER(Params);
-    UNREFERENCED_PARAMETER(Context);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
-
-    status = WdfRequestGetStatus(Request);
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-        TRACE_QUEUE,
-        "Request completed with status %!STATUS!", status);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Exit");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Exit");
 }
 

@@ -37,10 +37,9 @@ EVT_WDF_USB_READERS_FAILED AirBenderEvtUsbBulkReadReadersFailed;
 
 #define BULK_IN_BUFFER_LENGTH  512
 
-NTSTATUS
-WriteBulkPipe(
-    _In_ PDEVICE_CONTEXT Context,
-    _In_ PVOID Buffer,
-    _In_ ULONG BufferLength
-);
+NTSTATUS WriteBulkPipe(
+    PDEVICE_CONTEXT Context,
+    PVOID Buffer,
+    ULONG BufferLength,
+    PULONG BytesWritten);
 

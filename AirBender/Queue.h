@@ -25,17 +25,6 @@ SOFTWARE.
 
 EXTERN_C_START
 
-//
-// This is the context that can be placed per queue
-// and would contain per queue information.
-//
-typedef struct _QUEUE_CONTEXT {
-
-    ULONG PrivateDeviceData;  // just a placeholder
-
-} QUEUE_CONTEXT, *PQUEUE_CONTEXT;
-
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
 
 NTSTATUS
 AirBenderQueueInitialize(
@@ -58,6 +47,5 @@ AirBenderWriteBulkPipeQueueInitialize(
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL AirBenderEvtIoDeviceControl;
 EVT_WDF_IO_QUEUE_IO_STOP AirBenderEvtIoStop;
 EVT_WDF_IO_QUEUE_IO_DEFAULT AirBenderWriteBulkPipeEvtIoDefault;
-EVT_WDF_REQUEST_COMPLETION_ROUTINE AirBenderWriteBulkCompletionRoutine;
 
 EXTERN_C_END
