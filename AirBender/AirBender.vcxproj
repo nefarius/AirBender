@@ -209,7 +209,7 @@
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
     <Inf>
-      <TimeStamp>2.1.8.0</TimeStamp>
+      <TimeStamp>2.1.12.0</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -230,7 +230,7 @@
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
     </DriverSign>
     <Inf>
-      <TimeStamp>2.1.8.0</TimeStamp>
+      <TimeStamp>2.1.12.0</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -247,7 +247,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
     </ClCompile>
     <Inf>
-      <TimeStamp>2.1.8.0</TimeStamp>
+      <TimeStamp>2.1.12.0</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -264,7 +264,7 @@
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
     </ClCompile>
     <Inf>
-      <TimeStamp>2.1.8.0</TimeStamp>
+      <TimeStamp>2.1.12.0</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemGroup>
