@@ -257,28 +257,30 @@ NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG queueCfg;
     PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
-    RtlZeroMemory(node, sizeof(BTH_DEVICE));
+    if (node != NULL) {
+        RtlZeroMemory(node, sizeof(BTH_DEVICE));
 
-    node->ClientAddress = *Address;
+        node->ClientAddress = *Address;
 
-    WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
-    status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
-    if (!NT_SUCCESS(status)) {
-        free(node);
+        WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
+        status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
+        if (!NT_SUCCESS(status)) {
+            free(node);
+            return status;
+        }
+
+        if (List->logicalLength == 0) {
+            List->head = List->tail = node;
+        }
+        else {
+            List->tail->next = node;
+            List->tail = node;
+        }
+
+        List->logicalLength++;
+
         return status;
     }
-
-    if (List->logicalLength == 0) {
-        List->head = List->tail = node;
-    }
-    else {
-        List->tail->next = node;
-        List->tail = node;
-    }
-
-    List->logicalLength++;
-
-    return status;
 }
 
 /**
@@ -308,17 +310,17 @@ BOOLEAN FORCEINLINE BTH_DEVICE_LIST_REMOVE(
     * Visit each node, maintaining a pointer to
     * the previous node we just visited.
     */
-    for (currP = List->head; currP != NULL; prevP = currP, currP = currP->next) 
+    for (currP = List->head; currP != NULL; prevP = currP, currP = currP->next)
     {
-        if (*(PUSHORT)&currP->HCI_ConnectionHandle == *(PUSHORT)Handle) 
-        {  
+        if (*(PUSHORT)&currP->HCI_ConnectionHandle == *(PUSHORT)Handle)
+        {
             /* Found it. */
-            if (prevP == NULL) 
+            if (prevP == NULL)
             {
                 /* Fix beginning pointer. */
                 List->head = currP->next;
             }
-            else 
+            else
             {
                 /*
                 * Fix previous node's next to

@@ -20,7 +20,7 @@ Environment:
 // a775e97e-a41b-4bfc-868e-25be84643b62
 //
 DEFINE_GUID(GUID_DEVINTERFACE_AIRBENDER,
-    0xa775e97e,0xa41b,0x4bfc,0x86,0x8e,0x25,0xbe,0x84,0x64,0x3b,0x62);
+    0xa775e97e, 0xa41b, 0x4bfc, 0x86, 0x8e, 0x25, 0xbe, 0x84, 0x64, 0x3b, 0x62);
 
 //
 // Define the tracing flags.
@@ -50,7 +50,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_AIRBENDER,
 
 #define WPP_LEVEL_FLAGS_LOGGER(lvl,flags) \
            WPP_LEVEL_LOGGER(flags)
-               
+
 #define WPP_LEVEL_FLAGS_ENABLED(lvl, flags) \
            (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= lvl)
 
