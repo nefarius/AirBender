@@ -38,35 +38,37 @@ VOID InitByteArray(IN OUT PBYTE_ARRAY Array)
 
 VOID AppendElementsByteArray(IN PBYTE_ARRAY Array, IN PVOID Elements, IN ULONG NumElements)
 {
-    PBYTE_ARRAY_ELEMENT node = malloc(sizeof(BYTE_ARRAY_ELEMENT));
+	PBYTE_ARRAY_ELEMENT node = malloc(sizeof(BYTE_ARRAY_ELEMENT));
+	if (node != NULL) {
+		node->Length = NumElements;
+		node->Data = malloc(NumElements);
 
-    node->Length = NumElements;
-    node->Data = malloc(NumElements);
+		RtlCopyMemory(node->Data, Elements, NumElements);
 
-    RtlCopyMemory(node->Data, Elements, NumElements);
+		if (Array->logicalLength == 0) {
+			Array->head = Array->tail = node;
+		}
+		else {
+			Array->tail->next = node;
+			Array->tail = node;
+		}
 
-    if (Array->logicalLength == 0) {
-        Array->head = Array->tail = node;
-    }
-    else {
-        Array->tail->next = node;
-        Array->tail = node;
-    }
-
-    Array->logicalLength++;
+		Array->logicalLength++;
+	}
 }
 
 VOID GetElementsByteArray(IN PBYTE_ARRAY Array, IN ULONG Index, OUT PVOID *Elements, OUT PULONG NumElements)
 {
-    PBYTE_ARRAY_ELEMENT node = Array->head;
+	PBYTE_ARRAY_ELEMENT node = Array->head;
+	if (node != NULL) {
+		for (size_t i = 0; i < Index; i++)
+		{
+			node = node->next;
+		}
 
-    for (size_t i = 0; i < Index && node != NULL; i++)
-    {
-        node = node->next;
-    }
-
-    *Elements = node->Data;
-    *NumElements = node->Length;
+		*Elements = node->Data;
+		*NumElements = node->Length;
+	}
 }
 
 VOID FreeByteArray(IN PBYTE_ARRAY Array)

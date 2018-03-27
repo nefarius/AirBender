@@ -249,36 +249,38 @@ VOID FORCEINLINE BTH_DEVICE_LIST_FREE(
  * \return  NTSTATUS value.
  */
 NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
-    PBTH_DEVICE_LIST List,
-    PBD_ADDR Address,
-    WDFDEVICE HostDevice
+	PBTH_DEVICE_LIST List,
+	PBD_ADDR Address,
+	WDFDEVICE HostDevice
 )
 {
-    NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG queueCfg;
-    PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
-    RtlZeroMemory(node, sizeof(BTH_DEVICE));
+	NTSTATUS status;
+	WDF_IO_QUEUE_CONFIG queueCfg;
+	PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
+	if (node != NULL) {
+		RtlZeroMemory(node, sizeof(BTH_DEVICE));
 
-    node->ClientAddress = *Address;
+		node->ClientAddress = *Address;
 
-    WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
-    status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
-    if (!NT_SUCCESS(status)) {
-        free(node);
-        return status;
-    }
+		WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
+		status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
+		if (!NT_SUCCESS(status)) {
+			free(node);
+			return status;
+		}
 
-    if (List->logicalLength == 0) {
-        List->head = List->tail = node;
-    }
-    else {
-        List->tail->next = node;
-        List->tail = node;
-    }
+		if (List->logicalLength == 0) {
+			List->head = List->tail = node;
+		}
+		else {
+			List->tail->next = node;
+			List->tail = node;
+		}
 
-    List->logicalLength++;
+		List->logicalLength++;
 
-    return status;
+		return status;
+	}
 }
 
 /**
