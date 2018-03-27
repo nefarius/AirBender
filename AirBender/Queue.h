@@ -29,7 +29,7 @@ EXTERN_C_START
 NTSTATUS
 AirBenderQueueInitialize(
     _In_ WDFDEVICE Device
-    );
+);
 
 NTSTATUS
 AirBenderChildQueuesInitialize(

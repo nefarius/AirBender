@@ -309,42 +309,42 @@ typedef struct _L2CAP_SIGNALLING_DISCONNECTION_RESPONSE
  */
 #define L2CAP_IS_CONTROL_CHANNEL(_buf_)                     ((BOOLEAN)_buf_[6] == 0x01 && _buf_[7] == 0x00)
 
-/**
- * \def L2CAP_IS_HID_INPUT_REPORT(_buf_) ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
- *
- * \brief   A macro that identifies a HID input report.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    18.09.2017
- *
- * \param   _buf_   The buffer.
- */
+ /**
+  * \def L2CAP_IS_HID_INPUT_REPORT(_buf_) ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
+  *
+  * \brief   A macro that identifies a HID input report.
+  *
+  * \author  Benjamin "Nefarius" Höglinger
+  * \date    18.09.2017
+  *
+  * \param   _buf_   The buffer.
+  */
 #define L2CAP_IS_HID_INPUT_REPORT(_buf_)                    ((BOOLEAN)_buf_[8] == 0xA1 && _buf_[9] == 0x01)
 
-/**
- * \def L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_) ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
- *
- * \brief   A macro that validates the signalling command code.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    18.09.2017
- *
- * \param   _buf_   The buffer.
- */
+  /**
+   * \def L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_) ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
+   *
+   * \brief   A macro that validates the signalling command code.
+   *
+   * \author  Benjamin "Nefarius" Höglinger
+   * \date    18.09.2017
+   *
+   * \param   _buf_   The buffer.
+   */
 #define L2CAP_GET_SIGNALLING_COMMAND_CODE(_buf_)            ((L2CAP_SIGNALLING_COMMAND_CODE)_buf_[8])
 
-/**
- * \fn  BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE( PUCHAR Buffer )
- *
- * \brief   Checks if the supplied buffer represents a valid L2CAP signalling command code.
- *
- * \author  Benjamin "Nefarius" Höglinger
- * \date    18.09.2017
- *
- * \param   Buffer  The buffer.
- *
- * \return  TRUE if valid, FALSE otherwise.
- */
+   /**
+    * \fn  BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE( PUCHAR Buffer )
+    *
+    * \brief   Checks if the supplied buffer represents a valid L2CAP signalling command code.
+    *
+    * \author  Benjamin "Nefarius" Höglinger
+    * \date    18.09.2017
+    *
+    * \param   Buffer  The buffer.
+    *
+    * \return  TRUE if valid, FALSE otherwise.
+    */
 BOOLEAN FORCEINLINE L2CAP_IS_SIGNALLING_COMMAND_CODE(
     PUCHAR Buffer
 )

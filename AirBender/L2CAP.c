@@ -108,12 +108,12 @@ L2CAP_Command_Connection_Response(
     return L2CAP_Command(Context, Handle, buffer, 12);
 }
 
-NTSTATUS 
+NTSTATUS
 L2CAP_Command_Configuration_Request(
-    PDEVICE_CONTEXT Context, 
+    PDEVICE_CONTEXT Context,
     BTH_HANDLE Handle,
     BYTE Id,
-    L2CAP_CID DestinationChannelId, 
+    L2CAP_CID DestinationChannelId,
     BOOLEAN SetMtu)
 {
     BYTE buffer[12];
@@ -138,10 +138,10 @@ L2CAP_Command_Configuration_Request(
     return L2CAP_Command(Context, Handle, buffer, SetMtu ? 12 : 8);
 }
 
-NTSTATUS 
+NTSTATUS
 L2CAP_Command_Configuration_Response(
-    PDEVICE_CONTEXT Context, 
-    BTH_HANDLE Handle, 
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
     BYTE Id,
     L2CAP_CID SourceChannelId)
 {
@@ -161,12 +161,12 @@ L2CAP_Command_Configuration_Response(
     return L2CAP_Command(Context, Handle, buffer, 10);
 }
 
-NTSTATUS 
+NTSTATUS
 L2CAP_Command_Disconnection_Request(
-    PDEVICE_CONTEXT Context, 
-    BTH_HANDLE Handle, 
-    BYTE Id, 
-    L2CAP_CID DestinationChannelId, 
+    PDEVICE_CONTEXT Context,
+    BTH_HANDLE Handle,
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
     L2CAP_CID SourceChannelId)
 {
     BYTE buffer[8];
@@ -183,12 +183,12 @@ L2CAP_Command_Disconnection_Request(
     return L2CAP_Command(Context, Handle, buffer, 8);
 }
 
-NTSTATUS 
+NTSTATUS
 L2CAP_Command_Disconnection_Response(
     PDEVICE_CONTEXT Context,
     BTH_HANDLE Handle,
-    BYTE Id, 
-    L2CAP_CID DestinationChannelId, 
+    BYTE Id,
+    L2CAP_CID DestinationChannelId,
     L2CAP_CID SourceChannelId)
 {
     BYTE buffer[8];

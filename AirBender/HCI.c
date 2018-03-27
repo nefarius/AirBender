@@ -25,23 +25,23 @@ SOFTWARE.
 
 #include "Driver.h"
 
-NTSTATUS 
+NTSTATUS
 HCI_Command(
-    PDEVICE_CONTEXT Context, 
-    HCI_COMMAND Command, 
-    PVOID Buffer, 
+    PDEVICE_CONTEXT Context,
+    HCI_COMMAND Command,
+    PVOID Buffer,
     ULONG BufferLength)
 {
     ((PUCHAR)Buffer)[0] = (BYTE)(((ULONG)Command >> 0) & 0xFF);
     ((PUCHAR)Buffer)[1] = (BYTE)(((ULONG)Command >> 8) & 0xFF);
     ((PUCHAR)Buffer)[2] = (BYTE)(BufferLength - 3);
 
-    return SendControlRequest(Context, 
-        BmRequestClass, 
-        0x0000, 
-        0, 
-        0, 
-        Buffer, 
+    return SendControlRequest(Context,
+        BmRequestClass,
+        0x0000,
+        0,
+        0,
+        Buffer,
         BufferLength);
 }
 
@@ -56,8 +56,8 @@ HCI_Command_Reset(
 
 NTSTATUS
 HCI_Command_Accept_Connection_Request(
-    PDEVICE_CONTEXT Context, 
-    BD_ADDR BdAddr, 
+    PDEVICE_CONTEXT Context,
+    BD_ADDR BdAddr,
     BYTE role)
 {
     BYTE buffer[10];
@@ -325,7 +325,7 @@ HCI_Command_Write_Page_Scan_Type(
     return HCI_Command(Context, HCI_Write_Page_Scan_Type, buffer, 4);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Page_Scan_Activity(
     PDEVICE_CONTEXT Context)
 {
@@ -339,7 +339,7 @@ HCI_Command_Write_Page_Scan_Activity(
     return HCI_Command(Context, HCI_Write_Page_Scan_Activity, buffer, 7);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Page_Timeout(
     PDEVICE_CONTEXT Context)
 {
@@ -351,7 +351,7 @@ HCI_Command_Write_Page_Timeout(
     return HCI_Command(Context, HCI_Write_Page_Timeout, buffer, 5);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Authentication_Enable(
     PDEVICE_CONTEXT Context)
 {
@@ -362,7 +362,7 @@ HCI_Command_Write_Authentication_Enable(
     return HCI_Command(Context, HCI_Write_Authentication_Enable, buffer, 4);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Simple_Pairing_Mode(
     PDEVICE_CONTEXT Context)
 {
@@ -384,7 +384,7 @@ HCI_Command_Write_Simple_Pairing_Debug_Mode(
     return HCI_Command(Context, HCI_Write_Simple_Pairing_Debug_Mode, buffer, 4);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Inquiry_Mode(
     PDEVICE_CONTEXT Context)
 {
@@ -395,7 +395,7 @@ HCI_Command_Write_Inquiry_Mode(
     return HCI_Command(Context, HCI_Write_Inquiry_Mode, buffer, 4);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Write_Inquiry_Transmit_Power_Level(
     PDEVICE_CONTEXT Context)
 {
@@ -428,7 +428,7 @@ NTSTATUS HCI_Command_Inquiry_Cancel(
     return HCI_Command(Context, HCI_Inquiry_Cancel, buffer, 3);
 }
 
-NTSTATUS 
+NTSTATUS
 HCI_Command_Delete_Stored_Link_Key(
     PDEVICE_CONTEXT Context,
     BD_ADDR BdAddr)
@@ -436,7 +436,7 @@ HCI_Command_Delete_Stored_Link_Key(
     BYTE buffer[10];
 
     RtlCopyMemory(&buffer[3], &BdAddr, sizeof(BD_ADDR));
-    
+
     buffer[9] = 0x00;
 
     return HCI_Command(Context, HCI_Delete_Stored_Link_Key, buffer, 10);

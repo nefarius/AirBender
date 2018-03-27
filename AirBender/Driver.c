@@ -31,7 +31,7 @@ NTSTATUS
 DriverEntry(
     _In_ PDRIVER_OBJECT  DriverObject,
     _In_ PUNICODE_STRING RegistryPath
-    )
+)
 /*++
 
 Routine Description:
@@ -65,7 +65,7 @@ Return Value:
     //
     // Initialize WPP Tracing
     //
-    WPP_INIT_TRACING( DriverObject, RegistryPath );
+    WPP_INIT_TRACING(DriverObject, RegistryPath);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
@@ -77,15 +77,15 @@ Return Value:
     attributes.EvtCleanupCallback = AirBenderEvtDriverContextCleanup;
 
     WDF_DRIVER_CONFIG_INIT(&config,
-                           AirBenderEvtDeviceAdd
-                           );
+        AirBenderEvtDeviceAdd
+    );
 
     status = WdfDriverCreate(DriverObject,
-                             RegistryPath,
-                             &attributes,
-                             &config,
-                             WDF_NO_HANDLE
-                             );
+        RegistryPath,
+        &attributes,
+        &config,
+        WDF_NO_HANDLE
+    );
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
@@ -102,7 +102,7 @@ NTSTATUS
 AirBenderEvtDeviceAdd(
     _In_    WDFDRIVER       Driver,
     _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+)
 /*++
 Routine Description:
 
@@ -125,7 +125,7 @@ Return Value:
     NTSTATUS status;
 
     UNREFERENCED_PARAMETER(Driver);
-    
+
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     status = AirBenderCreateDevice(DeviceInit);
@@ -138,7 +138,7 @@ Return Value:
 VOID
 AirBenderEvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject
-    )
+)
 /*++
 Routine Description:
 
@@ -161,6 +161,6 @@ Return Value:
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 
 }
