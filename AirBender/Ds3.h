@@ -26,6 +26,7 @@ SOFTWARE.
 #pragma once
 
 #define DS3_INIT_HID_STAGE_MAX      0x07
+#define DS3_OUTPUT_REPORT_SIZE      0x32
 
 NTSTATUS
 Ds3ConnectionRequest(

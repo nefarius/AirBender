@@ -112,16 +112,6 @@ Return Value:
                 "AirBenderQueueInitialize failed with status %!STATUS!", status);
             return status;
         }
-
-        //
-        // Initialize I/O queue for bulk pipe write requests
-        // 
-        status = AirBenderWriteBulkPipeQueueInitialize(device);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
-                "AirBenderWriteBulkPipeQueueInitialize failed with status %!STATUS!", status);
-            return status;
-        }
     }
 
     return status;

@@ -130,38 +130,6 @@ NTSTATUS AirBenderChildQueuesInitialize(WDFDEVICE Device)
     return status;
 }
 
-NTSTATUS AirBenderWriteBulkPipeQueueInitialize(_In_ WDFDEVICE Device)
-{
-    NTSTATUS                status;
-    WDF_IO_QUEUE_CONFIG     queueConfig;
-    WDF_OBJECT_ATTRIBUTES   attributes;
-    PDEVICE_CONTEXT         pDeviceContext;
-
-    WDF_IO_QUEUE_CONFIG_INIT(&queueConfig, WdfIoQueueDispatchSequential);
-    queueConfig.EvtIoDefault = AirBenderWriteBulkPipeEvtIoDefault;
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.ParentObject = Device;
-
-    pDeviceContext = DeviceGetContext(Device);
-
-    status = WdfIoQueueCreate(
-        Device,
-        &queueConfig,
-        &attributes,
-        &pDeviceContext->BulkWritePipeQueue
-    );
-
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE,
-            "WdfIoQueueCreate for BulkWritePipeQueue failed with status %!STATUS!",
-            status);
-        return status;
-    }
-
-    return status;
-}
-
 VOID
 AirBenderEvtIoDeviceControl(
     _In_ WDFQUEUE Queue,
@@ -204,7 +172,9 @@ Return Value:
     PAIRBENDER_GET_CLIENT_COUNT         pGetClientCount;
     PAIRBENDER_GET_CLIENT_DETAILS       pGetStateReq;
     PAIRBENDER_GET_DS3_INPUT_REPORT     pGetDs3Input;
+    PAIRBENDER_SET_DS3_OUTPUT_REPORT    pSetDs3Output;
     PAIRBENDER_GET_HOST_VERSION         pGetHostVersion;
+    PVOID                               buffer;
 
     // TraceEvents(TRACE_LEVEL_INFORMATION,
     //     TRACE_QUEUE,
@@ -393,16 +363,29 @@ Return Value:
         TraceEvents(TRACE_LEVEL_VERBOSE,
             TRACE_QUEUE, "IOCTL_AIRBENDER_SET_DS3_OUTPUT_REPORT");
 
-        status = WdfRequestForwardToIoQueue(Request, pDeviceContext->BulkWritePipeQueue);
-        if (!NT_SUCCESS(status))
-        {
-            TraceEvents(TRACE_LEVEL_ERROR,
-                TRACE_QUEUE,
-                "Failed to forward request: %!STATUS!", status);
-            break;
-        }
+        status = WdfRequestRetrieveInputBuffer(
+            Request,
+            sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT),
+            (LPVOID)&pSetDs3Output,
+            &bufferLength);
 
-        status = STATUS_PENDING;
+        if (NT_SUCCESS(status) && InputBufferLength == sizeof(AIRBENDER_SET_DS3_OUTPUT_REPORT))
+        {
+            pBthDevice = BTH_DEVICE_LIST_GET_BY_BD_ADDR(&pDeviceContext->ClientDeviceList, &pSetDs3Output->ClientAddress);
+
+            if (pBthDevice == NULL)
+            {
+                TraceEvents(TRACE_LEVEL_INFORMATION,
+                    TRACE_QUEUE, "Device not found");
+
+                status = STATUS_DEVICE_DOES_NOT_EXIST;
+                break;
+            }
+
+            buffer = WdfMemoryGetBuffer(pBthDevice->HidOutputReportMemory, &bufferLength);
+
+            RtlCopyMemory(buffer, pSetDs3Output->ReportBuffer, bufferLength);
+        }
 
         break;
 

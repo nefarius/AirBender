@@ -408,6 +408,7 @@ Ds3DisconnectionResponse(
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00
     };
+    PVOID           memBuffer;
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
         ">> L2CAP_Disconnection_Response");
@@ -452,6 +453,26 @@ Ds3DisconnectionResponse(
 
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DS3,
             "<< HID_Command OUTPUT REPORT sent");
+
+        status = WdfMemoryCreate(
+            WDF_NO_OBJECT_ATTRIBUTES,
+            NonPagedPool,
+            BULK_RW_POOL_TAG,
+            DS3_OUTPUT_REPORT_SIZE,
+            &Device->HidOutputReportMemory,
+            &memBuffer);
+
+        if (!NT_SUCCESS(status))
+        {
+            TraceEvents(TRACE_LEVEL_ERROR,
+                TRACE_DS3,
+                "WdfMemoryCreate failed with status %!STATUS!", status);
+            return status;
+        }
+
+        RtlCopyMemory(memBuffer, hidOutputReport, DS3_OUTPUT_REPORT_SIZE);
+
+        WdfTimerStart(Device->HidOutputReportTimer, WDF_REL_TIMEOUT_IN_MS(10));
     }
 
     return status;

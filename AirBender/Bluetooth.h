@@ -28,6 +28,10 @@ SOFTWARE.
 #include <stdlib.h>
 
 #define BD_LINK_LENGTH  0x10
+#define DS3_OUTPUT_REPORT_TIMER_PERIOD     10 // ms
+
+EVT_WDF_TIMER AirBenderBulkWriteEvtTimerFunc;
+
 
 static const BYTE BD_LINK[BD_LINK_LENGTH] =
 {
@@ -127,6 +131,16 @@ typedef struct _BTH_DEVICE
     WDFQUEUE HidInputReportQueue;
 
     //
+    // Framework memory holding output repor
+    // 
+    WDFMEMORY HidOutputReportMemory;
+
+    //
+    // Framework object for periodic output timer
+    // 
+    WDFTIMER HidOutputReportTimer;
+
+    //
     // Pointer to next device in the list
     // 
     struct _BTH_DEVICE *next;
@@ -134,11 +148,29 @@ typedef struct _BTH_DEVICE
 } BTH_DEVICE, *PBTH_DEVICE;
 
 /**
+ * \struct  _BTH_DEVICE_CONTEXT
+ *
+ * \brief   A Bluetooth device context.
+ *
+ * \author  Benjamin "Nefarius" Höglinger
+ * \date    27.03.2018
+ */
+typedef struct _BTH_DEVICE_CONTEXT
+{
+    PBTH_DEVICE Device;
+
+    WDFDEVICE HostDevice;
+
+} BTH_DEVICE_CONTEXT, *PBTH_DEVICE_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BTH_DEVICE_CONTEXT, BluetoothDeviceGetContext)
+
+/**
  * \typedef struct _BTH_DEVICE_LIST
  *
  * \brief   Defines a linked list of Bluetooth client devices.
  */
-typedef struct _BTH_DEVICE_LIST
+    typedef struct _BTH_DEVICE_LIST
 {
     ULONG logicalLength;
 
@@ -254,19 +286,59 @@ NTSTATUS FORCEINLINE BTH_DEVICE_LIST_ADD(
     WDFDEVICE HostDevice
 )
 {
-    NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG queueCfg;
+    NTSTATUS                status;
+    WDF_IO_QUEUE_CONFIG     queueCfg;
+    WDF_TIMER_CONFIG        timerCfg;
+    WDF_OBJECT_ATTRIBUTES   attributes;
+    PBTH_DEVICE_CONTEXT     pBluetoothCtx;
     PBTH_DEVICE node = malloc(sizeof(BTH_DEVICE));
     RtlZeroMemory(node, sizeof(BTH_DEVICE));
 
     node->ClientAddress = *Address;
 
+    //
+    // Create queue for input reports
+    // 
     WDF_IO_QUEUE_CONFIG_INIT(&queueCfg, WdfIoQueueDispatchManual);
     status = WdfIoQueueCreate(HostDevice, &queueCfg, WDF_NO_OBJECT_ATTRIBUTES, &node->HidInputReportQueue);
     if (!NT_SUCCESS(status)) {
         free(node);
         return status;
     }
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = node->HidInputReportQueue;
+
+    //
+    // Create periodic timer for output report
+    // 
+    WDF_TIMER_CONFIG_INIT_PERIODIC(
+        &timerCfg,
+        AirBenderBulkWriteEvtTimerFunc,
+        DS3_OUTPUT_REPORT_TIMER_PERIOD
+    );
+    status = WdfTimerCreate(&timerCfg, &attributes, &node->HidOutputReportTimer);
+    if (!NT_SUCCESS(status)) {
+        free(node);
+        return status;
+    }
+
+    //
+    // Allocate context for timer to tie it together with the BTH_DEVICE
+    // 
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, BTH_DEVICE_CONTEXT);
+    status = WdfObjectAllocateContext(
+        node->HidOutputReportTimer,
+        &attributes,
+        (PVOID)&pBluetoothCtx
+    );
+    if (!NT_SUCCESS(status)) {
+        free(node);
+        return status;
+    }
+
+    pBluetoothCtx->Device = node;
+    pBluetoothCtx->HostDevice = HostDevice;
 
     if (List->logicalLength == 0) {
         List->head = List->tail = node;
@@ -308,17 +380,17 @@ BOOLEAN FORCEINLINE BTH_DEVICE_LIST_REMOVE(
     * Visit each node, maintaining a pointer to
     * the previous node we just visited.
     */
-    for (currP = List->head; currP != NULL; prevP = currP, currP = currP->next) 
+    for (currP = List->head; currP != NULL; prevP = currP, currP = currP->next)
     {
-        if (*(PUSHORT)&currP->HCI_ConnectionHandle == *(PUSHORT)Handle) 
-        {  
+        if (*(PUSHORT)&currP->HCI_ConnectionHandle == *(PUSHORT)Handle)
+        {
             /* Found it. */
-            if (prevP == NULL) 
+            if (prevP == NULL)
             {
                 /* Fix beginning pointer. */
                 List->head = currP->next;
             }
-            else 
+            else
             {
                 /*
                 * Fix previous node's next to

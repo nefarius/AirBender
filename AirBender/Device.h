@@ -43,8 +43,6 @@ typedef struct _DEVICE_CONTEXT
 
     WDFUSBPIPE BulkWritePipe;
 
-    WDFQUEUE BulkWritePipeQueue;
-
     BOOLEAN DisableSSP;
 
     BOOLEAN Started;

@@ -124,9 +124,7 @@ HID_Command(
 
     RtlCopyMemory(&buffer[8], Buffer, BufferLength);
 
-    WdfObjectAcquireLock(Context->BulkWritePipeQueue);
     status = WriteBulkPipe(Context, buffer, BufferLength + 8, NULL);
-    WdfObjectReleaseLock(Context->BulkWritePipeQueue);
 
 #ifndef _KERNEL_MODE
     free(buffer);
