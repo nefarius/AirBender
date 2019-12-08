@@ -3,7 +3,11 @@
 # AirBender
 Windows Bluetooth Host Driver for Sony DualShock Controllers
 
-This project was a research and testbed for getting familiar with the [UMDF](https://docs.microsoft.com/en-us/windows-hardware/drivers/wdf/getting-started-with-umdf-version-2) and an attempt of porting over the Bluetooth host stack from the C#-implementation used in [ScpToolkit](https://github.com/nefarius/ScpToolkit) to a native C Windows user-mode driver. It has been discontinued [in favour of better solutions](https://forums.vigem.org/topic/242/bluetooth-filter-driver-for-ds3-compatibility-research-notes). The code will stay up for anyone to use as either an inspiration or a negative example 😜
+---
+
+This was a research project and testbed for getting familiar with the [UMDF](https://docs.microsoft.com/en-us/windows-hardware/drivers/wdf/getting-started-with-umdf-version-2) and an attempt of porting over the Bluetooth host stack from the C#-implementation used in [ScpToolkit](https://github.com/nefarius/ScpToolkit) to a native C Windows user-mode driver. It has been discontinued [in favour of better solutions](https://forums.vigem.org/topic/242/bluetooth-filter-driver-for-ds3-compatibility-research-notes). The code will stay up for anyone to use as either an inspiration or a negative example 😜
+
+---
 
 ## Summary
 `AirBender` consists of a custom Windows Bluetooth Stack containing a user-mode driver and a user-mode dispatch service handling wireless communication with Sony DualShock 3 and 4 controllers. It allows 3rd party developers to handle controller inputs and ouputs via a simple plug-in system.
