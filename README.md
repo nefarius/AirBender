@@ -1,4 +1,4 @@
-![](https://github.com/ViGEm/AirBender/raw/master/AirBender/AirBender.png)
+<img src="AirBender/AirBender.png" height="128px" align="right" />
 
 # AirBender
 Windows Bluetooth Host Driver for Sony DualShock Controllers
@@ -15,7 +15,7 @@ This was a research project and testbed for getting familiar with the [UMDF](htt
 ## Architecture
 Since the Sony DualShock 3 utilizes a butchered non-standard Bluetooth protocol incompatible with standard HID profiles a custom Bluetooth stack is required to establish a connection on the Windows platform. The [AirBender user-mode driver](../../tree/master/AirBender) implements a compatible Bluetooth stack and also acts as a bus emulator allowing for multiple devices to connect and transmit. It's designed to work with most USB Bluetooth host devices obeying at least [Core Version 2.1 + EDR](https://www.bluetooth.com/specifications/bluetooth-core-specification/legacy-specifications) standards.
 
-The actual input and output reports flow between the driver and a [user-mode service](https://github.com/ViGEm/Shibari) running in the background. This service handles detection of "AirBender Dongle Devices", reacts to child device arrival/removal and forwards input/output data to or from a plugin sub-system where arbitrary code can process it. In the default implementation, input data is exposed to the system via [ViGEm](https://github.com/ViGEm).
+The actual input and output reports flow between the driver and a [user-mode service](https://github.com/nefarius/Shibari) running in the background. This service handles detection of "AirBender Dongle Devices", reacts to child device arrival/removal and forwards input/output data to or from a plugin sub-system where arbitrary code can process it. In the default implementation, input data is exposed to the system via [ViGEm](https://github.com/nefarius/ViGEmBus).
 
 ## Supported systems
 The driver is built for and tested with Windows 8.1 up to Windows 10 (x86 and amd64).
